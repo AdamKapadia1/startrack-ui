@@ -7,22 +7,32 @@ interface Props {
   topPasses: Pass[];
 }
 
-function useCountdown(targetUTC: number | null): string {
+function useNextPassCountdown(topPasses: Pass[]): string {
   const [display, setDisplay] = useState('--:--');
 
   useEffect(() => {
-    if (!targetUTC) { setDisplay('--:--'); return; }
     const tick = () => {
-      const diff = targetUTC - Math.floor(Date.now() / 1000);
-      if (diff <= 0) { setDisplay('0:00'); return; }
-      const m = Math.floor(diff / 60);
-      const s = diff % 60;
-      setDisplay(`${m}:${s.toString().padStart(2, '0')}`);
+      const now = Math.floor(Date.now() / 1000);
+      const next = topPasses.find(p => p.startUTC > now);
+      if (!next) { setDisplay('--:--'); return; }
+
+      const diff = next.startUTC - now;
+      if (diff > 24 * 3600) { setDisplay('--:--'); return; }
+
+      if (diff >= 3600) {
+        const h = Math.floor(diff / 3600);
+        const m = Math.floor((diff % 3600) / 60);
+        setDisplay(`${h}h ${m}m`);
+      } else {
+        const m = Math.floor(diff / 60);
+        const s = diff % 60;
+        setDisplay(`${m}:${s.toString().padStart(2, '0')}`);
+      }
     };
     tick();
     const id = setInterval(tick, 1_000);
     return () => clearInterval(id);
-  }, [targetUTC]);
+  }, [topPasses]);
 
   return display;
 }
@@ -35,13 +45,11 @@ function signalScore(satellites: Satellite[]): number {
 }
 
 export function MetricCards({ satellites, topPasses }: Props) {
-  const now = Math.floor(Date.now() / 1000);
-  const nextPass = topPasses.find(p => p.startUTC > now) ?? null;
-  const countdown = useCountdown(nextPass?.startUTC ?? null);
+  const countdown = useNextPassCountdown(topPasses);
 
-  const count    = satellites.length;
-  const bestEl   = count > 0 ? Math.max(...satellites.map(s => s.elevation)) : 0;
-  const score    = signalScore(satellites);
+  const count  = satellites.length;
+  const bestEl = count > 0 ? Math.max(...satellites.map(s => s.elevation)) : 0;
+  const score  = signalScore(satellites);
 
   return (
     <div className="metric-grid">
