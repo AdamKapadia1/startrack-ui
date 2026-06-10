@@ -1,0 +1,60 @@
+import type { Pass } from '../hooks/useRecommendation';
+
+interface Props {
+  passes: Pass[];
+  satname: string;
+}
+
+function elevColor(el: number) {
+  if (el >= 60) return 'var(--green)';
+  if (el >= 30) return 'var(--amber)';
+  return 'var(--grey)';
+}
+
+function passScore(el: number): number {
+  return Math.round(40 + (el / 90) * 60);
+}
+
+function formatTime(utc: number) {
+  return new Date(utc * 1000).toLocaleTimeString('en-GB', {
+    hour: '2-digit', minute: '2-digit', timeZone: 'Europe/London',
+  });
+}
+
+function shortName(name: string) {
+  return name.replace('STARLINK-', 'SL-').replace('SPACE STATION', 'ISS').slice(0, 14);
+}
+
+export function PassList({ passes, satname }: Props) {
+  if (!passes.length) {
+    return <div className="pass-empty">No passes in the next 2 hours</div>;
+  }
+
+  return (
+    <>
+      <div className="pass-list-head">
+        <span>Satellite</span>
+        <span>Elevation</span>
+        <span>Score</span>
+        <span>Time</span>
+      </div>
+      <div className="pass-list-body">
+        {passes.map((pass, i) => {
+          const color = elevColor(pass.maxEl);
+          const score = passScore(pass.maxEl);
+          const pct   = `${Math.round((pass.maxEl / 90) * 100)}%`;
+          return (
+            <div key={i} className="pass-row">
+              <div className="pass-name">{shortName(satname)}</div>
+              <div className="pass-bar-wrap">
+                <div className="pass-bar" style={{ width: pct, background: color }}/>
+              </div>
+              <div className="pass-score" style={{ color }}>{score} pts</div>
+              <div className="pass-time">{formatTime(pass.startUTC)}</div>
+            </div>
+          );
+        })}
+      </div>
+    </>
+  );
+}
