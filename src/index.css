@@ -386,7 +386,7 @@ button { font-family: inherit; }
 
 /* ── Pass list ───────────────────────────────────────────── */
 .passes-section {
-  height: 220px;
+  height: 160px;
   flex-shrink: 0;
   border-top: 1px solid var(--border-dim);
   display: flex;
@@ -469,6 +469,28 @@ button { font-family: inherit; }
   color: var(--text-muted);
 }
 
+/* ── Signal history chart ────────────────────────────────── */
+.history-section {
+  height: 155px;
+  flex-shrink: 0;
+  border-top: 1px solid var(--border-dim);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.history-chart-wrap {
+  flex: 1;
+  padding: 0 8px 4px;
+  min-height: 0;
+}
+
+.history-empty {
+  padding: 16px;
+  font-size: 11px;
+  color: var(--text-muted);
+}
+
 /* ── Footer ──────────────────────────────────────────────── */
 .footer {
   display: grid;
@@ -521,5 +543,6 @@ button { font-family: inherit; }
   .left-col  { border-right: none; border-bottom: 1px solid var(--border); overflow: visible; }
   .right-col { overflow: visible; }
   .sky-section { height: 420px; }
-  .passes-section { height: auto; max-height: 260px; }
+  .passes-section { height: auto; max-height: 200px; }
+  .history-section { height: auto; max-height: 200px; }
 }
