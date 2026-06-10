@@ -45,7 +45,7 @@ export function PassList({ passes, satname }: Props) {
           const pct   = `${Math.round((pass.maxEl / 90) * 100)}%`;
           return (
             <div key={i} className="pass-row">
-              <div className="pass-name">{shortName(satname)}</div>
+              <div className="pass-name">{shortName(pass.satname ?? satname)}</div>
               <div className="pass-bar-wrap">
                 <div className="pass-bar" style={{ width: pct, background: color }}/>
               </div>

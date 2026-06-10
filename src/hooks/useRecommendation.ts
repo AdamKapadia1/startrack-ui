@@ -6,6 +6,7 @@ export interface Pass {
   endUTC: number;
   maxEl: number;
   duration?: number;
+  satname?: string;
 }
 
 export interface RecommendationData {
