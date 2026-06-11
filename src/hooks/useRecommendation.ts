@@ -2,23 +2,27 @@ import { useState, useEffect, useCallback } from 'react';
 
 export interface Pass {
   startUTC: number;
-  maxUTC: number;
-  endUTC: number;
-  maxEl: number;
+  maxUTC:   number;
+  endUTC:   number;
+  maxEl:    number;
   duration?: number;
-  satname?: string;
+  satname?:  string;
 }
 
 export interface RecommendationData {
   recommendation: string;
-  satname?: string;
-  topPasses: Pass[];
+  satname?:   string;
+  topPasses:  Pass[];
+  today?:     Pass[];
+  tomorrow?:  Pass[];
+  thisWeek?:  Pass[];
+  bestPass?:  Pass | null;
 }
 
 export function useRecommendation() {
-  const [data, setData] = useState<RecommendationData | null>(null);
+  const [data, setData]       = useState<RecommendationData | null>(null);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const [error, setError]     = useState<string | null>(null);
 
   const fetchData = useCallback(async () => {
     try {

@@ -1,21 +1,16 @@
 import { useState, useEffect } from 'react';
-import type { Satellite } from '../types';
+import type { Satellite, ScoreBreakdown } from '../types';
 
 interface Props {
-  satellites: Satellite[];
-  lastUpdated: Date | null;
+  satellites:     Satellite[];
+  lastUpdated:    Date | null;
+  signalScore?:   number;
+  scoreBreakdown?: ScoreBreakdown;
 }
 
-const R  = 32;
-const C  = 40;
-const CIRC = 2 * Math.PI * R; // ≈ 201.06
-
-function signalScore(satellites: Satellite[]): number {
-  if (!satellites.length) return 0;
-  const best = Math.max(...satellites.map(s => s.elevation));
-  const avg  = satellites.reduce((s, x) => s + x.elevation, 0) / satellites.length;
-  return Math.min(100, Math.round(satellites.length * 6 + avg * 0.4 + (best > 60 ? 15 : best > 30 ? 8 : 0)));
-}
+const R    = 32;
+const C    = 40;
+const CIRC = 2 * Math.PI * R;
 
 function scoreColor(score: number): string {
   if (score >= 70) return 'var(--green)';
@@ -29,8 +24,9 @@ function scoreLabel(score: number): string {
   return 'Poor';
 }
 
-export function ConnectivityGauge({ satellites, lastUpdated }: Props) {
-  const [secsAgo, setSecsAgo] = useState(0);
+export function ConnectivityGauge({ satellites, lastUpdated, signalScore, scoreBreakdown }: Props) {
+  const [secsAgo, setSecsAgo]         = useState(0);
+  const [showTooltip, setShowTooltip] = useState(false);
 
   useEffect(() => {
     if (!lastUpdated) return;
@@ -40,19 +36,30 @@ export function ConnectivityGauge({ satellites, lastUpdated }: Props) {
     return () => clearInterval(id);
   }, [lastUpdated]);
 
-  const score  = signalScore(satellites);
-  const color  = scoreColor(score);
-  const label  = scoreLabel(score);
-  const dash   = (score / 100) * CIRC;
-  const count  = satellites.length;
+  // Use API-provided score if available, else fall back to local computation
+  const score = signalScore ?? (satellites.length === 0 ? 0 : Math.min(100, Math.round(
+    satellites.length * 6 +
+    (satellites.reduce((s, x) => s + x.elevation, 0) / satellites.length) * 0.4 +
+    (Math.max(...satellites.map(s => s.elevation)) > 60 ? 15 : 8)
+  )));
+
+  const color = scoreColor(score);
+  const label = scoreLabel(score);
+  const dash  = (score / 100) * CIRC;
+  const count = satellites.length;
+
+  const bd = scoreBreakdown;
 
   return (
     <div className="gauge-section">
-      <div className="gauge-wrap">
+      <div
+        className="gauge-wrap"
+        onMouseEnter={() => setShowTooltip(true)}
+        onMouseLeave={() => setShowTooltip(false)}
+        style={{ cursor: bd ? 'help' : 'default' }}
+      >
         <svg className="gauge-svg" viewBox="0 0 80 80">
-          {/* track */}
           <circle cx={C} cy={C} r={R} fill="none" stroke="rgba(255,255,255,0.05)" strokeWidth="7" />
-          {/* arc */}
           <circle
             cx={C} cy={C} r={R}
             fill="none"
@@ -68,6 +75,30 @@ export function ConnectivityGauge({ satellites, lastUpdated }: Props) {
           <span className="gauge-score-num" style={{ color }}>{score}</span>
           <span className="gauge-score-denom">/100</span>
         </div>
+
+        {showTooltip && bd && (
+          <div className="score-tooltip">
+            <div className="score-tooltip-title">Score Breakdown</div>
+            <div className="score-tooltip-row">
+              <span>Elevation</span><span>{bd.elevation}<em>/50</em></span>
+            </div>
+            <div className="score-tooltip-row">
+              <span>Cloud Cover</span><span>{bd.cloud}<em>/20</em></span>
+            </div>
+            <div className="score-tooltip-row">
+              <span>Visibility</span><span>{bd.visibility}<em>/15</em></span>
+            </div>
+            <div className="score-tooltip-row">
+              <span>Wind</span><span>{bd.wind}<em>/10</em></span>
+            </div>
+            <div className="score-tooltip-row">
+              <span>Range</span><span>{bd.range}<em>/5</em></span>
+            </div>
+            <div className="score-tooltip-total">
+              <span>Total</span><span>{score}<em>/100</em></span>
+            </div>
+          </div>
+        )}
       </div>
 
       <div className="gauge-info">
@@ -76,6 +107,7 @@ export function ConnectivityGauge({ satellites, lastUpdated }: Props) {
         <div className="gauge-updated">
           {lastUpdated ? `Updated ${secsAgo}s ago` : 'Waiting for data…'}
         </div>
+        {bd && <div className="gauge-updated" style={{ color: 'var(--green)', marginTop: 2 }}>Hover ring for breakdown</div>}
       </div>
     </div>
   );
