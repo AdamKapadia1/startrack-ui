@@ -10,12 +10,6 @@ interface Props {
 
 const CX = 210, CY = 210, R = 175;
 
-const CLOUD_BLOBS = [
-  { rx: -0.55, ry: -0.55 }, { rx:  0.05, ry: -0.65 }, { rx:  0.55, ry: -0.45 },
-  { rx: -0.72, ry: -0.10 }, { rx: -0.15, ry: -0.20 }, { rx:  0.35, ry: -0.10 },
-  { rx:  0.65, ry:  0.30 }, { rx: -0.40, ry:  0.55 }, { rx:  0.10, ry:  0.62 },
-  { rx: -0.62, ry:  0.40 }, { rx:  0.30, ry:  0.45 }, { rx:  0.55, ry:  0.05 },
-];
 
 function toXY(az: number, el: number) {
   const r   = ((90 - el) / 90) * R;
@@ -140,7 +134,7 @@ function SatPopup({ sat, passes, svgX, svgY, onClose }: PopupProps) {
 export function SkyMap({ satellites, cloudCover = 0, passes = [] }: Props) {
   const [selected, setSelected] = useState<{ sat: Satellite; x: number; y: number } | null>(null);
 
-  const cloudOpacity = cloudCover > 30 ? Math.min(0.45, ((cloudCover - 30) / 70) * 0.55) : 0;
+  const cloudOpacity = cloudCover / 100 * 0.3;
 
   function handleSatClick(e: React.MouseEvent, sat: Satellite) {
     e.stopPropagation();
@@ -177,11 +171,7 @@ export function SkyMap({ satellites, cloudCover = 0, passes = [] }: Props) {
           <circle cx={CX} cy={CY} r={R} fill="url(#skyBg)" stroke="rgba(29,158,117,0.2)" strokeWidth="1"/>
 
           {cloudOpacity > 0 && (
-            <g clipPath="url(#skyClip)" opacity={cloudOpacity}>
-              {CLOUD_BLOBS.map((pos, i) => (
-                <ellipse key={i} cx={CX + pos.rx * R} cy={CY + pos.ry * R} rx={40} ry={26} fill="#9ca3af"/>
-              ))}
-            </g>
+            <circle cx={CX} cy={CY} r={R} fill="#9ca3af" opacity={cloudOpacity}/>
           )}
 
           {[30, 60].map(el => {
