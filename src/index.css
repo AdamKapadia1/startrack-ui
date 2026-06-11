@@ -684,6 +684,260 @@ button { font-family: inherit; }
 
 @keyframes spin { to { transform: rotate(360deg); } }
 
+/* ── Pass list (with calendar column) ───────────────────── */
+.pass-list-head {
+  grid-template-columns: 1fr 1fr 52px 56px 26px;
+}
+.pass-row {
+  grid-template-columns: 1fr 1fr 52px 56px 26px;
+}
+
+/* ── Calendar buttons ────────────────────────────────────── */
+.cal-btn {
+  background: none;
+  border: 1px solid rgba(29,158,117,0.22);
+  border-radius: 5px;
+  color: var(--text-muted);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 4px;
+  width: 22px;
+  height: 22px;
+  transition: color 0.15s, border-color 0.15s;
+}
+.cal-btn:hover {
+  color: var(--green);
+  border-color: var(--green);
+}
+
+.bulk-cal-btn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin: 6px 16px 4px;
+  padding: 5px 10px;
+  background: rgba(29,158,117,0.07);
+  border: 1px solid rgba(29,158,117,0.2);
+  border-radius: 6px;
+  color: var(--text-dim);
+  font-size: 10px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s;
+  letter-spacing: 0.3px;
+}
+.bulk-cal-btn:hover {
+  background: rgba(29,158,117,0.13);
+  color: var(--green);
+}
+
+/* ── Settings panel ──────────────────────────────────────── */
+.settings-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.45);
+  z-index: 190;
+}
+
+.settings-panel {
+  position: fixed;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  width: 300px;
+  background: var(--surface);
+  border-left: 1px solid var(--border);
+  z-index: 200;
+  display: flex;
+  flex-direction: column;
+  transform: translateX(100%);
+  transition: transform 0.22s ease;
+}
+.settings-panel.open { transform: translateX(0); }
+
+.settings-hdr {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 16px;
+  border-bottom: 1px solid var(--border-dim);
+  flex-shrink: 0;
+}
+.settings-title {
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  color: var(--text);
+}
+.settings-close { color: var(--text-muted); }
+
+.settings-body {
+  flex: 1;
+  overflow-y: auto;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.settings-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+
+.settings-field {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.settings-label {
+  font-size: 9px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  color: var(--text-muted);
+}
+
+.settings-input {
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  color: var(--text);
+  font-size: 12px;
+  font-family: inherit;
+  padding: 7px 9px;
+  width: 100%;
+  outline: none;
+  transition: border-color 0.15s;
+}
+.settings-input:focus { border-color: var(--green); }
+.settings-input::placeholder { color: var(--text-muted); }
+
+.settings-geo-btn {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  padding: 8px 12px;
+  background: rgba(29,158,117,0.08);
+  border: 1px solid rgba(29,158,117,0.25);
+  border-radius: 7px;
+  color: var(--green);
+  font-size: 11px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+.settings-geo-btn:hover { background: rgba(29,158,117,0.14); }
+
+.settings-error {
+  font-size: 11px;
+  color: var(--red);
+}
+
+.settings-footer {
+  display: flex;
+  gap: 8px;
+  padding: 14px 16px;
+  border-top: 1px solid var(--border-dim);
+  flex-shrink: 0;
+}
+
+.settings-btn-cancel,
+.settings-btn-save {
+  flex: 1;
+  padding: 8px;
+  border-radius: 7px;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  border: 1px solid;
+  transition: background 0.15s;
+}
+.settings-btn-cancel {
+  background: none;
+  border-color: var(--border);
+  color: var(--text-dim);
+}
+.settings-btn-cancel:hover { background: var(--surface-2); }
+.settings-btn-save {
+  background: var(--green);
+  border-color: var(--green);
+  color: #fff;
+}
+.settings-btn-save:hover { background: #17835f; }
+
+/* ── Sky map satellite popup ─────────────────────────────── */
+.sky-svg-wrap { position: relative; }
+
+.sat-popup {
+  background: rgba(8, 16, 12, 0.97);
+  border: 1px solid var(--green);
+  border-radius: 9px;
+  padding: 11px 13px 10px;
+  min-width: 168px;
+  box-shadow: 0 4px 24px rgba(0,0,0,0.7), 0 0 0 1px rgba(29,158,117,0.12);
+  pointer-events: auto;
+}
+
+.sat-popup-close {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  color: var(--text-muted);
+}
+.sat-popup-close:hover { color: var(--text-dim); }
+
+.sat-popup-name {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--text);
+  font-family: var(--mono);
+  margin-bottom: 9px;
+  padding-right: 18px;
+  line-height: 1.3;
+}
+
+.dtc-badge {
+  display: inline-block;
+  margin-left: 6px;
+  padding: 1px 5px;
+  background: var(--blue-bg);
+  border: 1px solid var(--blue-border);
+  border-radius: 4px;
+  font-size: 8px;
+  font-weight: 700;
+  color: var(--blue-text);
+  vertical-align: middle;
+  letter-spacing: 0.5px;
+}
+
+.sat-popup-rows { display: flex; flex-direction: column; gap: 4px; }
+
+.sat-popup-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 12px;
+  font-size: 11px;
+}
+.sat-popup-row span:first-child { color: var(--text-muted); }
+.sat-popup-row span:last-child  {
+  font-family: var(--mono);
+  font-size: 10px;
+  color: var(--text-dim);
+}
+
+.sat-popup-pass {
+  margin-top: 4px;
+  padding-top: 4px;
+  border-top: 1px solid var(--border-dim);
+}
+.sat-popup-pass span:last-child { color: var(--green); }
+
 /* ── Responsive ──────────────────────────────────────────── */
 @media (max-width: 900px) {
   body { overflow: auto; }
@@ -692,6 +946,21 @@ button { font-family: inherit; }
   .left-col  { border-right: none; border-bottom: 1px solid var(--border); overflow: visible; }
   .right-col { overflow: visible; }
   .sky-section { height: 420px; }
-  .passes-section { height: auto; max-height: 200px; }
+  .passes-section { height: auto; max-height: 220px; }
   .history-section { height: auto; max-height: 200px; }
+
+  /* Settings panel full-width on mobile */
+  .settings-panel { width: 100%; }
+
+  /* Sky map popup as bottom sheet on mobile */
+  .sat-popup {
+    position: fixed !important;
+    top: auto !important;
+    bottom: 0 !important;
+    left: 0 !important;
+    right: 0 !important;
+    border-radius: 12px 12px 0 0;
+    min-width: unset;
+    padding: 16px 20px 24px;
+  }
 }

@@ -1,4 +1,11 @@
-export function Header() {
+import type { LocationSettings } from '../hooks/useLocation';
+
+interface Props {
+  location:       LocationSettings;
+  onOpenSettings: () => void;
+}
+
+export function Header({ location, onOpenSettings }: Props) {
   return (
     <header className="header">
       <div className="header-brand">
@@ -14,7 +21,10 @@ export function Header() {
           <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/>
           <circle cx="12" cy="10" r="3"/>
         </svg>
-        Tring, Hertfordshire &nbsp;|&nbsp; 51.79°N, 0.66°W &nbsp;|&nbsp; Alt 148m
+        {location.name}&nbsp;|&nbsp;
+        {Math.abs(location.lat).toFixed(2)}°{location.lat >= 0 ? 'N' : 'S'},&nbsp;
+        {Math.abs(location.lon).toFixed(2)}°{location.lon >= 0 ? 'E' : 'W'}&nbsp;|&nbsp;
+        Alt {location.alt}m
       </div>
 
       <div className="header-actions">
@@ -24,7 +34,7 @@ export function Header() {
             <path d="M13.73 21a2 2 0 0 1-3.46 0"/>
           </svg>
         </button>
-        <button className="icon-btn" aria-label="Menu">
+        <button className="icon-btn" aria-label="Settings" onClick={onOpenSettings}>
           <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
             <circle cx="5"  cy="12" r="1.5"/>
             <circle cx="12" cy="12" r="1.5"/>

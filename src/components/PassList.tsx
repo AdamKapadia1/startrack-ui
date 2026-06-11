@@ -1,8 +1,10 @@
 import type { Pass } from '../hooks/useRecommendation';
+import { CalendarButton, BulkExportButton } from './CalendarExport';
 
 interface Props {
-  passes: Pass[];
-  satname: string;
+  passes:       Pass[];
+  satname:      string;
+  locationName: string;
 }
 
 function elevColor(el: number) {
@@ -25,18 +27,20 @@ function shortName(name: string) {
   return name.replace('STARLINK-', 'SL-').replace('SPACE STATION', 'ISS').slice(0, 14);
 }
 
-export function PassList({ passes, satname }: Props) {
+export function PassList({ passes, satname, locationName }: Props) {
   if (!passes.length) {
-    return <div className="pass-empty">No passes in the next 2 hours</div>;
+    return <div className="pass-empty">No passes in the next 7 days</div>;
   }
 
   return (
     <>
+      <BulkExportButton passes={passes} locationName={locationName} />
       <div className="pass-list-head">
         <span>Satellite</span>
         <span>Elevation</span>
         <span>Score</span>
         <span>Time</span>
+        <span></span>
       </div>
       <div className="pass-list-body">
         {passes.map((pass, i) => {
@@ -51,6 +55,7 @@ export function PassList({ passes, satname }: Props) {
               </div>
               <div className="pass-score" style={{ color }}>{score} pts</div>
               <div className="pass-time">{formatTime(pass.startUTC)}</div>
+              <CalendarButton pass={pass} locationName={locationName} />
             </div>
           );
         })}

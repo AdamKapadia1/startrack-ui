@@ -1,13 +1,15 @@
+import { useState } from 'react';
 import type { Satellite } from '../types';
+import type { Pass } from '../hooks/useRecommendation';
 
 interface Props {
   satellites: Satellite[];
   cloudCover?: number;
+  passes?: Pass[];
 }
 
 const CX = 210, CY = 210, R = 175;
 
-// Pre-computed cloud blob positions (fraction of R from centre, within unit disc)
 const CLOUD_BLOBS = [
   { rx: -0.55, ry: -0.55 }, { rx:  0.05, ry: -0.65 }, { rx:  0.55, ry: -0.45 },
   { rx: -0.72, ry: -0.10 }, { rx: -0.15, ry: -0.20 }, { rx:  0.35, ry: -0.10 },
@@ -37,13 +39,124 @@ function shortName(name: string) {
   return name.replace('STARLINK-', 'SL-').replace('ONEWEB-', 'OW-').slice(0, 12);
 }
 
-export function SkyMap({ satellites, cloudCover = 0 }: Props) {
+function formatPassTime(utc: number): string {
+  return new Date(utc * 1000).toLocaleTimeString('en-GB', {
+    hour: '2-digit', minute: '2-digit', timeZone: 'Europe/London',
+  });
+}
+
+// ── Satellite detail popup ────────────────────────────────────────────────────
+
+interface PopupProps {
+  sat:     Satellite;
+  passes:  Pass[];
+  svgX:    number;
+  svgY:    number;
+  onClose: () => void;
+}
+
+function SatPopup({ sat, passes, svgX, svgY, onClose }: PopupProps) {
+  const altKm = Math.round(sat.range * Math.sin(sat.elevation * Math.PI / 180));
+  const isDtc = sat.satname.includes('[DTC]');
+
+  const nextPass = passes.find(p =>
+    p.satname === sat.satname ||
+    p.satname?.toUpperCase().startsWith(sat.satname.toUpperCase()),
+  );
+
+  // Map SVG coords (0-420) to percentage for positioning within sky-svg-wrap
+  const leftPct = svgX / 420;
+  const topPct  = svgY / 420;
+
+  const style: React.CSSProperties = {
+    position: 'absolute',
+    zIndex: 50,
+    // Horizontal: if dot is in right 55%, anchor right; else anchor left
+    ...(leftPct > 0.55
+      ? { right: `${Math.round((1 - leftPct) * 100) + 3}%` }
+      : { left:  `${Math.round(leftPct * 100) + 3}%` }),
+    // Vertical: if dot is in bottom 55%, anchor bottom; else anchor top
+    ...(topPct > 0.55
+      ? { bottom: `${Math.round((1 - topPct) * 100) + 3}%` }
+      : { top:    `${Math.round(topPct * 100) + 3}%` }),
+  };
+
+  const dHz = sat.dopplerShiftHz;
+  const dopplerColor = dHz === null ? 'var(--text-muted)'
+    : dHz > 0 ? '#1D9E75'
+    : dHz < 0 ? '#EF4444'
+    : '#6B7280';
+  const dopplerLabel = dHz === null ? '—'
+    : dHz === 0 ? '0 kHz'
+    : `${(dHz / 1000).toFixed(1)} kHz`;
+
+  return (
+    <div className="sat-popup" style={style} onClick={e => e.stopPropagation()}>
+      <button className="sat-popup-close icon-btn" onClick={onClose} aria-label="Close">
+        <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+          <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+        </svg>
+      </button>
+
+      <div className="sat-popup-name">
+        {sat.satname}
+        {isDtc && <span className="dtc-badge">DTC</span>}
+      </div>
+
+      <div className="sat-popup-rows">
+        <div className="sat-popup-row">
+          <span>Elevation</span>
+          <span style={{ color: dotColor(sat.elevation) }}>{sat.elevation.toFixed(1)}°</span>
+        </div>
+        <div className="sat-popup-row">
+          <span>Azimuth</span><span>{sat.azimuth.toFixed(1)}°</span>
+        </div>
+        <div className="sat-popup-row">
+          <span>Range</span><span>{sat.range.toLocaleString()} km</span>
+        </div>
+        <div className="sat-popup-row">
+          <span>Altitude</span><span>~{altKm.toLocaleString()} km</span>
+        </div>
+        <div className="sat-popup-row">
+          <span>Speed</span><span>~7.5 km/s</span>
+        </div>
+        <div className="sat-popup-row">
+          <span>Ku-band</span>
+          <span style={{ color: dopplerColor, fontWeight: 600 }}>{dopplerLabel}</span>
+        </div>
+        {nextPass && (
+          <div className="sat-popup-row sat-popup-pass">
+            <span>Next pass</span>
+            <span>{formatPassTime(nextPass.startUTC)} · {Math.round(nextPass.maxEl)}°</span>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
+// ── Main component ────────────────────────────────────────────────────────────
+
+export function SkyMap({ satellites, cloudCover = 0, passes = [] }: Props) {
+  const [selected, setSelected] = useState<{ sat: Satellite; x: number; y: number } | null>(null);
+
   const cloudOpacity = cloudCover > 30 ? Math.min(0.45, ((cloudCover - 30) / 70) * 0.55) : 0;
+
+  function handleSatClick(e: React.MouseEvent, sat: Satellite) {
+    e.stopPropagation();
+    const { x, y } = toXY(sat.azimuth, sat.elevation);
+    setSelected(prev => prev?.sat.satname === sat.satname ? null : { sat, x, y });
+  }
 
   return (
     <div className="sky-section">
       <div className="sky-svg-wrap">
-        <svg className="sky-svg" viewBox="0 0 420 420" preserveAspectRatio="xMidYMid meet">
+        <svg
+          className="sky-svg"
+          viewBox="0 0 420 420"
+          preserveAspectRatio="xMidYMid meet"
+          onClick={() => setSelected(null)}
+        >
           <defs>
             <radialGradient id="skyBg" cx="50%" cy="50%" r="50%">
               <stop offset="0%"   stopColor="#0d2318"/>
@@ -61,25 +174,16 @@ export function SkyMap({ satellites, cloudCover = 0 }: Props) {
             </clipPath>
           </defs>
 
-          {/* Sky disc */}
           <circle cx={CX} cy={CY} r={R} fill="url(#skyBg)" stroke="rgba(29,158,117,0.2)" strokeWidth="1"/>
 
-          {/* Cloud cover overlay — clipped to sky disc, opacity scales with cloudCover */}
           {cloudOpacity > 0 && (
             <g clipPath="url(#skyClip)" opacity={cloudOpacity}>
               {CLOUD_BLOBS.map((pos, i) => (
-                <ellipse
-                  key={i}
-                  cx={CX + pos.rx * R}
-                  cy={CY + pos.ry * R}
-                  rx={40} ry={26}
-                  fill="#9ca3af"
-                />
+                <ellipse key={i} cx={CX + pos.rx * R} cy={CY + pos.ry * R} rx={40} ry={26} fill="#9ca3af"/>
               ))}
             </g>
           )}
 
-          {/* Elevation rings */}
           {[30, 60].map(el => {
             const r = ((90 - el) / 90) * R;
             return (
@@ -90,14 +194,12 @@ export function SkyMap({ satellites, cloudCover = 0 }: Props) {
             );
           })}
 
-          {/* Cross-hairs */}
           <line x1={CX} y1={CY - R} x2={CX} y2={CY + R} stroke="rgba(29,158,117,0.1)" strokeWidth="0.75"/>
           <line x1={CX - R} y1={CY} x2={CX + R} y2={CY} stroke="rgba(29,158,117,0.1)" strokeWidth="0.75"/>
 
-          {/* Cardinal labels */}
           {[
-            { label: 'N', x: CX,        y: CY - R - 10 },
-            { label: 'S', x: CX,        y: CY + R + 18 },
+            { label: 'N', x: CX,          y: CY - R - 10 },
+            { label: 'S', x: CX,          y: CY + R + 18 },
             { label: 'E', x: CX + R + 12, y: CY + 4 },
             { label: 'W', x: CX - R - 12, y: CY + 4 },
           ].map(({ label, x, y }) => (
@@ -106,17 +208,26 @@ export function SkyMap({ satellites, cloudCover = 0 }: Props) {
             </text>
           ))}
 
-          {/* Satellites */}
           {satellites.map((sat, i) => {
-            const { x, y } = toXY(sat.azimuth, sat.elevation);
-            const color     = dotColor(sat.elevation);
-            const lx        = x < CX ? x + 9 : x - 9;
-            const anchor    = x < CX ? 'start' : 'end';
+            const { x, y }  = toXY(sat.azimuth, sat.elevation);
+            const color      = dotColor(sat.elevation);
+            const isSelected = selected?.sat.satname === sat.satname;
+            const lx         = x < CX ? x + 9 : x - 9;
+            const anchor     = x < CX ? 'start' : 'end';
             return (
-              <g key={i} filter="url(#glow)">
-                <title>{sat.satname} · El {sat.elevation}° Az {sat.azimuth}°</title>
-                <circle cx={x} cy={y} r="9"  fill={color} opacity="0.12"/>
-                <circle cx={x} cy={y} r="5"  fill={color} opacity="0.95"/>
+              <g
+                key={i}
+                filter="url(#glow)"
+                style={{ cursor: 'pointer' }}
+                onClick={e => handleSatClick(e, sat)}
+              >
+                {/* enlarged transparent hit area */}
+                <circle cx={x} cy={y} r="14" fill="transparent"/>
+                <circle cx={x} cy={y} r="9"  fill={color} opacity={isSelected ? 0.28 : 0.12}/>
+                <circle
+                  cx={x} cy={y} r="5" fill={color} opacity="0.95"
+                  stroke={isSelected ? '#fff' : 'none'} strokeWidth={isSelected ? 1 : 0}
+                />
                 <text x={lx} y={y - 7} fill="rgba(122,145,135,0.9)" fontSize="9" fontFamily="monospace" textAnchor={anchor}>
                   {shortName(sat.satname)}
                 </text>
@@ -127,12 +238,10 @@ export function SkyMap({ satellites, cloudCover = 0 }: Props) {
             );
           })}
 
-          {/* You marker */}
           <circle cx={CX} cy={CY} r="5"  fill="#3b82f6" opacity="0.9" filter="url(#glow)"/>
           <circle cx={CX} cy={CY} r="10" fill="none" stroke="#3b82f6" strokeWidth="1" opacity="0.3"/>
           <text x={CX} y={CY + 20} textAnchor="middle" fill="#3b82f6" fontSize="9" fontFamily="monospace" opacity="0.8">You</text>
 
-          {/* Weather badge — top-right of sky disc */}
           <g>
             <rect x={332} y={37} width={50} height={19} rx={5} fill="rgba(0,0,0,0.55)"/>
             <text x={357} y={50} textAnchor="middle" fill={badgeColor(cloudCover)} fontSize="10" fontFamily="monospace" fontWeight="600">
@@ -140,6 +249,16 @@ export function SkyMap({ satellites, cloudCover = 0 }: Props) {
             </text>
           </g>
         </svg>
+
+        {selected && (
+          <SatPopup
+            sat={selected.sat}
+            passes={passes}
+            svgX={selected.x}
+            svgY={selected.y}
+            onClose={() => setSelected(null)}
+          />
+        )}
       </div>
 
       <div className="sky-legend">
