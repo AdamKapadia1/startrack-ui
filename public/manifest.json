@@ -1,0 +1,14 @@
+{
+  "name": "StarTrack AI",
+  "short_name": "StarTrack",
+  "description": "Live Starlink satellite tracker with AI-powered pass recommendations",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#0a0f0c",
+  "theme_color": "#1D9E75",
+  "orientation": "portrait-primary",
+  "icons": [
+    { "src": "/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any maskable" },
+    { "src": "/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any maskable" }
+  ]
+}

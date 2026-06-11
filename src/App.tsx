@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { Header }            from './components/Header';
+import { InstallBanner }     from './components/InstallBanner';
 import { MetricCards }       from './components/MetricCards';
 import { ConnectivityGauge } from './components/ConnectivityGauge';
 import { AIRecommendation }  from './components/AIRecommendation';
@@ -78,6 +79,7 @@ function App() {
       </div>
 
       <Footer lastUpdated={lastUpdated} />
+      <InstallBanner />
     </div>
   );
 }
