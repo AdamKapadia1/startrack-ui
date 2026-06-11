@@ -208,24 +208,27 @@ export function SkyMap({ satellites, cloudCover = 0, passes = [] }: Props) {
             </text>
           ))}
 
-          {satellites.map((sat, i) => {
+          {satellites.map((sat) => {
             const { x, y }  = toXY(sat.azimuth, sat.elevation);
             const color      = dotColor(sat.elevation);
             const isSelected = selected?.sat.satname === sat.satname;
             const lx         = x < CX ? x + 9 : x - 9;
             const anchor     = x < CX ? 'start' : 'end';
+            // CSS cx/cy transition — animates position smoothly when satellite data updates
+            const circleStyle = { transition: 'cx 2s ease, cy 2s ease' } as React.CSSProperties;
             return (
               <g
-                key={i}
+                key={sat.satname}
                 filter="url(#glow)"
                 style={{ cursor: 'pointer' }}
                 onClick={e => handleSatClick(e, sat)}
               >
                 {/* enlarged transparent hit area */}
-                <circle cx={x} cy={y} r="14" fill="transparent"/>
-                <circle cx={x} cy={y} r="9"  fill={color} opacity={isSelected ? 0.28 : 0.12}/>
+                <circle style={{ ...circleStyle, cx: x, cy: y } as React.CSSProperties} r="14" fill="transparent"/>
+                <circle style={{ ...circleStyle, cx: x, cy: y } as React.CSSProperties} r="9"  fill={color} opacity={isSelected ? 0.28 : 0.12}/>
                 <circle
-                  cx={x} cy={y} r="5" fill={color} opacity="0.95"
+                  style={{ ...circleStyle, cx: x, cy: y } as React.CSSProperties}
+                  r="5" fill={color} opacity="0.95"
                   stroke={isSelected ? '#fff' : 'none'} strokeWidth={isSelected ? 1 : 0}
                 />
                 <text x={lx} y={y - 7} fill="rgba(122,145,135,0.9)" fontSize="9" fontFamily="monospace" textAnchor={anchor}>

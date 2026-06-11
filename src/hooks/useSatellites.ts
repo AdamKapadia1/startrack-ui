@@ -1,37 +1,59 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect } from 'react';
 import type { ApiResponse } from '../types';
 import type { LocationSettings } from './useLocation';
+import { DEFAULT_LOCATION } from './useLocation';
+import { useWebSocket } from './useWebSocket';
+import type { WsStatus } from './useWebSocket';
+
+function isDefaultLoc(loc: LocationSettings): boolean {
+  return (
+    Math.abs(loc.lat - DEFAULT_LOCATION.lat) < 0.001 &&
+    Math.abs(loc.lon - DEFAULT_LOCATION.lon) < 0.001
+  );
+}
 
 export function useSatellites(location: LocationSettings) {
-  const [data, setData]           = useState<ApiResponse | null>(null);
-  const [loading, setLoading]     = useState(true);
-  const [error, setError]         = useState<string | null>(null);
-  const [lastUpdated, setLastUpdated] = useState<Date | null>(null);
+  // WebSocket provides real-time updates for the default (Tring) location
+  const { satData: wsData, status, lastUpdate: wsLastUpdate } = useWebSocket();
 
-  const { lat, lon, alt, name } = location;
+  // For custom locations, layer a REST poll on top
+  const [restData,        setRestData]        = useState<ApiResponse | null>(null);
+  const [restLastUpdated, setRestLastUpdated] = useState<Date | null>(null);
 
-  const fetchData = useCallback(async () => {
-    try {
-      const base = import.meta.env.VITE_API_URL ?? '';
-      const params = `?lat=${lat}&lon=${lon}&alt=${alt}&name=${encodeURIComponent(name)}`;
-      const res = await fetch(`${base}/api/satellites/visible${params}`);
-      if (!res.ok) throw new Error(`HTTP ${res.status}`);
-      const json: ApiResponse = await res.json();
-      setData(json);
-      setError(null);
-      setLastUpdated(new Date());
-    } catch (e: any) {
-      setError(e.message);
-    } finally {
-      setLoading(false);
-    }
-  }, [lat, lon, alt, name]);
+  const isDefault = isDefaultLoc(location);
 
   useEffect(() => {
-    fetchData();
-    const id = setInterval(fetchData, 30_000);
-    return () => clearInterval(id);
-  }, [fetchData]);
+    if (isDefault) { setRestData(null); return; }
 
-  return { data, loading, error, lastUpdated };
+    let cancelled = false;
+
+    async function fetchRest() {
+      try {
+        const base = import.meta.env.VITE_API_URL ?? '';
+        const { lat, lon, alt, name } = location;
+        const params = `?lat=${lat}&lon=${lon}&alt=${alt}&name=${encodeURIComponent(name)}`;
+        const res = await fetch(`${base}/api/satellites/visible${params}`);
+        if (!res.ok || cancelled) return;
+        const json: ApiResponse = await res.json();
+        setRestData(json);
+        setRestLastUpdated(new Date());
+      } catch { /* ignore */ }
+    }
+
+    fetchRest();
+    const id = setInterval(fetchRest, 30_000);
+    return () => { cancelled = true; clearInterval(id); };
+  }, [location.lat, location.lon, location.alt, location.name, isDefault]);
+
+  // Custom location data takes precedence over WS default-location data
+  const data        = restData ?? wsData;
+  const lastUpdated = restData ? restLastUpdated : wsLastUpdate;
+
+  return {
+    data,
+    loading:     !data,
+    error:       null as string | null,
+    lastUpdated,
+    status:      (restData ? 'polling' : status) as WsStatus,
+  };
 }

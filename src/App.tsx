@@ -19,9 +19,9 @@ function App() {
   const { location, saveLocation } = useLocation();
   const [settingsOpen, setSettingsOpen] = useState(false);
 
-  const { data: satData, lastUpdated } = useSatellites(location);
-  const { data: recData, loading: recLoading } = useRecommendation(location);
-  const { data: weather } = useWeather(location);
+  const { data: satData, lastUpdated, status } = useSatellites(location);
+  const { data: recData, loading: recLoading }  = useRecommendation(location);
+  const { data: weather }                       = useWeather(location);
 
   const satellites     = satData?.satellites    ?? [];
   const topPasses      = recData?.topPasses     ?? [];
@@ -31,7 +31,12 @@ function App() {
 
   return (
     <div className="app">
-      <Header location={location} onOpenSettings={() => setSettingsOpen(true)} />
+      <Header
+        location={location}
+        onOpenSettings={() => setSettingsOpen(true)}
+        wsStatus={status}
+        lastUpdated={lastUpdated}
+      />
 
       <SettingsPanel
         open={settingsOpen}
