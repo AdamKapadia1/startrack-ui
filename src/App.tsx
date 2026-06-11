@@ -10,6 +10,7 @@ import { SatelliteList }     from './components/SatelliteList';
 import { SignalHistory }     from './components/SignalHistory';
 import { Footer }            from './components/Footer';
 import { SettingsPanel }     from './components/SettingsPanel';
+import { ChatPanel }         from './components/ChatPanel';
 import { useSatellites }     from './hooks/useSatellites';
 import { useRecommendation } from './hooks/useRecommendation';
 import { useWeather }        from './hooks/useWeather';
@@ -18,6 +19,7 @@ import { useLocation }       from './hooks/useLocation';
 function App() {
   const { location, saveLocation } = useLocation();
   const [settingsOpen, setSettingsOpen] = useState(false);
+  const [chatOpen,     setChatOpen]     = useState(false);
 
   const { data: satData, lastUpdated, status } = useSatellites(location);
   const { data: recData, loading: recLoading }  = useRecommendation(location);
@@ -85,6 +87,28 @@ function App() {
 
       <Footer lastUpdated={lastUpdated} />
       <InstallBanner />
+
+      <ChatPanel open={chatOpen} onClose={() => setChatOpen(false)} />
+
+      <button
+        className={`chat-bubble-btn${chatOpen ? ' open' : ''}`}
+        onClick={() => setChatOpen(o => !o)}
+        aria-label={chatOpen ? 'Close AI chat' : 'Open AI chat'}
+      >
+        {chatOpen ? (
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+            <line x1="18" y1="6" x2="6" y2="18"/>
+            <line x1="6" y1="6" x2="18" y2="18"/>
+          </svg>
+        ) : (
+          <>
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+              <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+            </svg>
+            <span className="chat-bubble-badge">AI</span>
+          </>
+        )}
+      </button>
     </div>
   );
 }
