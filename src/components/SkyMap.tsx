@@ -44,12 +44,10 @@ function formatPassTime(utc: number): string {
 interface PopupProps {
   sat:     Satellite;
   passes:  Pass[];
-  svgX:    number;
-  svgY:    number;
   onClose: () => void;
 }
 
-function SatPopup({ sat, passes, svgX, svgY, onClose }: PopupProps) {
+function SatPopup({ sat, passes, onClose }: PopupProps) {
   const altKm = Math.round(sat.range * Math.sin(sat.elevation * Math.PI / 180));
   const isDtc = sat.satname.includes('[DTC]');
 
@@ -58,21 +56,9 @@ function SatPopup({ sat, passes, svgX, svgY, onClose }: PopupProps) {
     p.satname?.toUpperCase().startsWith(sat.satname.toUpperCase()),
   );
 
-  // Map SVG coords (0-420) to percentage for positioning within sky-svg-wrap
-  const leftPct = svgX / 420;
-  const topPct  = svgY / 420;
-
   const style: React.CSSProperties = {
-    position: 'absolute',
-    zIndex: 50,
-    // Horizontal: if dot is in right 55%, anchor right; else anchor left
-    ...(leftPct > 0.55
-      ? { right: `${Math.round((1 - leftPct) * 100) + 3}%` }
-      : { left:  `${Math.round(leftPct * 100) + 3}%` }),
-    // Vertical: if dot is in bottom 55%, anchor bottom; else anchor top
-    ...(topPct > 0.55
-      ? { bottom: `${Math.round((1 - topPct) * 100) + 3}%` }
-      : { top:    `${Math.round(topPct * 100) + 3}%` }),
+    width: '100%',
+    marginTop: '8px',
   };
 
   const dHz = sat.dopplerShiftHz;
@@ -243,16 +229,15 @@ export function SkyMap({ satellites, cloudCover = 0, passes = [] }: Props) {
           </g>
         </svg>
 
-        {selected && (
-          <SatPopup
-            sat={selected.sat}
-            passes={passes}
-            svgX={selected.x}
-            svgY={selected.y}
-            onClose={() => setSelected(null)}
-          />
-        )}
       </div>
+
+      {selected && (
+        <SatPopup
+          sat={selected.sat}
+          passes={passes}
+          onClose={() => setSelected(null)}
+        />
+      )}
 
       <div className="sky-legend">
         <span className="legend-item"><span className="legend-dot" style={{ background: '#1D9E75' }}/> High signal</span>
