@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { createPortal } from 'react-dom';
 import type { Satellite } from '../types';
 import type { Pass } from '../hooks/useRecommendation';
 
@@ -57,8 +58,12 @@ function SatPopup({ sat, passes, onClose }: PopupProps) {
   );
 
   const style: React.CSSProperties = {
-    width: '100%',
-    marginTop: '8px',
+    position: 'fixed',
+    bottom: '80px',
+    right: '20px',
+    zIndex: 1000,
+    minWidth: '200px',
+    maxWidth: '260px',
   };
 
   const dHz = sat.dopplerShiftHz;
@@ -70,7 +75,7 @@ function SatPopup({ sat, passes, onClose }: PopupProps) {
     : dHz === 0 ? '0 kHz'
     : `${(dHz / 1000).toFixed(1)} kHz`;
 
-  return (
+  return createPortal(
     <div className="sat-popup" style={style} onClick={e => e.stopPropagation()}>
       <button className="sat-popup-close icon-btn" onClick={onClose} aria-label="Close">
         <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
@@ -111,7 +116,8 @@ function SatPopup({ sat, passes, onClose }: PopupProps) {
           </div>
         )}
       </div>
-    </div>
+    </div>,
+    document.body,
   );
 }
 
