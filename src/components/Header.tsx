@@ -33,13 +33,14 @@ function useAgoText(date: Date | null): string {
 interface Props {
   location:       LocationSettings;
   onOpenSettings: () => void;
+  onOpenHelp:     () => void;
   wsStatus:       WsStatus;
   lastUpdated:    Date | null;
   gpsAccuracy?:   number | null;
   topPasses:      Pass[];
 }
 
-export function Header({ location, onOpenSettings, wsStatus, lastUpdated, gpsAccuracy, topPasses }: Props) {
+export function Header({ location, onOpenSettings, onOpenHelp, wsStatus, lastUpdated, gpsAccuracy, topPasses }: Props) {
   const cfg      = STATUS[wsStatus] ?? STATUS.connecting;
   const agoText  = useAgoText(lastUpdated);
   const [flashing, setFlashing] = useState(false);
@@ -103,6 +104,13 @@ export function Header({ location, onOpenSettings, wsStatus, lastUpdated, gpsAcc
 
       <div className="header-actions">
         <AlertSettings passes={topPasses} />
+        <button className="icon-btn" aria-label="Help" onClick={onOpenHelp}>
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+            <circle cx="12" cy="12" r="10"/>
+            <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/>
+            <line x1="12" y1="17" x2="12.01" y2="17"/>
+          </svg>
+        </button>
         <button className="icon-btn" aria-label="Settings" onClick={onOpenSettings}>
           <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
             <circle cx="5"  cy="12" r="1.5"/>

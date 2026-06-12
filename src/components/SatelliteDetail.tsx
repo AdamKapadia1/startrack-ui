@@ -6,6 +6,7 @@ import {
 import type { Satellite, SatellitePosition } from '../types';
 import type { LocationSettings } from '../hooks/useLocation';
 import { getConstellation, CONSTELLATION_COLORS } from '../utils/constellation';
+import { PassShare } from './PassShare';
 
 const API_BASE = import.meta.env.VITE_API_URL ?? '';
 const D2R      = Math.PI / 180;
@@ -226,7 +227,7 @@ function OrbitalElements({ data, loading }: { data: TleData | null; loading: boo
 }
 
 // ── Section 4: Pass timeline ───────────────────────────────────────────────────
-function PassTimeline({ passes, loading, satname }: { passes: SatPass[]; loading: boolean; satname: string }) {
+function PassTimeline({ passes, loading, satname, locationName }: { passes: SatPass[]; loading: boolean; satname: string; locationName: string }) {
   if (loading) return <div className="sd-loading">Calculating passes…</div>;
   if (!passes.length) return <div className="sd-loading">No passes found in the next 7 days</div>;
 
@@ -250,6 +251,12 @@ function PassTimeline({ passes, loading, satname }: { passes: SatPass[]; loading
               <button className="pass-cal-btn" onClick={() => downloadICS(p, satname)} title="Export to calendar">
                 Cal
               </button>
+              <PassShare
+                startUTC={p.startUTC}
+                maxEl={p.maxEl}
+                satname={satname}
+                locationName={locationName}
+              />
             </div>
           </div>
         );
@@ -429,11 +436,22 @@ export function SatelliteDetail({ satellite, allSatellites, positions, location,
               </span>
             </div>
           </div>
-          <button className="sat-detail-close" onClick={onClose} aria-label="Close">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
-              <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
-            </svg>
-          </button>
+          <div className="sat-detail-hdr-right">
+            {nextPass && (
+              <PassShare
+                startUTC={nextPass.startUTC}
+                maxEl={nextPass.maxEl}
+                satname={satellite.satname}
+                locationName={location.name}
+                className="sat-detail-share"
+              />
+            )}
+            <button className="sat-detail-close" onClick={onClose} aria-label="Close">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+                <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+              </svg>
+            </button>
+          </div>
         </div>
 
         {/* Scrollable content */}
@@ -462,7 +480,7 @@ export function SatelliteDetail({ satellite, allSatellites, positions, location,
           {/* § 4 — Upcoming Passes */}
           <div className="sd-section">
             <div className="sd-section-title">Upcoming Passes — Next 7 Days</div>
-            <PassTimeline passes={passes} loading={passesLoading} satname={satellite.satname}/>
+            <PassTimeline passes={passes} loading={passesLoading} satname={satellite.satname} locationName={location.name}/>
           </div>
 
           {/* § 5 — Elevation profile */}

@@ -16,6 +16,8 @@ import { ChatPanel }            from './components/ChatPanel';
 import { LocationPermission }   from './components/LocationPermission';
 import { CountdownBanner }      from './components/CountdownBanner';
 import { SatelliteDetail }      from './components/SatelliteDetail';
+import { Onboarding, ONBOARDING_KEY } from './components/Onboarding';
+import { HelpPanel }            from './components/HelpPanel';
 import { getConstellation }     from './utils/constellation';
 import type { Satellite }       from './types';
 import { useSatellites }     from './hooks/useSatellites';
@@ -27,8 +29,10 @@ function App() {
   const { location, saveLocation, gpsAccuracy, permState, requestGPS, declineGPS } = useLocation();
   const [settingsOpen,         setSettingsOpen]         = useState(false);
   const [chatOpen,             setChatOpen]             = useState(false);
+  const [helpOpen,             setHelpOpen]             = useState(false);
   const [activeConstellation,  setActiveConstellation]  = useState('ALL');
   const [selectedSatellite,    setSelectedSatellite]    = useState<Satellite | null>(null);
+  const [onboarded,            setOnboarded]            = useState(() => !!localStorage.getItem(ONBOARDING_KEY));
 
   const { data: satData, lastUpdated, status, positions, posLastUpdate } = useSatellites(location);
   const { data: recData, loading: recLoading }  = useRecommendation(location);
@@ -50,6 +54,7 @@ function App() {
       <Header
         location={location}
         onOpenSettings={() => setSettingsOpen(true)}
+        onOpenHelp={() => setHelpOpen(true)}
         wsStatus={status}
         lastUpdated={lastUpdated}
         gpsAccuracy={gpsAccuracy}
@@ -123,6 +128,17 @@ function App() {
       <InstallBanner />
 
       <ChatPanel open={chatOpen} onClose={() => setChatOpen(false)} />
+
+      <HelpPanel open={helpOpen} onClose={() => setHelpOpen(false)} />
+
+      {!onboarded && (
+        <Onboarding
+          onComplete={loc => {
+            saveLocation(loc);
+            setOnboarded(true);
+          }}
+        />
+      )}
 
       <SatelliteDetail
         satellite={selectedSatellite}

@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from 'react';
 import type { Pass } from '../hooks/useRecommendation';
 import { CalendarButton, BulkExportButton } from './CalendarExport';
 import { ElevationArcChart } from './ElevationArcChart';
+import { PassShare } from './PassShare';
 
 interface Props {
   passes:       Pass[];
@@ -71,6 +72,7 @@ export function PassList({ passes, satname, locationName }: Props) {
         <span>Time (BST)</span>
         <span></span>
         <span></span>
+        <span></span>
       </div>
       <div className="pass-list-body">
         {passes.map((pass, i) => {
@@ -105,6 +107,12 @@ export function PassList({ passes, satname, locationName }: Props) {
                 </div>
                 <div className="pass-time">{formatTime(pass.startUTC)}</div>
                 <CalendarButton pass={pass} locationName={locationName} />
+                <PassShare
+                  startUTC={pass.startUTC}
+                  maxEl={pass.maxEl}
+                  satname={pass.satname ?? satname}
+                  locationName={locationName}
+                />
                 <div className="pass-chevron" style={{ transform: isOpen ? 'rotate(180deg)' : 'none' }}>
                   <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
                     <polyline points="6 9 12 15 18 9"/>
