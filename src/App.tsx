@@ -4,6 +4,7 @@ import { InstallBanner }     from './components/InstallBanner';
 import { MetricCards }       from './components/MetricCards';
 import { ConnectivityGauge } from './components/ConnectivityGauge';
 import { AIRecommendation }  from './components/AIRecommendation';
+import { DtcCard }           from './components/DtcCard';
 import { SkyMap }            from './components/SkyMap';
 import { PassList }          from './components/PassList';
 import { SatelliteList }     from './components/SatelliteList';
@@ -31,6 +32,7 @@ function App() {
   const satname        = recData?.satname       ?? 'Starlink';
   const signalScore    = satData?.signalScore;
   const scoreBreakdown = satData?.scoreBreakdown;
+  const starlinkSat    = satellites.find(s => s.satname.toUpperCase().includes('STARLINK'));
 
   return (
     <div className="app">
@@ -67,9 +69,10 @@ function App() {
 
           <AIRecommendation
             recommendation={recData?.recommendation ?? ''}
-            satellites={satellites}
             loading={recLoading}
           />
+
+          {starlinkSat && <DtcCard satellite={starlinkSat} />}
 
           <SatelliteList satellites={satellites} />
         </div>
