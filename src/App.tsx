@@ -19,6 +19,8 @@ import { SatelliteDetail }      from './components/SatelliteDetail';
 import { Onboarding, ONBOARDING_KEY } from './components/Onboarding';
 import { HelpPanel }            from './components/HelpPanel';
 import { PassLandingPage }      from './components/PassLandingPage';
+import { ChangelogPanel }       from './components/ChangelogPanel';
+import { useTheme }             from './hooks/useTheme';
 import { getConstellation }     from './utils/constellation';
 import type { Satellite }       from './types';
 import { useSatellites }     from './hooks/useSatellites';
@@ -29,9 +31,11 @@ import { useLocation }       from './hooks/useLocation';
 function App() {
   const isPassRoute = window.location.pathname === '/pass';
   const { location, saveLocation, gpsAccuracy, permState, requestGPS, declineGPS } = useLocation();
+  const { theme, toggleTheme } = useTheme();
   const [settingsOpen,         setSettingsOpen]         = useState(false);
   const [chatOpen,             setChatOpen]             = useState(false);
   const [helpOpen,             setHelpOpen]             = useState(false);
+  const [changelogOpen,        setChangelogOpen]        = useState(false);
   const [activeConstellation,  setActiveConstellation]  = useState('ALL');
   const [selectedSatellite,    setSelectedSatellite]    = useState<Satellite | null>(null);
   const [onboarded,            setOnboarded]            = useState(() => !!localStorage.getItem(ONBOARDING_KEY));
@@ -71,6 +75,8 @@ function App() {
         location={location}
         onOpenSettings={() => setSettingsOpen(true)}
         onOpenHelp={() => setHelpOpen(true)}
+        onToggleTheme={toggleTheme}
+        theme={theme}
         wsStatus={status}
         lastUpdated={lastUpdated}
         gpsAccuracy={gpsAccuracy}
@@ -140,12 +146,13 @@ function App() {
         </div>
       </div>
 
-      <Footer lastUpdated={lastUpdated} />
+      <Footer lastUpdated={lastUpdated} onOpenChangelog={() => setChangelogOpen(true)} />
       <InstallBanner />
 
       <ChatPanel open={chatOpen} onClose={() => setChatOpen(false)} context={liveContext} />
 
       <HelpPanel open={helpOpen} onClose={() => setHelpOpen(false)} />
+      <ChangelogPanel open={changelogOpen} onClose={() => setChangelogOpen(false)} />
 
       {!onboarded && (
         <Onboarding

@@ -1,6 +1,11 @@
-interface Props { lastUpdated: Date | null; }
+import { APP_VERSION } from './ChangelogPanel';
 
-export function Footer({ lastUpdated }: Props) {
+interface Props {
+  lastUpdated:     Date | null;
+  onOpenChangelog: () => void;
+}
+
+export function Footer({ lastUpdated, onOpenChangelog }: Props) {
   const mins = lastUpdated
     ? Math.round((Date.now() - lastUpdated.getTime()) / 60_000)
     : null;
@@ -11,7 +16,12 @@ export function Footer({ lastUpdated }: Props) {
         N2YO data{mins !== null ? ` · refreshed ${mins}m ago` : ''}
       </span>
       <span className="footer-text">SGP4 propagation · satellite.js</span>
-      <span className="footer-text">Agents: orbital · signal · scheduler · alert</span>
+      <span className="footer-text">
+        StarTrack AI ·{' '}
+        <button className="footer-version-badge" onClick={onOpenChangelog}>
+          v{APP_VERSION}
+        </button>
+      </span>
     </footer>
   );
 }
