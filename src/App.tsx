@@ -15,7 +15,9 @@ import { SettingsPanel }        from './components/SettingsPanel';
 import { ChatPanel }            from './components/ChatPanel';
 import { LocationPermission }   from './components/LocationPermission';
 import { CountdownBanner }      from './components/CountdownBanner';
+import { SatelliteDetail }      from './components/SatelliteDetail';
 import { getConstellation }     from './utils/constellation';
+import type { Satellite }       from './types';
 import { useSatellites }     from './hooks/useSatellites';
 import { useRecommendation } from './hooks/useRecommendation';
 import { useWeather }        from './hooks/useWeather';
@@ -26,6 +28,7 @@ function App() {
   const [settingsOpen,         setSettingsOpen]         = useState(false);
   const [chatOpen,             setChatOpen]             = useState(false);
   const [activeConstellation,  setActiveConstellation]  = useState('ALL');
+  const [selectedSatellite,    setSelectedSatellite]    = useState<Satellite | null>(null);
 
   const { data: satData, lastUpdated, status, positions, posLastUpdate } = useSatellites(location);
   const { data: recData, loading: recLoading }  = useRecommendation(location);
@@ -85,7 +88,7 @@ function App() {
 
           {starlinkSat && <DtcCard satellite={starlinkSat} />}
 
-          <SatelliteList satellites={filteredSatellites} />
+          <SatelliteList satellites={filteredSatellites} onSelectSatellite={setSelectedSatellite} />
         </div>
 
         {/* ── Right column ── */}
@@ -120,6 +123,14 @@ function App() {
       <InstallBanner />
 
       <ChatPanel open={chatOpen} onClose={() => setChatOpen(false)} />
+
+      <SatelliteDetail
+        satellite={selectedSatellite}
+        allSatellites={satellites}
+        positions={positions}
+        location={location}
+        onClose={() => setSelectedSatellite(null)}
+      />
 
       <button
         className={`chat-bubble-btn${chatOpen ? ' open' : ''}`}

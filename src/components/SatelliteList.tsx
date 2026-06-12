@@ -1,7 +1,8 @@
 import type { Satellite } from '../types';
 
 interface Props {
-  satellites: Satellite[];
+  satellites:        Satellite[];
+  onSelectSatellite: (sat: Satellite) => void;
 }
 
 function elevColor(elevation: number) {
@@ -24,7 +25,7 @@ function dopplerVal(hz: number | null, kHz: number | null): string {
   return hz > 0 ? `+${val}` : `${val}`;
 }
 
-export function SatelliteList({ satellites }: Props) {
+export function SatelliteList({ satellites, onSelectSatellite }: Props) {
   const sorted = [...satellites].sort((a, b) => b.elevation - a.elevation);
   const hasAnyDoppler = sorted.some(s => s.dopplerShiftKHz !== null);
 
@@ -52,7 +53,7 @@ export function SatelliteList({ satellites }: Props) {
             <tbody>
               {sorted.map((sat, i) => (
                 <tr key={i}>
-                  <td className="sat-name">{sat.satname}</td>
+                  <td className="sat-name sat-name-link" onClick={() => onSelectSatellite(sat)}>{sat.satname}</td>
                   <td style={{ color: elevColor(sat.elevation), fontWeight: 600 }}>
                     {sat.elevation.toFixed(1)}
                   </td>
