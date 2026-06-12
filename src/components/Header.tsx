@@ -1,7 +1,8 @@
 import { useState, useEffect, useRef } from 'react';
 import type { LocationSettings } from '../hooks/useLocation';
 import type { WsStatus } from '../hooks/useWebSocket';
-import { NotificationSetup } from './NotificationSetup';
+import type { Pass } from '../hooks/useRecommendation';
+import { AlertSettings } from './AlertSettings';
 
 interface StatusCfg { label: string; color: string; pulse: boolean }
 
@@ -35,9 +36,10 @@ interface Props {
   wsStatus:       WsStatus;
   lastUpdated:    Date | null;
   gpsAccuracy?:   number | null;
+  topPasses:      Pass[];
 }
 
-export function Header({ location, onOpenSettings, wsStatus, lastUpdated, gpsAccuracy }: Props) {
+export function Header({ location, onOpenSettings, wsStatus, lastUpdated, gpsAccuracy, topPasses }: Props) {
   const cfg      = STATUS[wsStatus] ?? STATUS.connecting;
   const agoText  = useAgoText(lastUpdated);
   const [flashing, setFlashing] = useState(false);
@@ -100,7 +102,7 @@ export function Header({ location, onOpenSettings, wsStatus, lastUpdated, gpsAcc
       </div>
 
       <div className="header-actions">
-        <NotificationSetup />
+        <AlertSettings passes={topPasses} />
         <button className="icon-btn" aria-label="Settings" onClick={onOpenSettings}>
           <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
             <circle cx="5"  cy="12" r="1.5"/>

@@ -13,6 +13,7 @@ import { Footer }            from './components/Footer';
 import { SettingsPanel }      from './components/SettingsPanel';
 import { ChatPanel }          from './components/ChatPanel';
 import { LocationPermission } from './components/LocationPermission';
+import { CountdownBanner }   from './components/CountdownBanner';
 import { useSatellites }     from './hooks/useSatellites';
 import { useRecommendation } from './hooks/useRecommendation';
 import { useWeather }        from './hooks/useWeather';
@@ -42,7 +43,10 @@ function App() {
         wsStatus={status}
         lastUpdated={lastUpdated}
         gpsAccuracy={gpsAccuracy}
+        topPasses={topPasses}
       />
+
+      <CountdownBanner passes={topPasses} />
 
       <SettingsPanel
         open={settingsOpen}
