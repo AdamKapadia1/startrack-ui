@@ -14,8 +14,9 @@ const WS_URL = (() => {
   return api.replace(/^https:\/\//, 'wss://').replace(/^http:\/\//, 'ws://');
 })();
 
-const MAX_RETRIES = 3;
-const BASE_DELAY  = 1_000; // ms, doubles each retry up to 30 s
+const MAX_RETRIES  = 5;
+const BASE_DELAY   = 1_000; // ms, doubles each retry up to 30 s
+const WS_RETRY_MS  = 60_000; // retry WS from polling mode every 60 s
 
 export function useWebSocket() {
   const [satData,       setSatData]       = useState<ApiResponse | null>(null);
@@ -25,11 +26,12 @@ export function useWebSocket() {
   const [status,        setStatus]        = useState<WsStatus>('connecting');
   const [lastUpdate,    setLastUpdate]    = useState<Date | null>(null);
 
-  const wsRef       = useRef<WebSocket | null>(null);
-  const retriesRef  = useRef(0);
-  const reconnTimer = useRef<ReturnType<typeof setTimeout>  | null>(null);
-  const pollTimer   = useRef<ReturnType<typeof setInterval> | null>(null);
-  const mounted     = useRef(true);
+  const wsRef        = useRef<WebSocket | null>(null);
+  const retriesRef   = useRef(0);
+  const reconnTimer  = useRef<ReturnType<typeof setTimeout>  | null>(null);
+  const pollTimer    = useRef<ReturnType<typeof setInterval> | null>(null);
+  const wsRetryTimer = useRef<ReturnType<typeof setInterval> | null>(null);
+  const mounted      = useRef(true);
 
   // REST fallback — kicks in after MAX_RETRIES failed reconnects
   const startPolling = useCallback(() => {
@@ -63,12 +65,15 @@ export function useWebSocket() {
         if (!mounted.current) return;
         retriesRef.current = 0;
         setStatus('live');
-        // Kill any REST fallback polling if WS reconnected
-        if (pollTimer.current) { clearInterval(pollTimer.current); pollTimer.current = null; }
+        // Kill REST fallback and WS retry timer if WS reconnected
+        if (pollTimer.current)    { clearInterval(pollTimer.current);    pollTimer.current    = null; }
+        if (wsRetryTimer.current) { clearInterval(wsRetryTimer.current); wsRetryTimer.current = null; }
       };
 
       ws.onmessage = event => {
         if (!mounted.current) return;
+        // Confirm live status on every received message — guards against state drift
+        setStatus('live');
         try {
           const msg = JSON.parse(event.data as string);
           if (msg.type === 'satellites') {
@@ -90,6 +95,14 @@ export function useWebSocket() {
 
         if (retriesRef.current > MAX_RETRIES) {
           startPolling();
+          // Retry WebSocket every 60 s while in polling mode
+          if (!wsRetryTimer.current) {
+            wsRetryTimer.current = setInterval(() => {
+              if (!mounted.current) return;
+              retriesRef.current = 0;
+              connect();
+            }, WS_RETRY_MS);
+          }
           return;
         }
 
@@ -111,8 +124,9 @@ export function useWebSocket() {
 
     return () => {
       mounted.current = false;
-      if (reconnTimer.current) clearTimeout(reconnTimer.current);
-      if (pollTimer.current)   clearInterval(pollTimer.current);
+      if (reconnTimer.current)  clearTimeout(reconnTimer.current);
+      if (pollTimer.current)    clearInterval(pollTimer.current);
+      if (wsRetryTimer.current) clearInterval(wsRetryTimer.current);
       if (wsRef.current) { wsRef.current.close(); wsRef.current = null; }
     };
   }, [connect]);

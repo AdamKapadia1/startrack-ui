@@ -305,18 +305,13 @@ export function SkyMap({ satellites, cloudCover = 0, passes = [], positions = []
 
           {/* Live satellite dots */}
           {displaySats.map((sat) => {
-            const { x, y }   = toXY(sat.azimuth, sat.elevation);
-            const color       = dotColor(sat.elevation);
-            const isSelected  = selected?.sat.satname === sat.satname;
-            const isEntering  = enteringNames.has(sat.satname);
-            const lx          = x < CX ? x + 9 : x - 9;
-            const anchor      = x < CX ? 'start' : 'end';
-            const trail       = trailRef.current.get(sat.satname) ?? [];
-
-            const dotStyle = {
-              transition: 'cx 4s ease-in-out, cy 4s ease-in-out',
-              cx: x, cy: y,
-            } as React.CSSProperties;
+            const { x, y }  = toXY(sat.azimuth, sat.elevation);
+            const color      = dotColor(sat.elevation);
+            const isSelected = selected?.sat.satname === sat.satname;
+            const isEntering = enteringNames.has(sat.satname);
+            const lx         = x < CX ? x + 9 : x - 9;
+            const anchor     = x < CX ? 'start' : 'end';
+            const trail      = trailRef.current.get(sat.satname) ?? [];
 
             return (
               <g
@@ -330,26 +325,21 @@ export function SkyMap({ satellites, cloudCover = 0, passes = [], positions = []
                   const opacity = [0.10, 0.18, 0.28][i + (3 - arr.length)];
                   const { x: tx, y: ty } = toXY(tp.az, tp.el);
                   return (
-                    <circle
-                      key={i}
-                      cx={tx} cy={ty}
-                      r="2.5"
-                      fill={color}
-                      opacity={opacity}
-                    />
+                    <circle key={i} cx={tx} cy={ty} r="2.5" fill={color} opacity={opacity}/>
                   );
                 })}
 
-                {/* Hit area + glow rings + main dot */}
-                <circle style={{ ...dotStyle } as React.CSSProperties} r="14" fill="transparent"/>
+                {/* Hit area */}
+                <circle cx={x} cy={y} r="14" fill="transparent"/>
+                {/* Glow ring */}
+                <circle cx={x} cy={y} r="9" fill={color} opacity={isSelected ? 0.28 : 0.12} filter="url(#glow)"/>
+                {/* Main dot */}
                 <circle
-                  style={{ ...dotStyle, filter: 'url(#glow)' } as React.CSSProperties}
-                  r="9" fill={color} opacity={isSelected ? 0.28 : 0.12}
-                />
-                <circle
-                  style={{ ...dotStyle, filter: 'url(#glow)' } as React.CSSProperties}
-                  r="5" fill={color} opacity="0.95"
-                  stroke={isSelected ? '#fff' : 'none'} strokeWidth={isSelected ? 1 : 0}
+                  cx={x} cy={y} r="5"
+                  fill={color} opacity="0.95"
+                  filter="url(#glow)"
+                  stroke={isSelected ? '#fff' : 'none'}
+                  strokeWidth={isSelected ? 1 : 0}
                 />
                 {sat.elevation >= 60 && (
                   <>
