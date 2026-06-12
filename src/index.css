@@ -895,6 +895,163 @@ button { font-family: inherit; }
 }
 .settings-btn-save:hover { background: #17835f; }
 
+/* ── Location search ─────────────────────────────────────── */
+.loc-search-wrap {
+  position:   relative;
+  display:    flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.loc-search-icon {
+  position:  absolute;
+  left:      9px;
+  color:     var(--text-muted);
+  pointer-events: none;
+  flex-shrink: 0;
+}
+
+.loc-search-input {
+  padding-left: 28px !important;
+  padding-right: 28px !important;
+  flex: 1;
+}
+
+.loc-clear-btn {
+  position:  absolute;
+  right:     70px;
+  color:     var(--text-muted);
+  padding:   4px;
+}
+.loc-clear-btn:hover { color: var(--text-dim); }
+
+.loc-search-btn {
+  flex-shrink:   0;
+  padding:       6px 10px;
+  background:    var(--green);
+  border:        none;
+  border-radius: 6px;
+  color:         #fff;
+  font-size:     11px;
+  font-weight:   600;
+  font-family:   inherit;
+  cursor:        pointer;
+  transition:    background 0.15s;
+  min-width:     54px;
+  display:       flex;
+  align-items:   center;
+  justify-content: center;
+}
+.loc-search-btn:hover:not(:disabled) { background: #17835f; }
+.loc-search-btn:disabled { opacity: 0.5; cursor: default; }
+
+/* Spinner inside search button */
+.loc-spinner {
+  display:       inline-block;
+  width:         11px;
+  height:        11px;
+  border:        2px solid rgba(255,255,255,0.35);
+  border-top-color: #fff;
+  border-radius: 50%;
+  animation:     loc-spin 0.7s linear infinite;
+}
+@keyframes loc-spin { to { transform: rotate(360deg); } }
+
+/* Results dropdown */
+.loc-results {
+  display:       flex;
+  flex-direction: column;
+  border:        1px solid var(--border);
+  border-radius: 7px;
+  overflow:      hidden;
+  margin-top:    4px;
+  background:    var(--surface-2);
+}
+
+.loc-result {
+  display:    flex;
+  flex-direction: column;
+  gap:        2px;
+  text-align: left;
+  padding:    8px 10px;
+  border:     none;
+  background: none;
+  cursor:     pointer;
+  border-bottom: 1px solid var(--border-dim);
+  transition: background 0.12s;
+  font-family: inherit;
+}
+.loc-result:last-child { border-bottom: none; }
+.loc-result:hover { background: rgba(29,158,117,0.1); }
+
+.loc-result-name {
+  font-size:   12px;
+  font-weight: 600;
+  color:       var(--text);
+}
+
+.loc-result-meta {
+  font-size: 10px;
+  color:     var(--text-muted);
+}
+
+/* Confirmation message */
+.loc-confirmed {
+  font-size:   11px;
+  font-weight: 600;
+  color:       var(--green);
+  padding:     2px 0;
+}
+
+/* Popular location chips */
+.loc-chips {
+  display:               grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap:                   6px;
+}
+
+.loc-chip {
+  padding:       6px 4px;
+  background:    var(--surface-2);
+  border:        1px solid var(--border);
+  border-radius: 20px;
+  color:         var(--text-dim);
+  font-size:     10px;
+  font-weight:   600;
+  font-family:   inherit;
+  cursor:        pointer;
+  text-align:    center;
+  transition:    background 0.12s, border-color 0.12s, color 0.12s;
+}
+.loc-chip:hover {
+  background:   rgba(29,158,117,0.12);
+  border-color: rgba(29,158,117,0.4);
+  color:        var(--green);
+}
+
+/* Advanced toggle */
+.loc-advanced-toggle {
+  display:     flex;
+  align-items: center;
+  gap:         5px;
+  background:  none;
+  border:      none;
+  padding:     0;
+  color:       var(--text-muted);
+  font-size:   10px;
+  font-family: inherit;
+  cursor:      pointer;
+  transition:  color 0.15s;
+}
+.loc-advanced-toggle:hover { color: var(--text-dim); }
+
+/* Header location flash */
+@keyframes loc-flash {
+  0%   { color: var(--green); }
+  100% { color: inherit; }
+}
+.header-location-flash { animation: loc-flash 1.2s ease-out; }
+
 /* ── Sky map satellite popup ─────────────────────────────── */
 .sky-svg-wrap { position: relative; }
 

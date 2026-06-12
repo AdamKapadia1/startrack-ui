@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import type { LocationSettings } from '../hooks/useLocation';
 import type { WsStatus } from '../hooks/useWebSocket';
 import { NotificationSetup } from './NotificationSetup';
@@ -37,8 +37,19 @@ interface Props {
 }
 
 export function Header({ location, onOpenSettings, wsStatus, lastUpdated }: Props) {
-  const cfg    = STATUS[wsStatus] ?? STATUS.connecting;
-  const agoText = useAgoText(lastUpdated);
+  const cfg      = STATUS[wsStatus] ?? STATUS.connecting;
+  const agoText  = useAgoText(lastUpdated);
+  const [flashing, setFlashing] = useState(false);
+  const prevName = useRef(location.name);
+
+  useEffect(() => {
+    if (location.name !== prevName.current) {
+      prevName.current = location.name;
+      setFlashing(true);
+      const id = setTimeout(() => setFlashing(false), 1200);
+      return () => clearTimeout(id);
+    }
+  }, [location.name]);
 
   return (
     <header className="header">
@@ -64,7 +75,7 @@ export function Header({ location, onOpenSettings, wsStatus, lastUpdated }: Prop
         </span>
       </div>
 
-      <div className="header-location">
+      <div className={`header-location${flashing ? ' header-location-flash' : ''}`}>
         <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
           <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/>
           <circle cx="12" cy="10" r="3"/>
