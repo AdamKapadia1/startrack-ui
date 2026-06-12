@@ -489,7 +489,9 @@ button { font-family: inherit; }
   border: 1px solid var(--blue-border);
   border-radius: 8px;
   padding: 10px 12px;
-  margin-top: auto;
+  margin-top: 12px;
+  margin-bottom: 4px;
+  flex-shrink: 0;
 }
 
 .dtc-icon { color: var(--blue-text); flex-shrink: 0; margin-top: 1px; }

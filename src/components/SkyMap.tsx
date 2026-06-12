@@ -351,12 +351,16 @@ export function SkyMap({ satellites, cloudCover = 0, passes = [], positions = []
                   r="5" fill={color} opacity="0.95"
                   stroke={isSelected ? '#fff' : 'none'} strokeWidth={isSelected ? 1 : 0}
                 />
-                <text x={lx} y={y - 7} fill="rgba(122,145,135,0.9)" fontSize="9" fontFamily="monospace" textAnchor={anchor}>
-                  {shortName(sat.satname)}
-                </text>
-                <text x={lx} y={y + 3} fill={color} fontSize="8" fontFamily="monospace" textAnchor={anchor} opacity="0.8">
-                  {sat.elevation.toFixed(0)}°
-                </text>
+                {sat.elevation >= 60 && (
+                  <>
+                    <text x={lx} y={y - 7} fill="rgba(122,145,135,0.9)" fontSize="9" fontFamily="monospace" textAnchor={anchor}>
+                      {shortName(sat.satname)}
+                    </text>
+                    <text x={lx} y={y + 3} fill={color} fontSize="8" fontFamily="monospace" textAnchor={anchor} opacity="0.8">
+                      {sat.elevation.toFixed(0)}°
+                    </text>
+                  </>
+                )}
               </g>
             );
           })}
