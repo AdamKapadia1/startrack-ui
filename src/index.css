@@ -709,12 +709,92 @@ button { font-family: inherit; }
 
 @keyframes spin { to { transform: rotate(360deg); } }
 
-/* ── Pass list (with calendar column) ───────────────────── */
+/* ── Pass list (quality + chevron columns) ───────────────── */
 .pass-list-head {
-  grid-template-columns: 1fr 1fr 52px 56px 26px;
+  grid-template-columns: 1fr 1fr 58px 56px 26px 18px;
 }
 .pass-row {
-  grid-template-columns: 1fr 1fr 52px 56px 26px;
+  grid-template-columns: 1fr 1fr 58px 56px 26px 18px;
+  cursor: pointer;
+}
+
+.pass-row-clickable { cursor: pointer; }
+.pass-row-open { background: var(--green-dim); }
+
+.pass-row-group { display: flex; flex-direction: column; }
+
+.pass-dur {
+  display:    block;
+  font-size:  9px;
+  color:      var(--text-muted);
+  margin-top: 1px;
+  font-family: var(--mono);
+}
+
+.pass-quality {
+  font-size:   10px;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.pass-chevron {
+  display:         flex;
+  align-items:     center;
+  justify-content: center;
+  color:           var(--text-muted);
+  transition:      transform 0.25s ease;
+  flex-shrink:     0;
+}
+
+/* Arc chart expand/collapse */
+.pass-arc-wrap {
+  overflow:   hidden;
+  max-height: 0;
+  transition: max-height 0.3s ease;
+}
+.pass-arc-wrap.open {
+  max-height: 300px;
+}
+
+/* Arc chart inner */
+.arc-chart-wrap {
+  background:  #080f0c;
+  border-top:  1px solid #1a2e24;
+  padding:     10px 10px 4px;
+}
+
+.arc-chart-hdr {
+  display:         flex;
+  align-items:     center;
+  justify-content: space-between;
+  margin-bottom:   6px;
+  padding:         0 2px;
+}
+
+.arc-chart-title {
+  font-size:   10px;
+  font-weight: 600;
+  font-family: var(--mono);
+  color:       var(--text-dim);
+}
+
+.arc-chart-badge {
+  font-size:     9px;
+  font-weight:   700;
+  border:        1px solid;
+  border-radius: 4px;
+  padding:       1px 6px;
+  letter-spacing: 0.3px;
+}
+
+.arc-tooltip {
+  background:    rgba(8,16,12,0.95);
+  border:        1px solid #1D9E75;
+  border-radius: 5px;
+  padding:       5px 8px;
+  font-size:     10px;
+  font-family:   monospace;
+  color:         var(--text-dim);
 }
 
 /* ── Calendar buttons ────────────────────────────────────── */
