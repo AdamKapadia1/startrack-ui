@@ -1,8 +1,21 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import {
   LineChart, Line, XAxis, YAxis, Tooltip,
   ResponsiveContainer, CartesianGrid,
 } from 'recharts';
+
+function useIsMobile(): boolean {
+  const [mobile, setMobile] = useState(() =>
+    typeof window !== 'undefined' && window.matchMedia('(max-width: 768px)').matches
+  );
+  useEffect(() => {
+    const mq = window.matchMedia('(max-width: 768px)');
+    const handler = (e: MediaQueryListEvent) => setMobile(e.matches);
+    mq.addEventListener('change', handler);
+    return () => mq.removeEventListener('change', handler);
+  }, []);
+  return mobile;
+}
 
 interface HistoryPoint {
   computed_at:  string;
@@ -17,6 +30,7 @@ function formatTime(iso: string) {
 export function SignalHistory() {
   const [data, setData]   = useState<HistoryPoint[]>([]);
   const [loading, setLoading] = useState(true);
+  const isMobile = useIsMobile();
 
   useEffect(() => {
     const base = import.meta.env.VITE_API_URL ?? '';
@@ -26,10 +40,13 @@ export function SignalHistory() {
       .catch(() => setLoading(false));
   }, []);
 
+  const hours = isMobile ? 24 : 48;
+  const label = `Signal History — Last ${hours} Hours`;
+
   if (loading) {
     return (
       <div className="history-section">
-        <div className="section-label">Signal History — Last 48 Hours</div>
+        <div className="section-label">{label}</div>
         <div className="history-empty">Loading…</div>
       </div>
     );
@@ -38,20 +55,23 @@ export function SignalHistory() {
   if (!data.length) {
     return (
       <div className="history-section">
-        <div className="section-label">Signal History — Last 48 Hours</div>
+        <div className="section-label">{label}</div>
         <div className="history-empty">No history yet — data appears after the first satellite scan.</div>
       </div>
     );
   }
 
-  const chartData = data.map(d => ({
-    time:  formatTime(d.computed_at),
-    score: d.signal_score,
-  }));
+  const cutoff = Date.now() - hours * 60 * 60 * 1000;
+  const chartData = useMemo(() =>
+    data
+      .filter(d => new Date(d.computed_at).getTime() >= cutoff)
+      .map(d => ({ time: formatTime(d.computed_at), score: d.signal_score })),
+    [data, cutoff]
+  );
 
   return (
     <div className="history-section">
-      <div className="section-label">Signal History — Last 48 Hours</div>
+      <div className="section-label">{label}</div>
       <div className="history-chart-wrap">
         <ResponsiveContainer width="100%" height={110}>
           <LineChart data={chartData} margin={{ top: 8, right: 16, left: -20, bottom: 0 }}>
@@ -79,7 +99,7 @@ export function SignalHistory() {
               type="monotone"
               dataKey="score"
               stroke="#1D9E75"
-              strokeWidth={2}
+              strokeWidth={isMobile ? 2.5 : 2}
               dot={false}
               activeDot={{ r: 3, fill: '#1D9E75' }}
             />

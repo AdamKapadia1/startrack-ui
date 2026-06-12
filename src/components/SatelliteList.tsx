@@ -17,11 +17,11 @@ function dopplerColor(hz: number | null, kHz: number | null): string {
   return (hz > 0) ? '#1D9E75' : '#EF4444';
 }
 
-function dopplerLabel(hz: number | null, kHz: number | null): string {
+function dopplerVal(hz: number | null, kHz: number | null): string {
   if (hz === null) return '—';
-  if (kHz === 0)   return '0 kHz';
+  if (kHz === 0)   return '0';
   const val = (hz / 1000).toFixed(1);
-  return hz > 0 ? `+${val} kHz` : `${val} kHz`;
+  return hz > 0 ? `+${val}` : `${val}`;
 }
 
 export function SatelliteList({ satellites }: Props) {
@@ -44,8 +44,8 @@ export function SatelliteList({ satellites }: Props) {
               <tr>
                 <th>Name</th>
                 <th>El°</th>
-                <th>Az°</th>
-                <th>km</th>
+                <th className="col-az">Az°</th>
+                <th>Range</th>
                 {hasAnyDoppler && <th>Ku-band Doppler</th>}
               </tr>
             </thead>
@@ -56,7 +56,7 @@ export function SatelliteList({ satellites }: Props) {
                   <td style={{ color: elevColor(sat.elevation), fontWeight: 600 }}>
                     {sat.elevation.toFixed(1)}
                   </td>
-                  <td className="sat-dim">{sat.azimuth.toFixed(1)}</td>
+                  <td className="col-az sat-dim">{sat.azimuth.toFixed(1)}</td>
                   <td className="sat-dim">{sat.range.toLocaleString()}</td>
                   {hasAnyDoppler && (
                     <td style={{
@@ -66,7 +66,10 @@ export function SatelliteList({ satellites }: Props) {
                       fontWeight: 600,
                       textAlign:  'right',
                     }}>
-                      {dopplerLabel(sat.dopplerShiftHz, sat.dopplerShiftKHz)}
+                      {dopplerVal(sat.dopplerShiftHz, sat.dopplerShiftKHz)}
+                      {sat.dopplerShiftHz !== null && (
+                        <span className="doppler-unit"> kHz</span>
+                      )}
                     </td>
                   )}
                 </tr>
