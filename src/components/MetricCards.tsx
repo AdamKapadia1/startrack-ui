@@ -1,10 +1,12 @@
 import { useState, useEffect } from 'react';
 import type { Satellite } from '../types';
 import type { Pass } from '../hooks/useRecommendation';
+import { CONSTELLATION_LABELS } from '../utils/constellation';
 
 interface Props {
-  satellites: Satellite[];
-  topPasses: Pass[];
+  satellites:          Satellite[];
+  topPasses:           Pass[];
+  activeConstellation: string;
 }
 
 function useNextPassCountdown(topPasses: Pass[]): string {
@@ -44,18 +46,22 @@ function signalScore(satellites: Satellite[]): number {
   return Math.min(100, Math.round(satellites.length * 6 + avg * 0.4 + (best > 60 ? 15 : best > 30 ? 8 : 0)));
 }
 
-export function MetricCards({ satellites, topPasses }: Props) {
+export function MetricCards({ satellites, topPasses, activeConstellation }: Props) {
   const countdown = useNextPassCountdown(topPasses);
 
-  const count  = satellites.length;
-  const bestEl = count > 0 ? Math.max(...satellites.map(s => s.elevation)) : 0;
-  const score  = signalScore(satellites);
+  const count      = satellites.length;
+  const bestEl     = count > 0 ? Math.max(...satellites.map(s => s.elevation)) : 0;
+  const score      = signalScore(satellites);
+  const filterLabel = activeConstellation === 'ALL'
+    ? 'All constellations'
+    : CONSTELLATION_LABELS[activeConstellation] ?? `${activeConstellation} only`;
 
   return (
     <div className="metric-grid">
       <div className="metric-card">
         <div className="metric-label">Satellites Overhead</div>
         <div className={`metric-value${count > 0 ? ' metric-value--green' : ''}`}>{count}</div>
+        <div className="metric-sublabel">{filterLabel}</div>
       </div>
 
       <div className="metric-card">

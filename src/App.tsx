@@ -1,19 +1,21 @@
 import { useState } from 'react';
-import { Header }            from './components/Header';
-import { InstallBanner }     from './components/InstallBanner';
-import { MetricCards }       from './components/MetricCards';
-import { ConnectivityGauge } from './components/ConnectivityGauge';
-import { AIRecommendation }  from './components/AIRecommendation';
-import { DtcCard }           from './components/DtcCard';
-import { SkyMap }            from './components/SkyMap';
-import { PassList }          from './components/PassList';
-import { SatelliteList }     from './components/SatelliteList';
-import { SignalHistory }     from './components/SignalHistory';
-import { Footer }            from './components/Footer';
-import { SettingsPanel }      from './components/SettingsPanel';
-import { ChatPanel }          from './components/ChatPanel';
-import { LocationPermission } from './components/LocationPermission';
-import { CountdownBanner }   from './components/CountdownBanner';
+import { Header }               from './components/Header';
+import { InstallBanner }        from './components/InstallBanner';
+import { MetricCards }          from './components/MetricCards';
+import { ConnectivityGauge }    from './components/ConnectivityGauge';
+import { AIRecommendation }     from './components/AIRecommendation';
+import { DtcCard }              from './components/DtcCard';
+import { SkyMap }               from './components/SkyMap';
+import { ConstellationFilter }  from './components/ConstellationFilter';
+import { PassList }             from './components/PassList';
+import { SatelliteList }        from './components/SatelliteList';
+import { SignalHistory }        from './components/SignalHistory';
+import { Footer }               from './components/Footer';
+import { SettingsPanel }        from './components/SettingsPanel';
+import { ChatPanel }            from './components/ChatPanel';
+import { LocationPermission }   from './components/LocationPermission';
+import { CountdownBanner }      from './components/CountdownBanner';
+import { getConstellation }     from './utils/constellation';
 import { useSatellites }     from './hooks/useSatellites';
 import { useRecommendation } from './hooks/useRecommendation';
 import { useWeather }        from './hooks/useWeather';
@@ -21,8 +23,9 @@ import { useLocation }       from './hooks/useLocation';
 
 function App() {
   const { location, saveLocation, gpsAccuracy, permState, requestGPS, declineGPS } = useLocation();
-  const [settingsOpen, setSettingsOpen] = useState(false);
-  const [chatOpen,     setChatOpen]     = useState(false);
+  const [settingsOpen,         setSettingsOpen]         = useState(false);
+  const [chatOpen,             setChatOpen]             = useState(false);
+  const [activeConstellation,  setActiveConstellation]  = useState('ALL');
 
   const { data: satData, lastUpdated, status, positions, posLastUpdate } = useSatellites(location);
   const { data: recData, loading: recLoading }  = useRecommendation(location);
@@ -34,6 +37,10 @@ function App() {
   const signalScore    = satData?.signalScore;
   const scoreBreakdown = satData?.scoreBreakdown;
   const starlinkSat    = satellites.find(s => s.satname.toUpperCase().includes('STARLINK'));
+
+  const filteredSatellites = activeConstellation === 'ALL'
+    ? satellites
+    : satellites.filter(s => getConstellation(s.satname) === activeConstellation);
 
   return (
     <div className="app">
@@ -62,7 +69,7 @@ function App() {
         <div className="left-col">
           <div className="section-label">Live Overview</div>
 
-          <MetricCards satellites={satellites} topPasses={topPasses} />
+          <MetricCards satellites={filteredSatellites} topPasses={topPasses} activeConstellation={activeConstellation} />
 
           <ConnectivityGauge
             satellites={satellites}
@@ -78,12 +85,18 @@ function App() {
 
           {starlinkSat && <DtcCard satellite={starlinkSat} />}
 
-          <SatelliteList satellites={satellites} />
+          <SatelliteList satellites={filteredSatellites} />
         </div>
 
         {/* ── Right column ── */}
         <div className="right-col">
           <div className="section-label">Sky Map — Azimuth / Elevation</div>
+
+          <ConstellationFilter
+            satellites={satellites}
+            active={activeConstellation}
+            onChange={setActiveConstellation}
+          />
 
           <SkyMap
             satellites={satellites}
@@ -91,6 +104,7 @@ function App() {
             passes={topPasses}
             positions={positions}
             posLastUpdate={posLastUpdate}
+            activeConstellation={activeConstellation}
           />
 
           <div className="passes-section">

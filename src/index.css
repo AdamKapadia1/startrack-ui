@@ -557,6 +557,64 @@ button { font-family: inherit; }
   flex-shrink: 0;
 }
 
+/* ── Constellation filter ────────────────────────────────── */
+.constellation-filter {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  padding: 0 20px;
+  margin-bottom: 8px;
+  flex-shrink: 0;
+}
+
+.const-pill {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  padding: 4px 12px;
+  border-radius: 20px;
+  border: 1px solid #1a3028;
+  background: #0d1f17;
+  color: #6B7280;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s, border-color 0.15s;
+  font-family: var(--mono);
+  white-space: nowrap;
+}
+
+.const-pill:hover {
+  background: #152a1e;
+  color: #9ca3af;
+}
+
+.const-pill--active {
+  background: #1D9E75;
+  color: #fff;
+  border-color: transparent;
+}
+
+.const-pill--active:hover {
+  background: #179065;
+}
+
+.const-pill-count {
+  font-size: 9px;
+  font-weight: 600;
+  opacity: 0.8;
+}
+
+/* ── Metric sublabel ─────────────────────────────────────── */
+.metric-sublabel {
+  font-size: 9px;
+  color: var(--text-muted);
+  margin-top: 3px;
+  letter-spacing: 0.3px;
+  font-family: var(--mono);
+}
+
 /* ── Pass list ───────────────────────────────────────────── */
 .passes-section {
   height: 160px;

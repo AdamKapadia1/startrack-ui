@@ -2,13 +2,15 @@ import { useState, useEffect, useRef } from 'react';
 import { createPortal } from 'react-dom';
 import type { Satellite, SatellitePosition } from '../types';
 import type { Pass } from '../hooks/useRecommendation';
+import { getConstellation, CONSTELLATION_COLORS } from '../utils/constellation';
 
 interface Props {
-  satellites:    Satellite[];
-  cloudCover?:   number;
-  passes?:       Pass[];
-  positions?:    SatellitePosition[];
-  posLastUpdate?: Date | null;
+  satellites:          Satellite[];
+  cloudCover?:         number;
+  passes?:             Pass[];
+  positions?:          SatellitePosition[];
+  posLastUpdate?:      Date | null;
+  activeConstellation: string;
 }
 
 const CX = 210, CY = 210, R = 175;
@@ -19,7 +21,11 @@ function toXY(az: number, el: number) {
   return { x: CX + r * Math.sin(rad), y: CY - r * Math.cos(rad) };
 }
 
-function dotColor(el: number) {
+function constellationColor(name: string): string {
+  return CONSTELLATION_COLORS[getConstellation(name)] ?? '#6B7280';
+}
+
+function elevColor(el: number): string {
   if (el >= 60) return '#1D9E75';
   if (el >= 30) return '#34d399';
   return '#6B7280';
@@ -92,7 +98,7 @@ function SatPopup({ sat, passes, onClose }: PopupProps) {
       <div className="sat-popup-rows">
         <div className="sat-popup-row">
           <span>Elevation</span>
-          <span style={{ color: dotColor(sat.elevation) }}>{sat.elevation.toFixed(1)}°</span>
+          <span style={{ color: elevColor(sat.elevation) }}>{sat.elevation.toFixed(1)}°</span>
         </div>
         <div className="sat-popup-row">
           <span>Azimuth</span><span>{sat.azimuth.toFixed(1)}°</span>
@@ -128,7 +134,7 @@ interface TrailPos { el: number; az: number; }
 
 // ── Main component ────────────────────────────────────────────────────────────
 
-export function SkyMap({ satellites, cloudCover = 0, passes = [], positions = [], posLastUpdate }: Props) {
+export function SkyMap({ satellites, cloudCover = 0, passes = [], positions = [], posLastUpdate, activeConstellation }: Props) {
   const [selected, setSelected] = useState<{ sat: Satellite; x: number; y: number } | null>(null);
 
   // Trails: name → last 3 positions (oldest first), not including current
@@ -154,6 +160,11 @@ export function SkyMap({ satellites, cloudCover = 0, passes = [], positions = []
           dopplerShiftKHz: s.dopplerShiftKHz,
           dopplerShiftHz:  s.dopplerShiftHz,
         }));
+
+  // Apply constellation filter at render time (trails still track all)
+  const renderSats = activeConstellation === 'ALL'
+    ? displaySats
+    : displaySats.filter(s => getConstellation(s.satname) === activeConstellation);
 
   // Update trails and entering/exiting state whenever displaySats changes
   useEffect(() => {
@@ -294,21 +305,25 @@ export function SkyMap({ satellites, cloudCover = 0, passes = [], positions = []
           ))}
 
           {/* Fading-out ghosts */}
-          {Array.from(fadingOut.entries()).map(([name, pos]) => {
-            const { x, y } = toXY(pos.az, pos.el);
-            return (
-              <circle key={`exit-${name}`} cx={x} cy={y} r="5"
-                fill="#6B7280" opacity="0" className="sat-fading-out"
-              />
-            );
-          })}
+          {Array.from(fadingOut.entries())
+            .filter(([name]) => activeConstellation === 'ALL' || getConstellation(name) === activeConstellation)
+            .map(([name, pos]) => {
+              const { x, y } = toXY(pos.az, pos.el);
+              return (
+                <circle key={`exit-${name}`} cx={x} cy={y} r="5"
+                  fill={constellationColor(name)} opacity="0" className="sat-fading-out"
+                />
+              );
+            })}
 
           {/* Live satellite dots */}
-          {displaySats.map((sat) => {
+          {renderSats.map((sat) => {
             const { x, y }  = toXY(sat.azimuth, sat.elevation);
-            const color      = dotColor(sat.elevation);
+            const color      = constellationColor(sat.satname);
             const isSelected = selected?.sat.satname === sat.satname;
             const isEntering = enteringNames.has(sat.satname);
+            const isIss      = getConstellation(sat.satname) === 'ISS';
+            const dotR       = isIss ? 8 : 5;
             const lx         = x < CX ? x + 9 : x - 9;
             const anchor     = x < CX ? 'start' : 'end';
             const trail      = trailRef.current.get(sat.satname) ?? [];
@@ -335,10 +350,10 @@ export function SkyMap({ satellites, cloudCover = 0, passes = [], positions = []
                 <circle cx={x} cy={y} r="9" fill={color} opacity={isSelected ? 0.28 : 0.12} filter="url(#glow)"/>
                 {/* Main dot */}
                 <circle
-                  cx={x} cy={y} r="5"
+                  cx={x} cy={y} r={dotR}
                   fill={color} opacity="0.95"
                   filter="url(#glow)"
-                  stroke={isSelected ? '#fff' : 'none'}
+                  stroke={isSelected ? (isIss ? '#aaa' : '#fff') : 'none'}
                   strokeWidth={isSelected ? 1 : 0}
                 />
                 {sat.elevation >= 60 && (
@@ -386,8 +401,19 @@ export function SkyMap({ satellites, cloudCover = 0, passes = [], positions = []
       )}
 
       <div className="sky-legend">
-        <span className="legend-item"><span className="legend-dot" style={{ background: '#1D9E75' }}/> High signal</span>
-        <span className="legend-item"><span className="legend-dot" style={{ background: '#34d399' }}/> Good</span>
+        {activeConstellation === 'ALL' ? (
+          <>
+            <span className="legend-item"><span className="legend-dot" style={{ background: '#1D9E75' }}/> Starlink</span>
+            <span className="legend-item"><span className="legend-dot" style={{ background: '#4A90D9' }}/> OneWeb</span>
+            <span className="legend-item"><span className="legend-dot" style={{ background: '#FFFFFF', boxShadow: '0 0 4px rgba(255,255,255,0.4)' }}/> ISS</span>
+            <span className="legend-item"><span className="legend-dot" style={{ background: '#F5A623' }}/> GPS</span>
+          </>
+        ) : (
+          <span className="legend-item" style={{ color: CONSTELLATION_COLORS[activeConstellation] }}>
+            <span className="legend-dot" style={{ background: CONSTELLATION_COLORS[activeConstellation] }}/>
+            {activeConstellation} only
+          </span>
+        )}
       </div>
     </div>
   );
