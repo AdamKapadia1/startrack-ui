@@ -72,22 +72,24 @@ export function SignalHistory() {
     <div className="history-section">
       <div className="section-label">{label}</div>
       <div className="history-chart-wrap">
-        <ResponsiveContainer width="100%" height={110}>
-          <LineChart data={chartData} margin={{ top: 8, right: 16, left: -20, bottom: 0 }}>
+        <ResponsiveContainer width="100%" height={120}>
+          <LineChart data={chartData} margin={{ top: 8, right: 16, left: 4, bottom: 0 }}>
             <CartesianGrid strokeDasharray="3 3" stroke="rgba(29,158,117,0.07)" vertical={false}/>
             <XAxis
               dataKey="time"
               tick={{ fill: '#3a4f47', fontSize: 9, fontFamily: 'monospace' }}
               tickLine={false}
               axisLine={false}
-              interval="preserveStartEnd"
+              interval={5}
             />
             <YAxis
               domain={[0, 100]}
               tick={{ fill: '#3a4f47', fontSize: 9, fontFamily: 'monospace' }}
               tickLine={false}
               axisLine={false}
-              tickCount={3}
+              tickCount={4}
+              width={36}
+              label={{ value: 'Signal', angle: -90, position: 'insideLeft', fill: '#3a4f47', fontSize: 8, dx: 10 }}
             />
             <Tooltip
               contentStyle={{ background: '#0f1512', border: '1px solid rgba(29,158,117,0.2)', borderRadius: 6, fontSize: 11 }}

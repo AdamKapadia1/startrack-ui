@@ -41,9 +41,10 @@ function useNextPassCountdown(topPasses: Pass[]): string {
 
 function signalScore(satellites: Satellite[]): number {
   if (!satellites.length) return 0;
-  const best = Math.max(...satellites.map(s => s.elevation));
-  const avg  = satellites.reduce((s, x) => s + x.elevation, 0) / satellites.length;
-  return Math.min(100, Math.round(satellites.length * 6 + avg * 0.4 + (best > 60 ? 15 : best > 30 ? 8 : 0)));
+  const best       = Math.max(...satellites.map(s => s.elevation));
+  const elevScore  = Math.max(0, Math.min(40, (best / 85) * 40));
+  const countBonus = satellites.length > 50 ? 10 : satellites.length > 10 ? 5 : 0;
+  return Math.min(100, Math.round(elevScore + countBonus + 28)); // 28 ≈ average weather baseline
 }
 
 export function MetricCards({ satellites, topPasses, activeConstellation }: Props) {
@@ -62,6 +63,7 @@ export function MetricCards({ satellites, topPasses, activeConstellation }: Prop
         <div className="metric-label">Satellites Overhead</div>
         <div className={`metric-value${count > 0 ? ' metric-value--green' : ''}`}>{count}</div>
         <div className="metric-sublabel">{filterLabel}</div>
+        <div className="metric-context">of ~6,000 Starlink satellites</div>
       </div>
 
       <div className="metric-card">

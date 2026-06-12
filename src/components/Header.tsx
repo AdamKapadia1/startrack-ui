@@ -7,11 +7,11 @@ import { AlertSettings } from './AlertSettings';
 interface StatusCfg { label: string; color: string; pulse: boolean }
 
 const STATUS: Record<WsStatus, StatusCfg> = {
-  connecting:   { label: 'CONNECTING',   color: '#F59E0B', pulse: true  },
-  live:         { label: 'LIVE',         color: '#1D9E75', pulse: true  },
-  reconnecting: { label: 'RECONNECTING', color: '#F59E0B', pulse: true  },
-  polling:      { label: 'POLLING',      color: '#6B7280', pulse: false },
-  offline:      { label: 'OFFLINE',      color: '#EF4444', pulse: false },
+  connecting:   { label: 'Connecting', color: '#F59E0B', pulse: true  },
+  live:         { label: 'Live',       color: '#1D9E75', pulse: true  },
+  reconnecting: { label: 'Connecting', color: '#F59E0B', pulse: true  },
+  polling:      { label: 'Refreshing', color: '#6B7280', pulse: false },
+  offline:      { label: 'Offline',    color: '#EF4444', pulse: false },
 };
 
 function useAgoText(date: Date | null): string {

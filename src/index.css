@@ -615,6 +615,13 @@ button { font-family: inherit; }
   font-family: var(--mono);
 }
 
+.metric-context {
+  font-size: 8px;
+  color: #2a4038;
+  margin-top: 2px;
+  font-family: var(--mono);
+}
+
 /* ── Pass list ───────────────────────────────────────────── */
 .passes-section {
   height: 160px;

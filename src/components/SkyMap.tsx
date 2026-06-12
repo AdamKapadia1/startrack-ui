@@ -32,9 +32,9 @@ function elevColor(el: number): string {
 }
 
 function badgeColor(cc: number) {
-  if (cc < 30) return '#1D9E75';
-  if (cc < 70) return '#F59E0B';
-  return '#EF4444';
+  if (cc <= 30) return '#1D9E75';
+  if (cc <= 70) return '#F59E0B';
+  return '#6B7280';
 }
 
 function shortName(name: string) {
