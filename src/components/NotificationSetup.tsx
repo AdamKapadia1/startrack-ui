@@ -14,7 +14,7 @@ export function NotificationSetup() {
     QRCode.toDataURL(NTFY_URL, {
       width: 120,
       margin: 1,
-      color: { dark: '#1D9E75', light: '#0a0f0c' },
+      color: { dark: '#00d4ff', light: '#0a0f0c' },
     }).then(setQrDataUrl).catch(() => {});
   }, []);
 

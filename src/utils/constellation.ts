@@ -9,11 +9,11 @@ export function getConstellation(name: string): string {
 }
 
 export const CONSTELLATION_COLORS: Record<string, string> = {
-  STARLINK: '#1D9E75',
-  ONEWEB:   '#4A90D9',
-  ISS:      '#FFFFFF',
-  GPS:      '#F5A623',
-  OTHER:    '#6B7280',
+  STARLINK: '#00ff88',  // matrix green
+  ONEWEB:   '#00d4ff',  // ice blue
+  ISS:      '#e8f4fd',  // near white
+  GPS:      '#ffb800',  // amber
+  OTHER:    '#4a6080',  // muted blue-grey
 };
 
 export const CONSTELLATION_LABELS: Record<string, string> = {

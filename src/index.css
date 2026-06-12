@@ -1,33 +1,66 @@
-/* ── Tokens ──────────────────────────────────────────────── */
+/* ══════════════════════════════════════════════════════════
+   MISSION CONTROL DESIGN SYSTEM — StarTrack AI v2
+   ══════════════════════════════════════════════════════════ */
 :root {
-  --bg:           #0a0f0c;
-  --surface:      #0f1512;
-  --surface-2:    #131a16;
-  --green:        #1D9E75;
-  --green-mid:    #34d399;
-  --green-dim:    rgba(29, 158, 117, 0.08);
-  --green-glow:   rgba(29, 158, 117, 0.25);
-  --amber:        #F59E0B;
-  --red:          #EF4444;
-  --blue-bg:      #06172a;
-  --blue-border:  rgba(59, 130, 246, 0.22);
-  --blue-text:    #60a5fa;
-  --grey:         #6B7280;
-  --border:       rgba(29, 158, 117, 0.13);
-  --border-dim:   rgba(255, 255, 255, 0.04);
-  --text:         #e8f0ec;
-  --text-dim:     #7a9187;
-  --text-muted:   #3a4f47;
-  --mono:         'SF Mono', 'Fira Code', 'Fira Mono', monospace;
+  /* ── Backgrounds: deep space layers ── */
+  --bg-primary:   #080c14;
+  --bg-secondary: #0d1520;
+  --bg-tertiary:  #111d2e;
+  --bg-overlay:   #0a1525;
+
+  /* ── Accent palette ── */
+  --accent-primary:   #00d4ff;   /* ice blue  — primary actions, live data */
+  --accent-secondary: #00ff88;   /* matrix green — positive / good status  */
+  --accent-warning:   #ffb800;   /* amber — warnings, moderate              */
+  --accent-danger:    #ff4444;   /* red — alerts, poor signal               */
+  --accent-purple:    #7b61ff;   /* purple — AI features                    */
+
+  /* ── Text hierarchy ── */
+  --text-primary:   #e8f4fd;
+  --text-secondary: #8ba3c4;
+  --text-tertiary:  #4a6080;
+  --text-data:      #00d4ff;
+
+  /* ── Borders ── */
+  --border-primary: #1a2d45;
+  --border-accent:  rgba(0, 212, 255, 0.13);
+  --border-bright:  rgba(0, 212, 255, 0.35);
+
+  /* ── Status ── */
+  --status-live:       #00ff88;
+  --status-connecting: #ffb800;
+  --status-offline:    #ff4444;
+
+  /* ── Legacy aliases (keep existing CSS working without changes) ── */
+  --bg:         var(--bg-primary);
+  --surface:    var(--bg-secondary);
+  --surface-2:  var(--bg-tertiary);
+  --green:      var(--accent-secondary);
+  --green-mid:  #00ff88;
+  --green-dim:  rgba(0, 212, 255, 0.06);
+  --green-glow: rgba(0, 212, 255, 0.18);
+  --amber:      var(--accent-warning);
+  --red:        var(--accent-danger);
+  --blue-bg:    var(--bg-overlay);
+  --blue-border: rgba(0, 212, 255, 0.18);
+  --blue-text:  var(--accent-primary);
+  --grey:       #4a6080;
+  --border:     var(--border-primary);
+  --border-dim: rgba(26, 45, 69, 0.55);
+  --text:       var(--text-primary);
+  --text-dim:   var(--text-secondary);
+  --text-muted: var(--text-tertiary);
+  --mono:       'JetBrains Mono', 'SF Mono', 'Fira Code', monospace;
 }
 
 /* ── Reset ───────────────────────────────────────────────── */
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
 body {
-  background: var(--bg);
-  color: var(--text);
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  background: radial-gradient(ellipse at 50% 0%, #0d1f3c 0%, #080c14 70%);
+  background-attachment: fixed;
+  color: var(--text-primary);
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
   font-size: 13px;
   line-height: 1.5;
   height: 100vh;
@@ -76,8 +109,8 @@ button { font-family: inherit; }
   display: flex;
   align-items: center;
   gap: 5px;
-  background: rgba(29, 158, 117, 0.1);
-  border: 1px solid rgba(29, 158, 117, 0.28);
+  background: rgba(0, 212, 255, 0.1);
+  border: 1px solid rgba(0, 212, 255, 0.28);
   border-radius: 20px;
   padding: 2px 8px 2px 5px;
   font-size: 9px;
@@ -364,8 +397,8 @@ button { font-family: inherit; }
 
 .sat-count-badge {
   margin-left: 8px;
-  background: rgba(29, 158, 117, 0.15);
-  border: 1px solid rgba(29, 158, 117, 0.3);
+  background: rgba(0, 212, 255, 0.15);
+  border: 1px solid rgba(0, 212, 255, 0.3);
   border-radius: 10px;
   padding: 1px 6px;
   font-size: 9px;
@@ -502,7 +535,7 @@ button { font-family: inherit; }
 
 .dtc-body {
   font-size: 11px;
-  color: rgba(96, 165, 250, 0.65);
+  color: rgba(0, 212, 255, 0.6);
   line-height: 1.5;
 }
 
@@ -573,9 +606,9 @@ button { font-family: inherit; }
   gap: 5px;
   padding: 4px 12px;
   border-radius: 20px;
-  border: 1px solid #1a3028;
-  background: #0d1f17;
-  color: #6B7280;
+  border: 1px solid var(--border-primary);
+  background: #0d1520;
+  color: var(--text-tertiary);
   font-size: 10px;
   font-weight: 700;
   letter-spacing: 0.5px;
@@ -586,18 +619,18 @@ button { font-family: inherit; }
 }
 
 .const-pill:hover {
-  background: #152a1e;
-  color: #9ca3af;
+  background: var(--bg-tertiary);
+  color: var(--text-secondary);
 }
 
 .const-pill--active {
-  background: #1D9E75;
+  background: #00d4ff;
   color: #fff;
   border-color: transparent;
 }
 
 .const-pill--active:hover {
-  background: #179065;
+  background: #0099cc;
 }
 
 .const-pill-count {
@@ -617,7 +650,7 @@ button { font-family: inherit; }
 
 .metric-context {
   font-size: 8px;
-  color: #2a4038;
+  color: #1a2d45;
   margin-top: 2px;
   font-family: var(--mono);
 }
@@ -823,7 +856,7 @@ button { font-family: inherit; }
 /* Arc chart inner */
 .arc-chart-wrap {
   background:  #080f0c;
-  border-top:  1px solid #1a2e24;
+  border-top:  1px solid #0d1520;
   padding:     10px 10px 4px;
 }
 
@@ -853,7 +886,7 @@ button { font-family: inherit; }
 
 .arc-tooltip {
   background:    rgba(8,16,12,0.95);
-  border:        1px solid #1D9E75;
+  border:        1px solid #00d4ff;
   border-radius: 5px;
   padding:       5px 8px;
   font-size:     10px;
@@ -864,7 +897,7 @@ button { font-family: inherit; }
 /* ── Calendar buttons ────────────────────────────────────── */
 .cal-btn {
   background: none;
-  border: 1px solid rgba(29,158,117,0.22);
+  border: 1px solid rgba(0,212,255,0.22);
   border-radius: 5px;
   color: var(--text-muted);
   cursor: pointer;
@@ -887,8 +920,8 @@ button { font-family: inherit; }
   gap: 6px;
   margin: 6px 16px 4px;
   padding: 5px 10px;
-  background: rgba(29,158,117,0.07);
-  border: 1px solid rgba(29,158,117,0.2);
+  background: rgba(0,212,255,0.07);
+  border: 1px solid rgba(0,212,255,0.2);
   border-radius: 6px;
   color: var(--text-dim);
   font-size: 10px;
@@ -898,7 +931,7 @@ button { font-family: inherit; }
   letter-spacing: 0.3px;
 }
 .bulk-cal-btn:hover {
-  background: rgba(29,158,117,0.13);
+  background: rgba(0,212,255,0.13);
   color: var(--green);
 }
 
@@ -991,8 +1024,8 @@ button { font-family: inherit; }
   align-items: center;
   gap: 7px;
   padding: 8px 12px;
-  background: rgba(29,158,117,0.08);
-  border: 1px solid rgba(29,158,117,0.25);
+  background: rgba(0,212,255,0.08);
+  border: 1px solid rgba(0,212,255,0.25);
   border-radius: 7px;
   color: var(--green);
   font-size: 11px;
@@ -1000,7 +1033,7 @@ button { font-family: inherit; }
   cursor: pointer;
   transition: background 0.15s;
 }
-.settings-geo-btn:hover { background: rgba(29,158,117,0.14); }
+.settings-geo-btn:hover { background: rgba(0,212,255,0.14); }
 
 .settings-error {
   font-size: 11px;
@@ -1126,7 +1159,7 @@ button { font-family: inherit; }
   font-family: inherit;
 }
 .loc-result:last-child { border-bottom: none; }
-.loc-result:hover { background: rgba(29,158,117,0.1); }
+.loc-result:hover { background: rgba(0,212,255,0.1); }
 
 .loc-result-name {
   font-size:   12px;
@@ -1168,8 +1201,8 @@ button { font-family: inherit; }
   transition:    background 0.12s, border-color 0.12s, color 0.12s;
 }
 .loc-chip:hover {
-  background:   rgba(29,158,117,0.12);
-  border-color: rgba(29,158,117,0.4);
+  background:   rgba(0,212,255,0.12);
+  border-color: rgba(0,212,255,0.4);
   color:        var(--green);
 }
 
@@ -1209,8 +1242,8 @@ button { font-family: inherit; }
   align-items: center;
   gap:         10px;
   padding:     8px 16px;
-  background:  rgba(29,158,117,0.08);
-  border-bottom: 1px solid rgba(29,158,117,0.2);
+  background:  rgba(0,212,255,0.08);
+  border-bottom: 1px solid rgba(0,212,255,0.2);
   font-size:   11px;
   color:       var(--text-dim);
   flex-shrink: 0;
@@ -1267,7 +1300,7 @@ button { font-family: inherit; }
   border-radius: 9px;
   padding: 11px 13px 10px;
   min-width: 168px;
-  box-shadow: 0 4px 24px rgba(0,0,0,0.7), 0 0 0 1px rgba(29,158,117,0.12);
+  box-shadow: 0 4px 24px rgba(0,0,0,0.7), 0 0 0 1px rgba(0,212,255,0.12);
   pointer-events: auto;
 }
 
@@ -1445,8 +1478,8 @@ button { font-family: inherit; }
   width: 17px;
   height: 17px;
   border-radius: 50%;
-  background: rgba(29,158,117,0.18);
-  border: 1px solid rgba(29,158,117,0.35);
+  background: rgba(0,212,255,0.18);
+  border: 1px solid rgba(0,212,255,0.35);
   color: var(--green);
   font-size: 9px;
   font-weight: 700;
@@ -1674,7 +1707,7 @@ button { font-family: inherit; }
 .alert-method-btn.active {
   border-color: var(--green);
   color:        var(--green);
-  background:   rgba(29,158,117,0.1);
+  background:   rgba(0,212,255,0.1);
 }
 
 /* ── ntfy section ────────────────────────────────────────── */
@@ -1713,20 +1746,20 @@ button { font-family: inherit; }
   padding:       6px 8px;
   border-radius: 6px;
 }
-.alert-browser-status.ok     { color: var(--green);  background: rgba(29,158,117,0.1); border: 1px solid rgba(29,158,117,0.25); }
+.alert-browser-status.ok     { color: var(--green);  background: rgba(0,212,255,0.1); border: 1px solid rgba(0,212,255,0.25); }
 .alert-browser-status.denied { color: #EF4444; background: rgba(239,68,68,0.08);    border: 1px solid rgba(239,68,68,0.2); }
 .alert-browser-req {
   font-size:     11px;
   font-weight:   600;
   padding:       7px 12px;
   border-radius: 6px;
-  border:        1px solid rgba(29,158,117,0.4);
-  background:    rgba(29,158,117,0.1);
+  border:        1px solid rgba(0,212,255,0.4);
+  background:    rgba(0,212,255,0.1);
   color:         var(--green);
   cursor:        pointer;
   transition:    background 0.15s;
 }
-.alert-browser-req:hover { background: rgba(29,158,117,0.18); }
+.alert-browser-req:hover { background: rgba(0,212,255,0.18); }
 
 /* ── Upcoming alerts list ────────────────────────────────── */
 .alert-upcoming {
@@ -1775,8 +1808,8 @@ button { font-family: inherit; }
 .alert-save-btn {
   padding:       8px 14px;
   border-radius: 7px;
-  border:        1px solid rgba(29,158,117,0.4);
-  background:    rgba(29,158,117,0.1);
+  border:        1px solid rgba(0,212,255,0.4);
+  background:    rgba(0,212,255,0.1);
   color:         var(--green);
   font-size:     12px;
   font-weight:   700;
@@ -1784,10 +1817,10 @@ button { font-family: inherit; }
   transition:    background 0.15s, border-color 0.15s;
   text-align:    center;
 }
-.alert-save-btn:hover:not(:disabled) { background: rgba(29,158,117,0.18); }
+.alert-save-btn:hover:not(:disabled) { background: rgba(0,212,255,0.18); }
 .alert-save-btn:disabled { opacity: 0.6; cursor: default; }
 .alert-save-btn.saved  {
-  background:  rgba(29,158,117,0.2);
+  background:  rgba(0,212,255,0.2);
   border-color: var(--green);
 }
 
@@ -1797,7 +1830,7 @@ button { font-family: inherit; }
   align-items: center;
   gap:         10px;
   background:  #0d2b1e;
-  border-bottom: 1px solid rgba(29,158,117,0.35);
+  border-bottom: 1px solid rgba(0,212,255,0.35);
   padding:     10px 20px;
   font-size:   13px;
   color:       var(--text);
@@ -1843,7 +1876,7 @@ button { font-family: inherit; }
   align-items: center;
   justify-content: center;
   color: #fff;
-  box-shadow: 0 4px 20px rgba(29, 158, 117, 0.45);
+  box-shadow: 0 4px 20px rgba(0, 212, 255, 0.45);
   transition: background 0.2s, transform 0.2s;
   animation: bubble-pulse 3s ease-in-out infinite;
 }
@@ -1851,8 +1884,8 @@ button { font-family: inherit; }
 .chat-bubble-btn.open   { background: #374151; box-shadow: 0 4px 16px rgba(0,0,0,0.4); animation: none; }
 
 @keyframes bubble-pulse {
-  0%, 100% { box-shadow: 0 4px 20px rgba(29,158,117,0.45); }
-  50%       { box-shadow: 0 4px 28px rgba(29,158,117,0.75); }
+  0%, 100% { box-shadow: 0 4px 20px rgba(0,212,255,0.45); }
+  50%       { box-shadow: 0 4px 28px rgba(0,212,255,0.75); }
 }
 
 .chat-bubble-badge {
@@ -1960,7 +1993,7 @@ button { font-family: inherit; }
 .chat-suggestion-chip:hover {
   border-color: var(--green);
   color: var(--green);
-  background: rgba(29,158,117,0.06);
+  background: rgba(0,212,255,0.06);
 }
 
 .chat-msg {
@@ -2207,7 +2240,7 @@ button { font-family: inherit; }
   width: 480px;
   max-width: 100vw;
   background: #071410;
-  border-left: 1px solid rgba(29, 158, 117, 0.2);
+  border-left: 1px solid rgba(0, 212, 255, 0.2);
   z-index: 1001;
   display: flex;
   flex-direction: column;
@@ -2220,9 +2253,9 @@ button { font-family: inherit; }
   align-items: flex-start;
   justify-content: space-between;
   padding: 18px 20px 14px;
-  border-bottom: 1px solid rgba(29, 158, 117, 0.15);
+  border-bottom: 1px solid rgba(0, 212, 255, 0.15);
   flex-shrink: 0;
-  background: #0a1a12;
+  background: #0d1520;
 }
 
 .sat-detail-hdr-left { flex: 1; min-width: 0; }
@@ -2258,9 +2291,9 @@ button { font-family: inherit; }
   border-radius: 10px;
   font-size: 9px;
   font-weight: 700;
-  background: rgba(59, 130, 246, 0.12);
-  border: 1px solid rgba(59, 130, 246, 0.35);
-  color: #60a5fa;
+  background: rgba(0, 212, 255, 0.12);
+  border: 1px solid rgba(0, 212, 255, 0.35);
+  color: #00d4ff;
   font-family: var(--mono);
 }
 
@@ -2272,14 +2305,14 @@ button { font-family: inherit; }
   letter-spacing: 0.5px;
   background: rgba(107, 114, 128, 0.12);
   border: 1px solid rgba(107, 114, 128, 0.3);
-  color: #6B7280;
+  color: var(--text-tertiary);
   font-family: var(--mono);
 }
 
 .sat-status-badge--live {
-  background: rgba(29, 158, 117, 0.12);
-  border-color: rgba(29, 158, 117, 0.35);
-  color: #1D9E75;
+  background: rgba(0, 212, 255, 0.12);
+  border-color: rgba(0, 212, 255, 0.35);
+  color: #00d4ff;
 }
 
 .sat-detail-close {
@@ -2288,16 +2321,16 @@ button { font-family: inherit; }
   display: flex;
   align-items: center;
   justify-content: center;
-  border: 1px solid rgba(29, 158, 117, 0.2);
+  border: 1px solid rgba(0, 212, 255, 0.2);
   border-radius: 8px;
   background: transparent;
-  color: #3a4f47;
+  color: #4a6080;
   cursor: pointer;
   flex-shrink: 0;
   margin-left: 12px;
   transition: color 0.15s, border-color 0.15s;
 }
-.sat-detail-close:hover { color: #e8f5f0; border-color: rgba(29, 158, 117, 0.5); }
+.sat-detail-close:hover { color: #e8f5f0; border-color: rgba(0, 212, 255, 0.5); }
 
 /* Scrollable content */
 .sat-detail-content { flex: 1; overflow-y: auto; }
@@ -2305,7 +2338,7 @@ button { font-family: inherit; }
 /* Sections */
 .sd-section {
   padding: 14px 20px 16px;
-  border-bottom: 1px solid rgba(29, 158, 117, 0.08);
+  border-bottom: 1px solid rgba(0, 212, 255, 0.08);
 }
 .sd-section:last-child { border-bottom: none; padding-bottom: 24px; }
 
@@ -2314,7 +2347,7 @@ button { font-family: inherit; }
   font-weight: 700;
   letter-spacing: 1.2px;
   text-transform: uppercase;
-  color: #3a4f47;
+  color: #4a6080;
   margin-bottom: 12px;
   font-family: var(--mono);
   display: flex;
@@ -2327,12 +2360,12 @@ button { font-family: inherit; }
   font-weight: 500;
   letter-spacing: 0;
   text-transform: none;
-  color: #1D9E75;
+  color: #00d4ff;
 }
 
 .sd-loading {
   font-size: 11px;
-  color: #3a4f47;
+  color: #4a6080;
   font-family: var(--mono);
   text-align: center;
   padding: 12px 0;
@@ -2348,7 +2381,7 @@ button { font-family: inherit; }
 .mini-skymap-svg { width: 200px; height: 200px; }
 .mini-skymap-pos {
   font-size: 11px;
-  color: #3a4f47;
+  color: #4a6080;
   font-family: var(--mono);
 }
 
@@ -2359,8 +2392,8 @@ button { font-family: inherit; }
   gap: 8px;
 }
 .telemetry-card {
-  background: rgba(29, 158, 117, 0.04);
-  border: 1px solid rgba(29, 158, 117, 0.1);
+  background: rgba(0, 212, 255, 0.04);
+  border: 1px solid rgba(0, 212, 255, 0.1);
   border-radius: 8px;
   padding: 10px 12px;
 }
@@ -2370,7 +2403,7 @@ button { font-family: inherit; }
   font-weight: 600;
   letter-spacing: 0.8px;
   text-transform: uppercase;
-  color: #3a4f47;
+  color: #4a6080;
   margin-bottom: 4px;
   font-family: var(--mono);
 }
@@ -2388,12 +2421,12 @@ button { font-family: inherit; }
   justify-content: space-between;
   align-items: center;
   padding: 7px 0;
-  border-bottom: 1px solid rgba(29, 158, 117, 0.06);
+  border-bottom: 1px solid rgba(0, 212, 255, 0.06);
 }
 .orbital-row:last-child { border-bottom: none; }
 .orbital-label {
   font-size: 10px;
-  color: #4a5568;
+  color: #4a6080;
   font-family: var(--mono);
   display: flex;
   align-items: center;
@@ -2406,16 +2439,16 @@ button { font-family: inherit; }
   width: 13px;
   height: 13px;
   border-radius: 50%;
-  border: 1px solid #2a4038;
+  border: 1px solid var(--border-primary);
   font-size: 8px;
-  color: #2a4038;
+  color: #1a2d45;
   cursor: help;
   flex-shrink: 0;
 }
 .orbital-value {
   font-size: 11px;
   font-weight: 600;
-  color: #9ca3af;
+  color: var(--text-secondary);
   font-family: var(--mono);
   text-align: right;
   max-width: 55%;
@@ -2428,17 +2461,17 @@ button { font-family: inherit; }
   justify-content: space-between;
   align-items: center;
   padding: 8px 10px;
-  background: rgba(29, 158, 117, 0.03);
-  border: 1px solid rgba(29, 158, 117, 0.1);
+  background: rgba(0, 212, 255, 0.03);
+  border: 1px solid rgba(0, 212, 255, 0.1);
   border-radius: 8px;
   gap: 8px;
 }
 .pass-item-time { display: flex; flex-direction: column; gap: 2px; }
-.pass-item-date { font-size: 9px; color: #3a4f47; font-family: var(--mono); }
-.pass-item-times { font-size: 11px; color: #9ca3af; font-family: var(--mono); font-weight: 600; }
+.pass-item-date { font-size: 9px; color: #4a6080; font-family: var(--mono); }
+.pass-item-times { font-size: 11px; color: var(--text-secondary); font-family: var(--mono); font-weight: 600; }
 .pass-item-stats { display: flex; align-items: center; gap: 7px; flex-shrink: 0; }
 .pass-item-el { font-size: 13px; font-weight: 700; font-family: var(--mono); }
-.pass-item-dur { font-size: 10px; color: #4a5568; font-family: var(--mono); }
+.pass-item-dur { font-size: 10px; color: #4a6080; font-family: var(--mono); }
 .pass-quality-badge {
   font-size: 9px;
   font-weight: 700;
@@ -2453,19 +2486,19 @@ button { font-family: inherit; }
   font-weight: 700;
   padding: 2px 7px;
   border-radius: 6px;
-  border: 1px solid rgba(29, 158, 117, 0.3);
+  border: 1px solid rgba(0, 212, 255, 0.3);
   background: transparent;
-  color: #1D9E75;
+  color: #00d4ff;
   cursor: pointer;
   font-family: var(--mono);
   transition: background 0.15s;
 }
-.pass-cal-btn:hover { background: rgba(29, 158, 117, 0.1); }
+.pass-cal-btn:hover { background: rgba(0, 212, 255, 0.1); }
 
 /* Clickable satellite name in list */
 .sat-name-link { cursor: pointer; transition: color 0.15s; }
 .sat-name-link:hover {
-  color: #1D9E75 !important;
+  color: #00d4ff !important;
   text-decoration: underline;
   text-decoration-style: dotted;
   text-underline-offset: 3px;
@@ -2581,8 +2614,8 @@ button { font-family: inherit; }
 .ob-btn-primary:hover:not(:disabled) { opacity: 0.88; }
 .ob-btn-primary:active:not(:disabled) { transform: scale(0.98); }
 .ob-btn-primary:disabled { opacity: 0.5; cursor: not-allowed; }
-.ob-gps-btn { background: rgba(29,158,117,0.15); color: var(--green); border: 1px solid rgba(29,158,117,0.4); }
-.ob-gps-btn:hover:not(:disabled) { background: rgba(29,158,117,0.25); opacity: 1; }
+.ob-gps-btn { background: rgba(0,212,255,0.15); color: var(--green); border: 1px solid rgba(0,212,255,0.4); }
+.ob-gps-btn:hover:not(:disabled) { background: rgba(0,212,255,0.25); opacity: 1; }
 
 .ob-btn-skip {
   background: none;
@@ -2611,7 +2644,7 @@ button { font-family: inherit; }
   transition:   all 0.2s;
 }
 .ob-dot--active { background: var(--green); border-color: var(--green); width: 20px; border-radius: 4px; }
-.ob-dot--done   { background: rgba(29,158,117,0.4); border-color: transparent; }
+.ob-dot--done   { background: rgba(0,212,255,0.4); border-color: transparent; }
 
 .ob-back {
   position:    absolute;
@@ -2667,8 +2700,8 @@ button { font-family: inherit; }
 
 .ob-search-btn {
   padding:       9px 14px;
-  background:    rgba(29,158,117,0.15);
-  border:        1px solid rgba(29,158,117,0.35);
+  background:    rgba(0,212,255,0.15);
+  border:        1px solid rgba(0,212,255,0.35);
   border-radius: 8px;
   color:         var(--green);
   font-size:     12px;
@@ -2723,8 +2756,8 @@ button { font-family: inherit; }
   gap:           6px;
   text-align:    center;
 }
-.ob-notif-card:hover      { border-color: rgba(29,158,117,0.35); background: var(--green-dim); }
-.ob-notif-card--active    { border-color: var(--green); background: rgba(29,158,117,0.08); }
+.ob-notif-card:hover      { border-color: rgba(0,212,255,0.35); background: var(--green-dim); }
+.ob-notif-card--active    { border-color: var(--green); background: rgba(0,212,255,0.08); }
 
 .ob-notif-icon  { font-size: 24px; }
 .ob-notif-title { font-size: 11px; font-weight: 700; color: var(--text); line-height: 1.3; }
@@ -2741,7 +2774,7 @@ button { font-family: inherit; }
   font-family: var(--mono);
   font-size:   11px;
   color:       var(--green);
-  background:  rgba(29,158,117,0.1);
+  background:  rgba(0,212,255,0.1);
   padding:     3px 8px;
   border-radius: 4px;
   display:     inline-block;
@@ -2892,11 +2925,11 @@ button { font-family: inherit; }
   font-size:     10px;
   font-weight:   600;
 }
-.help-badge--green { background: rgba(29,158,117,0.15); color: #1D9E75; }
+.help-badge--green { background: rgba(0,212,255,0.15); color: #00d4ff; }
 .help-badge--blue  { background: rgba(74,144,217,0.15); color: #4A90D9; }
 .help-badge--white { background: rgba(255,255,255,0.08); color: #d0d0d0; }
 .help-badge--amber { background: rgba(245,158,11,0.15); color: #F59E0B; }
-.help-badge--grey  { background: rgba(107,114,128,0.15); color: #6B7280; }
+.help-badge--grey  { background: rgba(107,114,128,0.15); color: var(--text-tertiary); }
 
 .help-badge-row {
   display:    flex;
@@ -2908,7 +2941,7 @@ button { font-family: inherit; }
 .help-code {
   font-family:   var(--mono);
   font-size:     11px;
-  background:    rgba(29,158,117,0.1);
+  background:    rgba(0,212,255,0.1);
   color:         var(--green);
   padding:       1px 5px;
   border-radius: 3px;
@@ -2953,7 +2986,7 @@ button { font-family: inherit; }
 }
 .pass-share-btn:hover {
   color:        var(--green);
-  border-color: rgba(29,158,117,0.3);
+  border-color: rgba(0,212,255,0.3);
   background:   var(--green-dim);
 }
 
@@ -3013,3 +3046,533 @@ button { font-family: inherit; }
 @media (max-width: 768px) {
   .pass-share-wrap { display: none; }
 }
+
+/* ══════════════════════════════════════════════════════════
+   MISSION CONTROL REDESIGN — Section overrides v2
+   All rules here have higher specificity / later cascade
+   than the generic rules above.
+   ══════════════════════════════════════════════════════════ */
+
+/* ── Typography: Inter UI + JetBrains Mono for data ── */
+body { font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; }
+
+/* All monospace contexts get JetBrains Mono */
+.metric-value,
+.metric-unit,
+.gauge-score-num,
+.sat-name,
+.pass-name,
+.pass-time,
+.pass-dur,
+.header-location,
+.gps-accuracy,
+.header-ago,
+.const-pill,
+.const-pill-count,
+.metric-sublabel,
+.metric-context,
+.history-chart-wrap,
+.gauge-score-denom,
+code,
+.help-code,
+.ob-ntfy-topic,
+.telemetry-value,
+.orbital-value,
+.sat-detail-name,
+.footer-meta,
+[class*="sat-badge"],
+[class*="pass-item-el"],
+[class*="pass-item-dur"],
+[class*="pass-item-times"] {
+  font-family: 'JetBrains Mono', 'SF Mono', 'Fira Code', monospace;
+}
+
+/* ── Header ── */
+.header {
+  background:    var(--bg-secondary);
+  border-bottom: 1px solid var(--border-primary);
+  border-top:    2px solid var(--accent-primary);
+  box-shadow:    0 1px 20px rgba(0, 0, 0, 0.4);
+}
+
+.header-logo {
+  font-family:    'Inter', sans-serif;
+  font-weight:    600;
+  font-size:      14px;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color:          var(--text-primary);
+}
+
+.header-logo sup {
+  font-size:   9px;
+  color:       var(--accent-primary);
+  font-weight: 600;
+  letter-spacing: 0;
+  vertical-align: super;
+}
+
+.header-location {
+  font-family: 'JetBrains Mono', monospace;
+  font-size:   10px;
+  color:       var(--text-secondary);
+}
+
+.gps-accuracy { font-family: 'JetBrains Mono', monospace; }
+
+.icon-btn { color: var(--text-tertiary); }
+.icon-btn:hover { color: var(--accent-primary); }
+
+.status-pill { background: transparent !important; }
+
+/* ── Section labels ── */
+.section-label {
+  display:      flex;
+  align-items:  center;
+  gap:          8px;
+  font-family:  'Inter', sans-serif;
+  font-size:    10px;
+  font-weight:  500;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color:        var(--text-tertiary);
+  border-bottom: 1px solid var(--border-primary);
+}
+.section-label::before {
+  content:  '';
+  display:  inline-block;
+  width:    2px;
+  height:   12px;
+  background: var(--accent-primary);
+  border-radius: 1px;
+  flex-shrink: 0;
+}
+
+/* ── Left column ── */
+.left-col { border-right: 1px solid var(--border-primary); }
+
+/* ── Metric cards ── */
+.metric-card {
+  background:   var(--bg-secondary);
+  border-right: 1px solid var(--border-primary);
+  border-bottom: 1px solid var(--border-primary);
+  border-left:  3px solid var(--accent-primary);
+  position:     relative;
+}
+.metric-card:nth-child(2n) {
+  border-right: none;
+  border-left:  3px solid var(--accent-primary);
+}
+.metric-card:nth-child(3),
+.metric-card:nth-child(4) { border-bottom: none; }
+
+.metric-label {
+  font-family:    'Inter', sans-serif;
+  font-size:      9px;
+  font-weight:    500;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color:          var(--text-tertiary);
+}
+
+.metric-value {
+  font-family: 'JetBrains Mono', monospace;
+  font-size:   36px;
+  color:       var(--text-data);
+  letter-spacing: -1px;
+}
+.metric-value--green { color: var(--accent-secondary); }
+.metric-unit { color: var(--text-secondary); }
+
+.metric-sublabel { color: var(--text-tertiary); }
+.metric-context  { color: var(--border-primary); }
+
+/* ── Connectivity gauge ── */
+.gauge-score-num { font-family: 'JetBrains Mono', monospace; color: var(--text-data); }
+.gauge-score-denom { font-family: 'JetBrains Mono', monospace; }
+.gauge-status { font-family: 'Inter', sans-serif; }
+.gauge-sub    { color: var(--text-secondary); }
+.gauge-updated { font-family: 'JetBrains Mono', monospace; color: var(--text-tertiary); }
+
+/* Score tooltip */
+.score-tooltip {
+  background: var(--bg-tertiary);
+  border:     1px solid var(--border-primary);
+}
+.score-tooltip-row span:last-child,
+.score-tooltip-total span:last-child { font-family: 'JetBrains Mono', monospace; color: var(--text-data); }
+
+/* ── AI recommendation ── */
+.ai-panel-eyebrow {
+  color: var(--accent-purple);
+  letter-spacing: 1.5px;
+}
+.ai-panel-eyebrow::before {
+  content: '● ';
+  color:   var(--accent-purple);
+  font-size: 8px;
+}
+.ai-text-first strong,
+.ai-text-rest strong { color: var(--accent-primary); }
+.ai-text-rest { color: var(--text-secondary); line-height: 1.7; }
+.ai-text-first { color: var(--text-primary); line-height: 1.7; }
+
+/* ── DTC card redesign ── */
+.dtc-card {
+  background:  linear-gradient(135deg, var(--bg-overlay), var(--bg-tertiary));
+  border:      1px solid rgba(0, 212, 255, 0.25);
+  border-left: 3px solid var(--accent-primary);
+  box-shadow:  0 0 20px rgba(0, 212, 255, 0.05);
+}
+.dtc-icon  { color: var(--accent-primary); }
+.dtc-title { color: var(--accent-primary); font-family: 'Inter', sans-serif; font-weight: 600; }
+.dtc-body  { color: var(--text-secondary); }
+
+/* ── Satellite table ── */
+.sat-table th {
+  font-family:    'Inter', sans-serif;
+  font-weight:    500;
+  letter-spacing: 0.1em;
+  color:          var(--text-tertiary);
+}
+.sat-table td         { color: var(--text-secondary); border-bottom: 1px solid var(--border-primary); }
+.sat-table tbody tr:hover { background: rgba(0, 212, 255, 0.04); }
+.sat-name { color: var(--text-primary); }
+.sat-name-link:hover { color: var(--accent-primary); }
+
+.sat-count-badge {
+  background: rgba(0, 212, 255, 0.1);
+  border:     1px solid rgba(0, 212, 255, 0.25);
+  color:      var(--accent-primary);
+}
+
+/* ── Constellation filter pills ── */
+.const-pill {
+  background:  transparent;
+  border:      1px solid var(--border-primary);
+  color:       var(--text-tertiary);
+  font-family: 'JetBrains Mono', monospace;
+}
+.const-pill:hover {
+  background:   rgba(0, 212, 255, 0.06);
+  border-color: rgba(0, 212, 255, 0.3);
+  color:        var(--text-secondary);
+}
+.const-pill--active {
+  background:   rgba(0, 212, 255, 0.12);
+  border-color: var(--accent-primary);
+  color:        var(--accent-primary);
+}
+.const-pill--active:hover {
+  background: rgba(0, 212, 255, 0.18);
+}
+
+/* ── Pass list ── */
+.pass-list-head span {
+  font-family:    'Inter', sans-serif;
+  font-weight:    500;
+  letter-spacing: 0.1em;
+  color:          var(--text-tertiary);
+}
+.pass-name { font-family: 'JetBrains Mono', monospace; color: var(--text-primary); }
+.pass-time { font-family: 'JetBrains Mono', monospace; color: var(--accent-primary); }
+.pass-dur  { font-family: 'JetBrains Mono', monospace; }
+.pass-row:hover { background: rgba(0, 212, 255, 0.04); }
+.pass-bar { background: linear-gradient(90deg, var(--accent-secondary), var(--accent-primary)); }
+
+/* Quality badges */
+.pass-quality-badge[style*="#00ff88"],
+.pass-quality-badge[style*="#00d4ff"] {
+  background: rgba(0, 212, 255, 0.1);
+  border-color: rgba(0, 212, 255, 0.35) !important;
+  color: var(--accent-primary) !important;
+}
+
+/* Better: override via class approach — update component styles */
+.quality-excellent { background: rgba(0,255,136,0.08); border: 1px solid rgba(0,255,136,0.3); color: var(--accent-secondary); }
+.quality-good      { background: rgba(0,212,255,0.08); border: 1px solid rgba(0,212,255,0.3); color: var(--accent-primary); }
+.quality-fair      { background: rgba(255,184,0,0.08); border: 1px solid rgba(255,184,0,0.3); color: var(--accent-warning); }
+.quality-poor      { background: rgba(255,68,68,0.08); border: 1px solid rgba(255,68,68,0.3); color: var(--accent-danger); }
+
+/* Pass row expanded section */
+.pass-row-open { background: rgba(0, 212, 255, 0.04); }
+
+/* ── Calendar / share buttons ── */
+.cal-btn, .pass-cal-btn {
+  color:        var(--text-tertiary);
+  border-color: var(--border-primary);
+}
+.cal-btn:hover, .pass-cal-btn:hover {
+  color:        var(--accent-primary);
+  border-color: rgba(0, 212, 255, 0.4);
+  background:   rgba(0, 212, 255, 0.08);
+}
+.pass-share-btn:hover {
+  color:        var(--accent-primary);
+  border-color: rgba(0, 212, 255, 0.3);
+  background:   rgba(0, 212, 255, 0.06);
+}
+
+/* ── Signal history chart ── */
+.history-section { background: var(--bg-secondary); }
+.history-empty   { color: var(--text-tertiary); }
+.section-label   { background: var(--bg-secondary); }
+
+/* ── Sky map scan-line overlay ── */
+.sky-svg-wrap::after {
+  content:  '';
+  position: absolute;
+  inset:    0;
+  border-radius: 50%;
+  pointer-events: none;
+  background: repeating-linear-gradient(
+    0deg,
+    transparent,
+    transparent 2px,
+    rgba(0, 212, 255, 0.015) 2px,
+    rgba(0, 212, 255, 0.015) 4px
+  );
+  z-index: 1;
+}
+.sky-svg-wrap { position: relative; }
+
+/* Cloud badge glassmorphism */
+.cloud-badge-wrap > div,
+g[id*="cloud"] rect,
+.cloud-overlay {
+  background:     rgba(0, 0, 0, 0.4) !important;
+  backdrop-filter: blur(4px);
+  border:         1px solid rgba(255, 255, 255, 0.1) !important;
+}
+
+/* ── Settings & help panels ── */
+.settings-panel,
+.help-panel {
+  background:  var(--bg-secondary);
+  border-left: 1px solid var(--border-primary);
+  box-shadow:  -4px 0 40px rgba(0, 0, 0, 0.5);
+}
+.settings-overlay,
+.help-overlay { background: rgba(4, 8, 16, 0.65); backdrop-filter: blur(2px); }
+
+.settings-hdr,
+.help-hdr {
+  border-bottom: 1px solid var(--border-primary);
+}
+.settings-title,
+.help-title {
+  font-family:    'Inter', sans-serif;
+  font-weight:    600;
+  color:          var(--text-primary);
+  letter-spacing: 0.05em;
+}
+
+.settings-label,
+.help-sec-title {
+  font-family: 'Inter', sans-serif;
+  font-weight: 500;
+  color:       var(--text-secondary);
+}
+
+.settings-input {
+  background:  var(--bg-tertiary);
+  border:      1px solid var(--border-primary);
+  color:       var(--text-primary);
+}
+.settings-input:focus { border-color: var(--accent-primary); }
+
+.loc-chip {
+  background:  var(--bg-tertiary);
+  border:      1px solid var(--border-primary);
+  color:       var(--text-secondary);
+}
+.loc-chip:hover { border-color: var(--accent-primary); color: var(--accent-primary); }
+
+.settings-geo-btn {
+  background:   rgba(0, 212, 255, 0.08);
+  border-color: rgba(0, 212, 255, 0.3);
+  color:        var(--accent-primary);
+}
+.settings-btn-save {
+  background: var(--accent-primary);
+  color:      #000;
+}
+.settings-btn-save:hover { background: #00b8d9; }
+
+/* ── Chat panel ── */
+.chat-panel {
+  background: var(--bg-secondary);
+  border-left: 1px solid var(--border-primary);
+}
+.chat-bubble-btn {
+  background: var(--accent-primary);
+  box-shadow: 0 0 20px rgba(0, 212, 255, 0.3);
+}
+.chat-bubble-btn:hover { background: #00b8d9; }
+.chat-bubble-badge {
+  background: var(--accent-purple);
+  color:      #fff;
+}
+
+/* ── Satellite detail panel ── */
+.sat-detail-panel {
+  background:  var(--bg-secondary);
+  border-left: 1px solid var(--border-primary);
+  box-shadow:  -4px 0 40px rgba(0, 0, 0, 0.6);
+}
+.sat-detail-overlay { background: rgba(4, 8, 16, 0.65); backdrop-filter: blur(2px); }
+.sat-detail-header  { background: var(--bg-overlay); border-bottom: 1px solid var(--border-primary); }
+.sat-detail-name    { font-family: 'JetBrains Mono', monospace; color: var(--text-primary); }
+
+.sat-status-badge--live {
+  background:   rgba(0, 255, 136, 0.1);
+  border-color: rgba(0, 255, 136, 0.3);
+  color:        var(--accent-secondary);
+}
+
+.telemetry-card   { background: var(--bg-tertiary); border: 1px solid var(--border-primary); }
+.telemetry-label  { color: var(--text-tertiary); font-family: 'Inter', sans-serif; }
+.telemetry-value  { font-family: 'JetBrains Mono', monospace; }
+
+.orbital-table { background: var(--bg-tertiary); border: 1px solid var(--border-primary); }
+.orbital-label { color: var(--text-secondary); font-family: 'Inter', sans-serif; }
+.orbital-value { font-family: 'JetBrains Mono', monospace; color: var(--text-primary); }
+
+.sd-section-title {
+  font-family:    'Inter', sans-serif;
+  font-weight:    600;
+  color:          var(--text-primary);
+  letter-spacing: 0.02em;
+}
+.sd-section-title::before {
+  content:    '';
+  display:    inline-block;
+  width:      3px;
+  height:     12px;
+  background: var(--accent-primary);
+  border-radius: 2px;
+  margin-right: 8px;
+  vertical-align: middle;
+}
+
+/* ── Pass timeline in detail panel ── */
+.pass-item        { border-bottom: 1px solid var(--border-primary); }
+.pass-item-date   { font-family: 'Inter', sans-serif; color: var(--text-secondary); }
+.pass-item-times  { font-family: 'JetBrains Mono', monospace; color: var(--accent-primary); }
+.pass-item-el     { font-family: 'JetBrains Mono', monospace; }
+.pass-item-dur    { font-family: 'JetBrains Mono', monospace; color: var(--text-tertiary); }
+
+/* ── Footer ── */
+.footer {
+  background:   var(--bg-secondary);
+  border-top:   1px solid var(--border-primary);
+  font-family:  'JetBrains Mono', monospace;
+  font-size:    10px;
+  color:        var(--text-tertiary);
+}
+
+/* ── Onboarding overlay ── */
+.ob-overlay { background: rgba(4, 8, 16, 0.94); backdrop-filter: blur(8px); }
+.ob-card    { background: var(--bg-secondary); border-color: var(--border-primary); }
+.ob-heading { color: var(--text-primary); font-family: 'Inter', sans-serif; }
+.ob-sub     { color: var(--text-secondary); font-family: 'Inter', sans-serif; }
+.ob-feature { background: rgba(0, 212, 255, 0.04); border-color: var(--border-primary); }
+.ob-feature-title { color: var(--text-primary); font-family: 'Inter', sans-serif; }
+.ob-feature-desc  { color: var(--text-secondary); }
+.ob-btn-primary   { background: var(--accent-primary); color: #000; font-family: 'Inter', sans-serif; font-weight: 600; }
+.ob-btn-primary:hover:not(:disabled) { background: #00b8d9; opacity: 1; }
+.ob-gps-btn { background: rgba(0, 212, 255, 0.1); color: var(--accent-primary); border-color: rgba(0, 212, 255, 0.35); }
+.ob-gps-btn:hover:not(:disabled) { background: rgba(0, 212, 255, 0.18); }
+.ob-btn-skip  { color: var(--text-tertiary); }
+.ob-dot--active { background: var(--accent-primary); border-color: var(--accent-primary); }
+.ob-dot--done   { background: rgba(0, 212, 255, 0.35); }
+.ob-search-btn  { background: rgba(0, 212, 255, 0.1); border-color: rgba(0, 212, 255, 0.3); color: var(--accent-primary); }
+.ob-input { background: var(--bg-tertiary); border-color: var(--border-primary); color: var(--text-primary); }
+.ob-input:focus { border-color: var(--accent-primary); }
+.ob-results     { background: var(--bg-tertiary); border-color: var(--border-primary); }
+.ob-result-btn:hover { background: rgba(0, 212, 255, 0.06); color: var(--accent-primary); }
+.ob-confirmed   { color: var(--accent-secondary); }
+.ob-ntfy-topic  { color: var(--accent-primary); background: rgba(0, 212, 255, 0.08); }
+.ob-notif-card  { background: var(--bg-tertiary); border-color: var(--border-primary); }
+.ob-notif-card:hover { border-color: rgba(0, 212, 255, 0.3); background: rgba(0, 212, 255, 0.04); }
+.ob-notif-card--active { border-color: var(--accent-primary); background: rgba(0, 212, 255, 0.08); }
+.ob-summary     { background: var(--bg-tertiary); border-color: var(--border-primary); }
+.ob-ready-check circle { stroke: var(--accent-primary); fill: rgba(0, 212, 255, 0.1); }
+
+/* ── Help panel content ── */
+.help-sec-btn:hover { background: rgba(0, 212, 255, 0.04); }
+.help-p strong  { color: var(--text-primary); }
+.help-p em      { color: var(--accent-primary); }
+.help-badge--green { background: rgba(0,255,136,0.1); color: var(--accent-secondary); }
+.help-badge--blue  { background: rgba(0,212,255,0.1); color: var(--accent-primary); }
+.help-code { background: rgba(0, 212, 255, 0.08); color: var(--accent-primary); }
+.help-faq-q { color: var(--text-primary); }
+.help-faq-a { color: var(--text-secondary); }
+
+/* ── Error boundary ── */
+.error-boundary-wrap { background: var(--bg-primary); }
+
+/* ── Share dropdown ── */
+.pass-share-dropdown {
+  background:  var(--bg-tertiary);
+  border:      1px solid var(--border-primary);
+  box-shadow:  0 8px 24px rgba(0, 0, 0, 0.6);
+}
+.share-opt:hover { background: rgba(0, 212, 255, 0.06); color: var(--accent-primary); }
+
+/* ── Countdown banner ── */
+.countdown-banner {
+  background:  linear-gradient(135deg, rgba(0,212,255,0.06), rgba(0,212,255,0.02));
+  border-bottom: 1px solid rgba(0, 212, 255, 0.15);
+}
+
+/* ── Alert panel ── */
+.alert-panel      { background: var(--bg-tertiary); border: 1px solid var(--border-primary); }
+.alert-panel-title { color: var(--text-tertiary); }
+.alert-toggle.on  { background: var(--accent-primary); }
+.alert-row-label  { color: var(--text-primary); font-family: 'Inter', sans-serif; }
+
+/* ── Location permission banner ── */
+.loc-perm-banner {
+  background:   linear-gradient(135deg, rgba(0,212,255,0.06), rgba(0,212,255,0.02));
+  border-bottom: 1px solid rgba(0,212,255,0.15);
+}
+
+/* ── Install banner ── */
+.install-banner {
+  background: linear-gradient(135deg, var(--bg-tertiary), var(--bg-secondary));
+  border-top:  1px solid var(--border-primary);
+}
+
+/* ── Glows for key elements ── */
+.gauge-svg circle[stroke-width="8"] {
+  filter: drop-shadow(0 0 6px currentColor);
+}
+
+/* Satellite dot glows by elevation (set from constellation colors in SkyMap) */
+circle[fill="#00ff88"] { filter: drop-shadow(0 0 4px #00ff88); }
+circle[fill="#00d4ff"] { filter: drop-shadow(0 0 3px #00d4ff); }
+circle[fill="#7b61ff"] { filter: drop-shadow(0 0 6px #7b61ff); }
+
+/* ── Tab buttons (if any) ── */
+.tab-btn {
+  background:   transparent;
+  border:       1px solid var(--border-primary);
+  color:        var(--text-tertiary);
+  font-family:  'Inter', sans-serif;
+}
+.tab-btn.active,
+.tab-btn--active {
+  background:   rgba(0, 212, 255, 0.1);
+  border-color: var(--accent-primary);
+  color:        var(--accent-primary);
+}
+
+/* ── Scrollbar styling ── */
+::-webkit-scrollbar         { width: 4px; height: 4px; }
+::-webkit-scrollbar-track   { background: transparent; }
+::-webkit-scrollbar-thumb   { background: var(--border-primary); border-radius: 2px; }
+::-webkit-scrollbar-thumb:hover { background: rgba(0, 212, 255, 0.3); }
+
+/* ── Selection colour ── */
+::selection { background: rgba(0, 212, 255, 0.25); color: var(--text-primary); }

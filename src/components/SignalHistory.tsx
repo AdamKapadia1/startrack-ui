@@ -74,7 +74,7 @@ export function SignalHistory() {
       <div className="history-chart-wrap">
         <ResponsiveContainer width="100%" height={120}>
           <LineChart data={chartData} margin={{ top: 8, right: 16, left: 4, bottom: 0 }}>
-            <CartesianGrid strokeDasharray="3 3" stroke="rgba(29,158,117,0.07)" vertical={false}/>
+            <CartesianGrid strokeDasharray="3 3" stroke="rgba(0,212,255,0.07)" vertical={false}/>
             <XAxis
               dataKey="time"
               tick={{ fill: '#3a4f47', fontSize: 9, fontFamily: 'monospace' }}
@@ -92,17 +92,17 @@ export function SignalHistory() {
               label={{ value: 'Signal', angle: -90, position: 'insideLeft', fill: '#3a4f47', fontSize: 8, dx: 10 }}
             />
             <Tooltip
-              contentStyle={{ background: '#0f1512', border: '1px solid rgba(29,158,117,0.2)', borderRadius: 6, fontSize: 11 }}
+              contentStyle={{ background: '#0f1512', border: '1px solid rgba(0,212,255,0.2)', borderRadius: 6, fontSize: 11 }}
               labelStyle={{ color: '#7a9187' }}
-              itemStyle={{ color: '#1D9E75' }}
+              itemStyle={{ color: '#00d4ff' }}
             />
             <Line
               type="monotone"
               dataKey="score"
-              stroke="#1D9E75"
+              stroke="var(--accent-primary)"
               strokeWidth={isMobile ? 2.5 : 2}
               dot={false}
-              activeDot={{ r: 3, fill: '#1D9E75' }}
+              activeDot={{ r: 3, fill: '#00d4ff' }}
             />
           </LineChart>
         </ResponsiveContainer>

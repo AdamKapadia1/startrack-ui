@@ -21,10 +21,10 @@ function passScore(el: number): number {
 }
 
 function qualityInfo(score: number): { label: string; color: string } {
-  if (score >= 85) return { label: 'Excellent', color: '#1D9E75' };
-  if (score >= 70) return { label: 'Good',      color: '#14b8a6' };
-  if (score >= 50) return { label: 'Fair',       color: '#F59E0B' };
-  return              { label: 'Poor',      color: '#6B7280' };
+  if (score >= 85) return { label: 'Excellent', color: '#00d4ff' };
+  if (score >= 70) return { label: 'Good',      color: '#00d4ff' };
+  if (score >= 50) return { label: 'Fair',       color: '#ffb800' };
+  return              { label: 'Poor',      color: '#ff4444' };
 }
 
 function formatTime(utc: number) {

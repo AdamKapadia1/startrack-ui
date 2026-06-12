@@ -36,26 +36,26 @@ export class ErrorBoundary extends Component<Props, State> {
           width: '100%',
           textAlign: 'center',
         }}>
-          <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#EF4444"
+          <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#ff4444"
             strokeWidth="1.5" style={{ marginBottom: '16px', opacity: 0.8 }}>
             <path d="M12 2L2 19h20L12 2z"/>
             <line x1="12" y1="9" x2="12" y2="13"/>
-            <circle cx="12" cy="16" r="0.5" fill="#EF4444"/>
+            <circle cx="12" cy="16" r="0.5" fill="#ff4444"/>
           </svg>
           <div style={{ fontSize: '16px', fontWeight: 700, color: '#e8f5f0', marginBottom: '8px' }}>
             Something went wrong
           </div>
-          <div style={{ fontSize: '12px', color: '#6B7280', lineHeight: 1.6, marginBottom: '24px' }}>
+          <div style={{ fontSize: '12px', color: '#4a6080', lineHeight: 1.6, marginBottom: '24px' }}>
             StarTrack encountered an error. Refresh the page to reconnect.
           </div>
           <button
             onClick={() => window.location.reload()}
             style={{
               padding: '8px 24px',
-              background: 'rgba(29,158,117,0.15)',
-              border: '1px solid rgba(29,158,117,0.4)',
+              background: 'rgba(0,212,255,0.15)',
+              border: '1px solid rgba(0,212,255,0.4)',
               borderRadius: '8px',
-              color: '#1D9E75',
+              color: '#00d4ff',
               fontSize: '12px',
               fontWeight: 700,
               cursor: 'pointer',

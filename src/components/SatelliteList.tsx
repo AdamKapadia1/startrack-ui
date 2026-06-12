@@ -6,16 +6,16 @@ interface Props {
 }
 
 function elevColor(elevation: number) {
-  if (elevation >= 60) return '#1D9E75';
-  if (elevation >= 30) return '#F59E0B';
-  return '#6B7280';
+  if (elevation >= 60) return '#00d4ff';
+  if (elevation >= 30) return '#ffb800';
+  return '#4a6080';
 }
 
 // Uses raw Hz for 1-decimal kHz display; uses integer kHz only for zero check
 function dopplerColor(hz: number | null, kHz: number | null): string {
   if (hz === null) return 'var(--text-muted)';
   if (kHz === 0)   return 'var(--text-dim)';      // grey at zero crossing
-  return (hz > 0) ? '#1D9E75' : '#EF4444';
+  return (hz > 0) ? '#00d4ff' : '#ff4444';
 }
 
 function dopplerVal(hz: number | null, kHz: number | null): string {

@@ -20,10 +20,10 @@ const ELEVATION_LABELS: [number, string][] = [
 
 function passScore(el: number): number { return Math.round(40 + (el / 90) * 60); }
 function qualityLabel(score: number): { label: string; color: string } {
-  if (score >= 85) return { label: 'Excellent', color: '#1D9E75' };
+  if (score >= 85) return { label: 'Excellent', color: '#00d4ff' };
   if (score >= 70) return { label: 'Good',      color: '#14b8a6' };
-  if (score >= 50) return { label: 'Fair',       color: '#F59E0B' };
-  return              { label: 'Poor',      color: '#6B7280' };
+  if (score >= 50) return { label: 'Fair',       color: '#ffb800' };
+  return              { label: 'Poor',      color: '#4a6080' };
 }
 function formatBST(utc: number): string {
   return new Date(utc * 1000).toLocaleTimeString('en-GB', {
@@ -59,7 +59,7 @@ export function AlertSettings({ passes }: Props) {
 
   // QR code
   useEffect(() => {
-    QRCode.toDataURL(NTFY_URL, { width: 100, margin: 1, color: { dark: '#1D9E75', light: '#0a0f0c' } })
+    QRCode.toDataURL(NTFY_URL, { width: 100, margin: 1, color: { dark: '#00d4ff', light: '#0a0f0c' } })
       .then(setQrDataUrl).catch(() => {});
   }, []);
 
@@ -148,7 +148,7 @@ export function AlertSettings({ passes }: Props) {
           <path d="M13.73 21a2 2 0 0 1-3.46 0"/>
         </svg>
         {config.enabled && (
-          <span className="bell-dot" style={{ background: bellShaking ? '#F59E0B' : 'var(--green)' }} />
+          <span className="bell-dot" style={{ background: bellShaking ? '#ffb800' : 'var(--green)' }} />
         )}
       </button>
 

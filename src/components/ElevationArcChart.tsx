@@ -33,10 +33,10 @@ function passScore(el: number): number {
 }
 
 function qualityInfo(score: number): { label: string; color: string } {
-  if (score >= 85) return { label: 'Excellent', color: '#1D9E75' };
+  if (score >= 85) return { label: 'Excellent', color: '#00d4ff' };
   if (score >= 70) return { label: 'Good',      color: '#14b8a6' };
-  if (score >= 50) return { label: 'Fair',       color: '#F59E0B' };
-  return              { label: 'Poor',      color: '#6B7280' };
+  if (score >= 50) return { label: 'Fair',       color: '#ffb800' };
+  return              { label: 'Poor',      color: '#4a6080' };
 }
 
 function CustomTooltip({ active, payload }: any) {
@@ -45,7 +45,7 @@ function CustomTooltip({ active, payload }: any) {
   return (
     <div className="arc-tooltip">
       <div>{d.t.toFixed(1)} min</div>
-      <div style={{ color: '#1D9E75', fontWeight: 700 }}>{d.el.toFixed(1)}°</div>
+      <div style={{ color: '#00d4ff', fontWeight: 700 }}>{d.el.toFixed(1)}°</div>
     </div>
   );
 }
@@ -72,8 +72,8 @@ export function ElevationArcChart({ satellite, peakElevation, peakTime, duration
         <AreaChart data={data} margin={{ top: 8, right: 12, bottom: 20, left: 28 }}>
           <defs>
             <linearGradient id="arcGrad" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="5%"  stopColor="#1D9E75" stopOpacity={0.35}/>
-              <stop offset="95%" stopColor="#1D9E75" stopOpacity={0}/>
+              <stop offset="5%"  stopColor="#00d4ff" stopOpacity={0.35}/>
+              <stop offset="95%" stopColor="#00d4ff" stopOpacity={0}/>
             </linearGradient>
           </defs>
 
@@ -83,23 +83,23 @@ export function ElevationArcChart({ satellite, peakElevation, peakTime, duration
           {peakElevation >= 60 && (
             <ReferenceArea
               y1={60} y2={yMax}
-              fill="#1D9E75" fillOpacity={0.06}
-              label={{ value: 'Optimal', position: 'insideTopLeft', fill: '#1D9E75', fontSize: 8, dy: 2 }}
+              fill="#00d4ff" fillOpacity={0.06}
+              label={{ value: 'Optimal', position: 'insideTopLeft', fill: '#00d4ff', fontSize: 8, dy: 2 }}
             />
           )}
 
           {/* 10° minimum threshold */}
           <ReferenceLine
-            y={10} stroke="#F59E0B" strokeDasharray="4 3" strokeWidth={1}
-            label={{ value: 'Min 10°', position: 'insideBottomRight', fill: '#F59E0B', fontSize: 8 }}
+            y={10} stroke="#ffb800" strokeDasharray="4 3" strokeWidth={1}
+            label={{ value: 'Min 10°', position: 'insideBottomRight', fill: '#ffb800', fontSize: 8 }}
           />
 
           {/* Peak moment */}
           <ReferenceLine
-            x={peakMinute} stroke="#1D9E75" strokeDasharray="4 3" strokeWidth={1}
+            x={peakMinute} stroke="#00d4ff" strokeDasharray="4 3" strokeWidth={1}
             label={{
               value: `${peakElevation.toFixed(0)}° at ${formatBST(peakTime)}`,
-              position: 'top', fill: '#1D9E75', fontSize: 8,
+              position: 'top', fill: '#00d4ff', fontSize: 8,
             }}
           />
 
@@ -122,16 +122,16 @@ export function ElevationArcChart({ satellite, peakElevation, peakTime, duration
             width={24}
           />
 
-          <Tooltip content={<CustomTooltip />} cursor={{ stroke: '#1D9E75', strokeWidth: 1, strokeDasharray: '3 3' }}/>
+          <Tooltip content={<CustomTooltip />} cursor={{ stroke: '#00d4ff', strokeWidth: 1, strokeDasharray: '3 3' }}/>
 
           <Area
             type="monotone"
             dataKey="el"
-            stroke="#1D9E75"
+            stroke="#00d4ff"
             strokeWidth={2}
             fill="url(#arcGrad)"
             dot={false}
-            activeDot={{ r: 4, fill: '#1D9E75', stroke: '#fff', strokeWidth: 1 }}
+            activeDot={{ r: 4, fill: '#00d4ff', stroke: '#fff', strokeWidth: 1 }}
             animationDuration={800}
             animationEasing="ease-out"
           />

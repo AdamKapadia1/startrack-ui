@@ -7,11 +7,11 @@ import { AlertSettings } from './AlertSettings';
 interface StatusCfg { label: string; color: string; pulse: boolean }
 
 const STATUS: Record<WsStatus, StatusCfg> = {
-  connecting:   { label: 'Connecting', color: '#F59E0B', pulse: true  },
-  live:         { label: 'Live',       color: '#1D9E75', pulse: true  },
-  reconnecting: { label: 'Connecting', color: '#F59E0B', pulse: true  },
-  polling:      { label: 'Refreshing', color: '#6B7280', pulse: false },
-  offline:      { label: 'Offline',    color: '#EF4444', pulse: false },
+  connecting:   { label: 'Connecting', color: '#ffb800', pulse: true  },
+  live:         { label: 'Live',       color: '#00d4ff', pulse: true  },
+  reconnecting: { label: 'Connecting', color: '#ffb800', pulse: true  },
+  polling:      { label: 'Refreshing', color: '#4a6080', pulse: false },
+  offline:      { label: 'Offline',    color: '#ff4444', pulse: false },
 };
 
 function useAgoText(date: Date | null): string {
@@ -58,7 +58,7 @@ export function Header({ location, onOpenSettings, onOpenHelp, wsStatus, lastUpd
   return (
     <header className="header">
       <div className="header-brand">
-        <span className="header-logo">StarTrack AI</span>
+        <span className="header-logo">STARTRACK<sup>AI</sup></span>
         <span
           className="status-pill"
           style={{
@@ -91,7 +91,7 @@ export function Header({ location, onOpenSettings, onOpenHelp, wsStatus, lastUpd
           <span
             className="gps-accuracy"
             style={{
-              color: gpsAccuracy < 50 ? '#1D9E75' : gpsAccuracy < 200 ? '#F59E0B' : '#6B7280',
+              color: gpsAccuracy < 50 ? '#00d4ff' : gpsAccuracy < 200 ? '#ffb800' : '#4a6080',
             }}
           >
             ±{gpsAccuracy}m

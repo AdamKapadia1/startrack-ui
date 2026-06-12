@@ -22,19 +22,19 @@ function shortName(s: string) {
 function SatSVG() {
   return (
     <svg width="72" height="72" viewBox="0 0 80 80" fill="none">
-      <rect x="28" y="28" width="24" height="24" rx="3" fill="#1D9E75" opacity="0.9"/>
+      <rect x="28" y="28" width="24" height="24" rx="3" fill="#00d4ff" opacity="0.9"/>
       {/* left panel */}
-      <rect x="4"  y="34" width="22" height="12" rx="2" fill="#0d1f17" stroke="#1D9E75" strokeWidth="1.5"/>
-      <line x1="15" y1="34" x2="15" y2="46" stroke="#1D9E75" strokeWidth="0.8" opacity="0.6"/>
+      <rect x="4"  y="34" width="22" height="12" rx="2" fill="#0d1520" stroke="#00d4ff" strokeWidth="1.5"/>
+      <line x1="15" y1="34" x2="15" y2="46" stroke="#00d4ff" strokeWidth="0.8" opacity="0.6"/>
       {/* right panel */}
-      <rect x="54" y="34" width="22" height="12" rx="2" fill="#0d1f17" stroke="#1D9E75" strokeWidth="1.5"/>
-      <line x1="65" y1="34" x2="65" y2="46" stroke="#1D9E75" strokeWidth="0.8" opacity="0.6"/>
+      <rect x="54" y="34" width="22" height="12" rx="2" fill="#0d1520" stroke="#00d4ff" strokeWidth="1.5"/>
+      <line x1="65" y1="34" x2="65" y2="46" stroke="#00d4ff" strokeWidth="0.8" opacity="0.6"/>
       {/* dish */}
       <ellipse cx="40" cy="22" rx="7" ry="5" fill="none" stroke="#4ade80" strokeWidth="1.5"/>
       <line x1="40" y1="27" x2="40" y2="28" stroke="#4ade80" strokeWidth="1.5"/>
       {/* signal rings */}
-      <path d="M56 15 Q61 20 56 25" stroke="#1D9E75" strokeWidth="1.2" fill="none" opacity="0.5"/>
-      <path d="M59 12 Q67 20 59 28" stroke="#1D9E75" strokeWidth="1"   fill="none" opacity="0.3"/>
+      <path d="M56 15 Q61 20 56 25" stroke="#00d4ff" strokeWidth="1.2" fill="none" opacity="0.5"/>
+      <path d="M59 12 Q67 20 59 28" stroke="#00d4ff" strokeWidth="1"   fill="none" opacity="0.3"/>
     </svg>
   );
 }
@@ -283,8 +283,8 @@ export function Onboarding({ onComplete }: Props) {
       <div className="ob-card" key="4">
         <div className="ob-ready-check">
           <svg width="52" height="52" viewBox="0 0 52 52" fill="none">
-            <circle cx="26" cy="26" r="24" fill="rgba(29,158,117,0.12)" stroke="#1D9E75" strokeWidth="1.5"/>
-            <path d="M14 26 L22 34 L38 18" stroke="#1D9E75" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"/>
+            <circle cx="26" cy="26" r="24" fill="rgba(0,212,255,0.12)" stroke="#00d4ff" strokeWidth="1.5"/>
+            <path d="M14 26 L22 34 L38 18" stroke="#00d4ff" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"/>
           </svg>
         </div>
         <h2 className="ob-heading">You're all set!</h2>
@@ -292,7 +292,7 @@ export function Onboarding({ onComplete }: Props) {
 
         <div className="ob-summary">
           <div className="ob-summary-row">
-            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#1D9E75" strokeWidth="2">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#00d4ff" strokeWidth="2">
               <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/>
               <circle cx="12" cy="10" r="3"/>
             </svg>
@@ -301,7 +301,7 @@ export function Onboarding({ onComplete }: Props) {
           {notifMethod && notifMethod !== 'browser-denied'
             ? (
               <div className="ob-summary-row">
-                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#1D9E75" strokeWidth="2">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#00d4ff" strokeWidth="2">
                   <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/>
                   <path d="M13.73 21a2 2 0 0 1-3.46 0"/>
                 </svg>
@@ -310,7 +310,7 @@ export function Onboarding({ onComplete }: Props) {
             )
             : (
               <div className="ob-summary-row ob-summary-row--dim">
-                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#6B7280" strokeWidth="2">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#4a6080" strokeWidth="2">
                   <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/>
                   <path d="M13.73 21a2 2 0 0 1-3.46 0"/>
                 </svg>

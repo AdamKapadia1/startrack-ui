@@ -70,10 +70,10 @@ function formatDuration(secs: number): string {
 }
 
 function qualityInfo(score: number): { label: string; color: string } {
-  if (score >= 85) return { label: 'Excellent', color: '#1D9E75' };
-  if (score >= 70) return { label: 'Good',      color: '#14b8a6' };
-  if (score >= 50) return { label: 'Fair',       color: '#F59E0B' };
-  return              { label: 'Poor',       color: '#6B7280' };
+  if (score >= 85) return { label: 'Excellent', color: '#00d4ff' };
+  if (score >= 70) return { label: 'Good',      color: '#00d4ff' };
+  if (score >= 50) return { label: 'Fair',       color: '#ffb800' };
+  return              { label: 'Poor',       color: '#4a6080' };
 }
 
 function downloadICS(pass: SatPass, satname: string) {
@@ -101,7 +101,7 @@ function MiniSkyMap({ sat, pos }: { sat: Satellite; pos: SatellitePosition | und
   const el    = pos?.elevation ?? sat.elevation;
   const az    = pos?.azimuth   ?? sat.azimuth;
   const { x, y } = toXY(az, el);
-  const color = CONSTELLATION_COLORS[getConstellation(sat.satname)] ?? '#1D9E75';
+  const color = CONSTELLATION_COLORS[getConstellation(sat.satname)] ?? '#00d4ff';
   const isIss = getConstellation(sat.satname) === 'ISS';
   const dotR  = isIss ? 8 : 5;
 
@@ -118,14 +118,14 @@ function MiniSkyMap({ sat, pos }: { sat: Satellite; pos: SatellitePosition | und
             <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
           </filter>
         </defs>
-        <circle cx={CX} cy={CY} r={R} fill="url(#sdMiniBg)" stroke="rgba(29,158,117,0.2)" strokeWidth="1"/>
+        <circle cx={CX} cy={CY} r={R} fill="url(#sdMiniBg)" stroke="rgba(0,212,255,0.2)" strokeWidth="1"/>
         {[30, 60].map(e => (
           <circle key={e} cx={CX} cy={CY} r={((90 - e) / 90) * R}
-            fill="none" stroke="rgba(29,158,117,0.12)" strokeWidth="0.75" strokeDasharray="3 3"
+            fill="none" stroke="rgba(0,212,255,0.12)" strokeWidth="0.75" strokeDasharray="3 3"
           />
         ))}
-        <line x1={CX} y1={CY - R} x2={CX} y2={CY + R} stroke="rgba(29,158,117,0.08)" strokeWidth="0.5"/>
-        <line x1={CX - R} y1={CY} x2={CX + R} y2={CY} stroke="rgba(29,158,117,0.08)" strokeWidth="0.5"/>
+        <line x1={CX} y1={CY - R} x2={CX} y2={CY + R} stroke="rgba(0,212,255,0.08)" strokeWidth="0.5"/>
+        <line x1={CX - R} y1={CY} x2={CX + R} y2={CY} stroke="rgba(0,212,255,0.08)" strokeWidth="0.5"/>
         {(['N', 'S', 'E', 'W'] as const).map((d, i) => {
           const px = [CX, CX, CX + R + 8, CX - R - 8][i];
           const py = [CY - R - 6, CY + R + 13, CY + 3, CY + 3][i];
@@ -157,8 +157,8 @@ function TelemetryGrid({ sat, pos }: { sat: Satellite; pos: SatellitePosition | 
   const dKHz  = sat.dopplerShiftKHz;
   const altKm = Math.round(range * Math.sin(el * D2R));
 
-  const elColor = el >= 60 ? '#1D9E75' : el >= 30 ? '#F59E0B' : '#6B7280';
-  const dColor  = dHz === null ? '#6B7280' : dHz > 0 ? '#1D9E75' : dHz < 0 ? '#EF4444' : '#6B7280';
+  const elColor = el >= 60 ? '#00d4ff' : el >= 30 ? '#ffb800' : '#4a6080';
+  const dColor  = dHz === null ? '#4a6080' : dHz > 0 ? '#00d4ff' : dHz < 0 ? '#ff4444' : '#4a6080';
   const dLabel  = dHz === null ? '—'
     : dKHz === 0 ? '0 kHz'
     : `${dHz > 0 ? '+' : ''}${(dHz / 1000).toFixed(1)} kHz`;
@@ -235,7 +235,7 @@ function PassTimeline({ passes, loading, satname, locationName }: { passes: SatP
     <div className="pass-timeline">
       {passes.map(p => {
         const q       = qualityInfo(p.score);
-        const elColor = p.maxEl >= 60 ? '#1D9E75' : p.maxEl >= 30 ? '#F59E0B' : '#6B7280';
+        const elColor = p.maxEl >= 60 ? '#00d4ff' : p.maxEl >= 30 ? '#ffb800' : '#4a6080';
         return (
           <div key={p.startUTC} className="pass-item">
             <div className="pass-item-time">
@@ -284,30 +284,30 @@ function ElevationChart({ pass }: { pass: SatPass }) {
       <AreaChart data={data} margin={{ top: 10, right: 12, bottom: 26, left: 28 }}>
         <defs>
           <linearGradient id="sdArcGrad" x1="0" y1="0" x2="0" y2="1">
-            <stop offset="5%"  stopColor="#1D9E75" stopOpacity={0.3}/>
-            <stop offset="95%" stopColor="#1D9E75" stopOpacity={0}/>
+            <stop offset="5%"  stopColor="#00d4ff" stopOpacity={0.3}/>
+            <stop offset="95%" stopColor="#00d4ff" stopOpacity={0}/>
           </linearGradient>
         </defs>
-        <CartesianGrid strokeDasharray="3 3" stroke="#1a2e24" vertical={false}/>
-        <ReferenceLine y={10} stroke="#F59E0B" strokeDasharray="4 3" strokeWidth={1}/>
+        <CartesianGrid strokeDasharray="3 3" stroke="#0d1520" vertical={false}/>
+        <ReferenceLine y={10} stroke="#ffb800" strokeDasharray="4 3" strokeWidth={1}/>
         <XAxis dataKey="label"
           tick={{ fill: '#3a4f47', fontSize: 8, fontFamily: 'monospace' }}
-          axisLine={{ stroke: '#1a2e24' }} tickLine={false}
+          axisLine={{ stroke: '#0d1520' }} tickLine={false}
           interval={Math.floor(points / 4) - 1}
           label={{ value: 'Time (BST)', position: 'insideBottom', fill: '#3a4f47', fontSize: 8, dy: 18 }}
         />
         <YAxis domain={[0, yMax]} tickFormatter={v => `${v}°`}
           tick={{ fill: '#3a4f47', fontSize: 8, fontFamily: 'monospace' }}
-          axisLine={{ stroke: '#1a2e24' }} tickLine={false} width={26}
+          axisLine={{ stroke: '#0d1520' }} tickLine={false} width={26}
         />
         <Tooltip
           formatter={(v: unknown) => [`${Number(v).toFixed(1)}°`, 'Elevation']}
-          contentStyle={{ background: '#0d1f17', border: '1px solid #1a3028', borderRadius: 6, fontSize: 10 }}
+          contentStyle={{ background: '#0d1520', border: '1px solid #1a2d45', borderRadius: 6, fontSize: 10 }}
           labelStyle={{ color: '#6b7280' }}
         />
-        <Area type="monotone" dataKey="el" stroke="#1D9E75" strokeWidth={2}
+        <Area type="monotone" dataKey="el" stroke="#00d4ff" strokeWidth={2}
           fill="url(#sdArcGrad)" dot={false}
-          activeDot={{ r: 4, fill: '#1D9E75', stroke: '#fff', strokeWidth: 1 }}
+          activeDot={{ r: 4, fill: '#00d4ff', stroke: '#fff', strokeWidth: 1 }}
           animationDuration={800} animationEasing="ease-out"
         />
       </AreaChart>
@@ -336,30 +336,30 @@ function DopplerChart({ pass }: { pass: SatPass }) {
       <LineChart data={data} margin={{ top: 10, right: 12, bottom: 26, left: 34 }}>
         <defs>
           <linearGradient id="sdDopplerGrad" x1="0" y1="0" x2="1" y2="0">
-            <stop offset="0%"   stopColor="#1D9E75"/>
+            <stop offset="0%"   stopColor="#00d4ff"/>
             <stop offset="50%"  stopColor="#4a5568"/>
-            <stop offset="100%" stopColor="#EF4444"/>
+            <stop offset="100%" stopColor="#ff4444"/>
           </linearGradient>
         </defs>
-        <CartesianGrid strokeDasharray="3 3" stroke="#1a2e24" vertical={false}/>
+        <CartesianGrid strokeDasharray="3 3" stroke="#0d1520" vertical={false}/>
         <ReferenceLine y={0} stroke="#2d3748" strokeWidth={1}/>
-        <ReferenceLine x={peakLabel} stroke="#1D9E75" strokeDasharray="4 3" strokeWidth={1}
-          label={{ value: 'Peak El', position: 'top', fill: '#1D9E75', fontSize: 8 }}
+        <ReferenceLine x={peakLabel} stroke="#00d4ff" strokeDasharray="4 3" strokeWidth={1}
+          label={{ value: 'Peak El', position: 'top', fill: '#00d4ff', fontSize: 8 }}
         />
         <XAxis dataKey="label"
           tick={{ fill: '#3a4f47', fontSize: 8, fontFamily: 'monospace' }}
-          axisLine={{ stroke: '#1a2e24' }} tickLine={false}
+          axisLine={{ stroke: '#0d1520' }} tickLine={false}
           interval={Math.floor(points / 4) - 1}
           label={{ value: 'Time (BST)', position: 'insideBottom', fill: '#3a4f47', fontSize: 8, dy: 18 }}
         />
         <YAxis tickFormatter={v => `${v > 0 ? '+' : ''}${v}`}
           tick={{ fill: '#3a4f47', fontSize: 8, fontFamily: 'monospace' }}
-          axisLine={{ stroke: '#1a2e24' }} tickLine={false} width={32}
+          axisLine={{ stroke: '#0d1520' }} tickLine={false} width={32}
           label={{ value: 'kHz', angle: -90, position: 'insideLeft', fill: '#3a4f47', fontSize: 8, dx: 4 }}
         />
         <Tooltip
           formatter={(v: unknown) => { const n = Number(v); return [`${n > 0 ? '+' : ''}${n} kHz`, 'Doppler']; }}
-          contentStyle={{ background: '#0d1f17', border: '1px solid #1a3028', borderRadius: 6, fontSize: 10 }}
+          contentStyle={{ background: '#0d1520', border: '1px solid #1a2d45', borderRadius: 6, fontSize: 10 }}
           labelStyle={{ color: '#6b7280' }}
         />
         <Line type="monotone" dataKey="d"
@@ -406,7 +406,7 @@ export function SatelliteDetail({ satellite, allSatellites, positions, location,
   const pos        = positions.find(p => p.satname === satellite.satname);
   const isOverhead = allSatellites.some(s => s.satname === satellite.satname);
   const c          = getConstellation(satellite.satname);
-  const cColor     = CONSTELLATION_COLORS[c] ?? '#6B7280';
+  const cColor     = CONSTELLATION_COLORS[c] ?? '#4a6080';
   const isDtc      = satellite.satname.includes('[DTC]');
   const nextPass   = passes[0];
 

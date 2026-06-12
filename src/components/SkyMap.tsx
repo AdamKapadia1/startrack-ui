@@ -22,19 +22,19 @@ function toXY(az: number, el: number) {
 }
 
 function constellationColor(name: string): string {
-  return CONSTELLATION_COLORS[getConstellation(name)] ?? '#6B7280';
+  return CONSTELLATION_COLORS[getConstellation(name)] ?? '#4a6080';
 }
 
 function elevColor(el: number): string {
-  if (el >= 60) return '#1D9E75';
-  if (el >= 30) return '#34d399';
-  return '#6B7280';
+  if (el >= 60) return '#00ff88';
+  if (el >= 30) return '#00d4ff';
+  return '#4a6080';
 }
 
 function badgeColor(cc: number) {
-  if (cc <= 30) return '#1D9E75';
-  if (cc <= 70) return '#F59E0B';
-  return '#6B7280';
+  if (cc <= 30) return '#00ff88';
+  if (cc <= 70) return '#ffb800';
+  return '#4a6080';
 }
 
 function shortName(name: string) {
@@ -74,10 +74,10 @@ function SatPopup({ sat, passes, onClose }: PopupProps) {
   };
 
   const dHz = sat.dopplerShiftHz;
-  const dopplerColor = dHz === null ? 'var(--text-muted)'
-    : dHz > 0 ? '#1D9E75'
-    : dHz < 0 ? '#EF4444'
-    : '#6B7280';
+  const dopplerColor = dHz === null ? 'var(--text-tertiary)'
+    : dHz > 0 ? '#00ff88'
+    : dHz < 0 ? '#ff4444'
+    : '#4a6080';
   const dopplerLabel = dHz === null ? '—'
     : dHz === 0 ? '0 kHz'
     : `${(dHz / 1000).toFixed(1)} kHz`;
@@ -243,10 +243,10 @@ export function SkyMap({ satellites, cloudCover = 0, passes = [], positions = []
     setSelected(prev => prev?.sat.satname === satname ? null : { sat: full, x, y });
   }
 
-  const ageColor = secsAgo === null ? '#3a4f47'
-    : secsAgo < 10 ? '#1D9E75'
-    : secsAgo < 30 ? '#F59E0B'
-    : '#EF4444';
+  const ageColor = secsAgo === null ? '#4a6080'
+    : secsAgo < 10 ? '#00ff88'
+    : secsAgo < 30 ? '#ffb800'
+    : '#ff4444';
 
   return (
     <div className="sky-section">
@@ -259,8 +259,8 @@ export function SkyMap({ satellites, cloudCover = 0, passes = [], positions = []
         >
           <defs>
             <radialGradient id="skyBg" cx="50%" cy="50%" r="50%">
-              <stop offset="0%"   stopColor="#0d2318"/>
-              <stop offset="100%" stopColor="#060f0b"/>
+              <stop offset="0%"   stopColor="#0d1f3c"/>
+              <stop offset="100%" stopColor="#080c14"/>
             </radialGradient>
             <filter id="glow">
               <feGaussianBlur stdDeviation="2.5" result="blur"/>
@@ -274,24 +274,24 @@ export function SkyMap({ satellites, cloudCover = 0, passes = [], positions = []
             </clipPath>
           </defs>
 
-          <circle cx={CX} cy={CY} r={R} fill="url(#skyBg)" stroke="rgba(29,158,117,0.2)" strokeWidth="1"/>
+          <circle cx={CX} cy={CY} r={R} fill="url(#skyBg)" stroke="rgba(0,212,255,0.18)" strokeWidth="1"/>
 
           {cloudOpacity > 0 && (
-            <circle cx={CX} cy={CY} r={R} fill="#9ca3af" opacity={cloudOpacity}/>
+            <circle cx={CX} cy={CY} r={R} fill="#4a6080" opacity={cloudOpacity}/>
           )}
 
           {[30, 60].map(el => {
             const r = ((90 - el) / 90) * R;
             return (
               <g key={el}>
-                <circle cx={CX} cy={CY} r={r} fill="none" stroke="rgba(29,158,117,0.15)" strokeWidth="0.75" strokeDasharray="4 3"/>
-                <text x={CX + 3} y={CY - r + 11} fill="rgba(58,79,71,0.9)" fontSize="8" fontFamily="monospace">{el}°</text>
+                <circle cx={CX} cy={CY} r={r} fill="none" stroke="rgba(0,212,255,0.12)" strokeWidth="0.75" strokeDasharray="4 3"/>
+                <text x={CX + 3} y={CY - r + 11} fill="rgba(74,96,128,0.8)" fontSize="8" fontFamily="monospace">{el}°</text>
               </g>
             );
           })}
 
-          <line x1={CX} y1={CY - R} x2={CX} y2={CY + R} stroke="rgba(29,158,117,0.1)" strokeWidth="0.75"/>
-          <line x1={CX - R} y1={CY} x2={CX + R} y2={CY} stroke="rgba(29,158,117,0.1)" strokeWidth="0.75"/>
+          <line x1={CX} y1={CY - R} x2={CX} y2={CY + R} stroke="rgba(26,45,69,0.8)" strokeWidth="0.75"/>
+          <line x1={CX - R} y1={CY} x2={CX + R} y2={CY} stroke="rgba(26,45,69,0.8)" strokeWidth="0.75"/>
 
           {[
             { label: 'N', x: CX,          y: CY - R - 10 },
@@ -299,7 +299,7 @@ export function SkyMap({ satellites, cloudCover = 0, passes = [], positions = []
             { label: 'E', x: CX + R + 12, y: CY + 4 },
             { label: 'W', x: CX - R - 12, y: CY + 4 },
           ].map(({ label, x, y }) => (
-            <text key={label} x={x} y={y} textAnchor="middle" fill="#3a4f47" fontSize="11" fontFamily="monospace" fontWeight="600">
+            <text key={label} x={x} y={y} textAnchor="middle" fill="#4a6080" fontSize="11" fontFamily="JetBrains Mono, monospace" fontWeight="500">
               {label}
             </text>
           ))}
@@ -358,10 +358,10 @@ export function SkyMap({ satellites, cloudCover = 0, passes = [], positions = []
                 />
                 {sat.elevation >= 60 && (
                   <>
-                    <text x={lx} y={y - 7} fill="rgba(122,145,135,0.9)" fontSize="9" fontFamily="monospace" textAnchor={anchor}>
+                    <text x={lx} y={y - 7} fill="rgba(139,163,196,0.9)" fontSize="9" fontFamily="JetBrains Mono, monospace" textAnchor={anchor}>
                       {shortName(sat.satname)}
                     </text>
-                    <text x={lx} y={y + 3} fill={color} fontSize="8" fontFamily="monospace" textAnchor={anchor} opacity="0.8">
+                    <text x={lx} y={y + 3} fill={color} fontSize="8" fontFamily="JetBrains Mono, monospace" textAnchor={anchor} opacity="0.85">
                       {sat.elevation.toFixed(0)}°
                     </text>
                   </>
@@ -371,9 +371,9 @@ export function SkyMap({ satellites, cloudCover = 0, passes = [], positions = []
           })}
 
           {/* Observer dot */}
-          <circle cx={CX} cy={CY} r="5"  fill="#3b82f6" opacity="0.9" filter="url(#glow)"/>
-          <circle cx={CX} cy={CY} r="10" fill="none" stroke="#3b82f6" strokeWidth="1" opacity="0.3"/>
-          <text x={CX} y={CY + 20} textAnchor="middle" fill="#3b82f6" fontSize="9" fontFamily="monospace" opacity="0.8">You</text>
+          <circle cx={CX} cy={CY} r="5"  fill="#7b61ff" opacity="0.95" filter="url(#glow)"/>
+          <circle cx={CX} cy={CY} r="11" fill="none" stroke="#7b61ff" strokeWidth="1" opacity="0.35"/>
+          <text x={CX} y={CY + 22} textAnchor="middle" fill="#7b61ff" fontSize="9" fontFamily="JetBrains Mono, monospace" opacity="0.85">YOU</text>
 
           {/* Cloud cover badge */}
           <g>
@@ -403,10 +403,10 @@ export function SkyMap({ satellites, cloudCover = 0, passes = [], positions = []
       <div className="sky-legend">
         {activeConstellation === 'ALL' ? (
           <>
-            <span className="legend-item"><span className="legend-dot" style={{ background: '#1D9E75' }}/> Starlink</span>
-            <span className="legend-item"><span className="legend-dot" style={{ background: '#4A90D9' }}/> OneWeb</span>
-            <span className="legend-item"><span className="legend-dot" style={{ background: '#FFFFFF', boxShadow: '0 0 4px rgba(255,255,255,0.4)' }}/> ISS</span>
-            <span className="legend-item"><span className="legend-dot" style={{ background: '#F5A623' }}/> GPS</span>
+            <span className="legend-item"><span className="legend-dot" style={{ background: '#00ff88', boxShadow: '0 0 4px rgba(0,255,136,0.5)' }}/> Starlink</span>
+            <span className="legend-item"><span className="legend-dot" style={{ background: '#00d4ff', boxShadow: '0 0 4px rgba(0,212,255,0.5)' }}/> OneWeb</span>
+            <span className="legend-item"><span className="legend-dot" style={{ background: '#e8f4fd', boxShadow: '0 0 4px rgba(255,255,255,0.3)' }}/> ISS</span>
+            <span className="legend-item"><span className="legend-dot" style={{ background: '#ffb800', boxShadow: '0 0 4px rgba(255,184,0,0.5)' }}/> GPS</span>
           </>
         ) : (
           <span className="legend-item" style={{ color: CONSTELLATION_COLORS[activeConstellation] }}>
