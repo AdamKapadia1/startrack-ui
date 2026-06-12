@@ -3,20 +3,77 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>StarTrack AI</title>
 
-    <!-- PWA manifest -->
-    <link rel="manifest" href="/manifest.json" />
-    <meta name="theme-color" content="#080c14" />
+    <!-- Primary Meta Tags -->
+    <title>StarTrack AI — Real-time Starlink Satellite Tracker</title>
+    <meta name="title"       content="StarTrack AI — Real-time Starlink Satellite Tracker">
+    <meta name="description" content="Track 400+ Starlink satellites live overhead. AI-powered pass predictions, Doppler shift calculations, and smart alerts. Works anywhere with GPS auto-detection. Free to use.">
+    <meta name="keywords"    content="Starlink tracker, satellite tracking, Starlink passes, satellite connectivity, SpaceX Starlink, real-time satellite, Doppler shift, satellite alerts, pass prediction">
+    <meta name="author"      content="StarTrack AI">
+    <meta name="robots"      content="index, follow">
+    <link rel="canonical"    href="https://startrackv1-ui.vercel.app">
 
-    <!-- iOS PWA -->
-    <meta name="apple-mobile-web-app-capable" content="yes" />
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
-    <meta name="apple-mobile-web-app-title" content="StarTrack AI" />
-    <link rel="apple-touch-icon" href="/icon-192.png" />
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type"        content="website">
+    <meta property="og:url"         content="https://startrackv1-ui.vercel.app">
+    <meta property="og:title"       content="StarTrack AI — Real-time Starlink Satellite Tracker">
+    <meta property="og:description" content="Track 400+ Starlink satellites live overhead. AI-powered pass predictions tell you exactly when to connect for the best signal — anywhere in the world.">
+    <meta property="og:image"       content="https://startrackv1-ui.vercel.app/og-image.png">
+    <meta property="og:image:width"  content="1200">
+    <meta property="og:image:height" content="630">
+    <meta property="og:image:alt"   content="StarTrack AI dashboard showing live satellite tracking">
+    <meta property="og:site_name"   content="StarTrack AI">
+    <meta property="og:locale"      content="en_GB">
 
-    <!-- Favicon fallback -->
-    <link rel="icon" type="image/png" href="/icon-192.png" />
+    <!-- Twitter Card -->
+    <meta name="twitter:card"        content="summary_large_image">
+    <meta name="twitter:url"         content="https://startrackv1-ui.vercel.app">
+    <meta name="twitter:title"       content="StarTrack AI — Real-time Starlink Satellite Tracker">
+    <meta name="twitter:description" content="Track 400+ Starlink satellites live. AI tells you your best connectivity windows. Free, works anywhere.">
+    <meta name="twitter:image"       content="https://startrackv1-ui.vercel.app/og-image.png">
+    <meta name="twitter:image:alt"   content="StarTrack AI — Live satellite tracking dashboard">
+
+    <!-- PWA / Mobile -->
+    <meta name="theme-color"                        content="#080c14">
+    <meta name="apple-mobile-web-app-capable"       content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title"         content="StarTrack AI">
+    <meta name="application-name"                   content="StarTrack AI">
+    <link rel="apple-touch-icon" href="/icon-192.png">
+    <link rel="manifest"         href="/manifest.json">
+
+    <!-- Favicon -->
+    <link rel="icon" type="image/png" href="/icon-192.png">
+
+    <!-- Structured data -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "WebApplication",
+      "name": "StarTrack AI",
+      "description": "Real-time Starlink satellite tracking with AI-powered pass predictions",
+      "url": "https://startrackv1-ui.vercel.app",
+      "applicationCategory": "UtilityApplication",
+      "operatingSystem": "Web, iOS, Android",
+      "offers": {
+        "@type": "Offer",
+        "price": "0",
+        "priceCurrency": "GBP"
+      },
+      "author": {
+        "@type": "Person",
+        "name": "Adam Kapadia"
+      },
+      "featureList": [
+        "Real-time satellite tracking",
+        "AI-powered pass predictions",
+        "Doppler shift calculations",
+        "GPS auto-detection",
+        "7-day pass forecasts",
+        "Push notifications"
+      ]
+    }
+    </script>
 
     <!-- Mission control typography -->
     <link rel="preconnect" href="https://fonts.googleapis.com">

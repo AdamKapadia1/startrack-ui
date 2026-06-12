@@ -51,6 +51,32 @@ export function PassLandingPage() {
   const loc     = params.get('loc')   ?? 'Unknown Location';
   const score   = params.get('score') ? parseFloat(params.get('score')!) : null;
 
+  // Update document meta tags for this specific pass (for social sharing)
+  useEffect(() => {
+    const formattedTime = timeStr
+      ? new Date(timeStr).toLocaleString('en-GB', {
+          timeZone: 'Europe/London', dateStyle: 'medium', timeStyle: 'short',
+        })
+      : '';
+
+    document.title = `${satname} Pass Alert — StarTrack AI`;
+
+    function setMeta(selector: string, content: string) {
+      const el = document.querySelector(selector);
+      if (el) el.setAttribute('content', content);
+    }
+
+    const ogTitle   = `${satname} passes at ${Math.round(el)}° — StarTrack AI`;
+    const ogDesc    = `${satname} will pass overhead at ${Math.round(el)}° elevation over ${loc}${formattedTime ? ` at ${formattedTime}` : ''}. Track it live on StarTrack AI.`;
+    const twDesc    = `${satname} overhead at ${Math.round(el)}° over ${loc}${formattedTime ? ` at ${formattedTime}` : ''}. Track it live.`;
+
+    setMeta('meta[property="og:title"]',          ogTitle);
+    setMeta('meta[property="og:description"]',    ogDesc);
+    setMeta('meta[name="twitter:title"]',         ogTitle);
+    setMeta('meta[name="twitter:description"]',   twDesc);
+    setMeta('meta[name="description"]',           ogDesc);
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+
   const startDate = timeStr ? new Date(timeStr) : new Date();
   const startMs   = startDate.getTime();
   const duration  = estimateDuration(el);
