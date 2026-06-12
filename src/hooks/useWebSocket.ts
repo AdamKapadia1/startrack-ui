@@ -7,12 +7,14 @@ export type WsStatus = 'connecting' | 'live' | 'reconnecting' | 'polling' | 'off
 // Derive WebSocket URL from VITE_API_URL at module init
 const WS_URL = (() => {
   const api = import.meta.env.VITE_API_URL as string | undefined;
+  console.log('[ws] VITE_API_URL env:', api ?? '(undefined — will fall back to window.location.host)');
   if (!api) {
     const proto = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
     return `${proto}//${window.location.host}`;
   }
   return api.replace(/^https:\/\//, 'wss://').replace(/^http:\/\//, 'ws://');
 })();
+console.log('[ws] WS_URL derived as:', WS_URL);
 
 const MAX_RETRIES  = 5;
 const BASE_DELAY   = 1_000; // ms, doubles each retry up to 30 s
@@ -58,11 +60,14 @@ export function useWebSocket() {
     if (!mounted.current) return;
 
     try {
+      console.log('[ws] attempting connection to:', WS_URL);
       const ws = new WebSocket(WS_URL);
       wsRef.current = ws;
+      console.log('[ws] readyState after construction:', ws.readyState, '(0=CONNECTING, 1=OPEN, 2=CLOSING, 3=CLOSED)');
 
       ws.onopen = () => {
         if (!mounted.current) return;
+        console.log('[ws] onopen fired — connection established! readyState:', ws.readyState);
         retriesRef.current = 0;
         setStatus('live');
         // Kill REST fallback and WS retry timer if WS reconnected
@@ -88,17 +93,20 @@ export function useWebSocket() {
         } catch { /* malformed message — ignore */ }
       };
 
-      ws.onclose = () => {
+      ws.onclose = (e) => {
         if (!mounted.current) return;
+        console.log('[ws] onclose fired — code:', e.code, '| reason:', e.reason || '(none)', '| wasClean:', e.wasClean, '| retry count now:', retriesRef.current + 1);
         wsRef.current = null;
         retriesRef.current++;
 
         if (retriesRef.current > MAX_RETRIES) {
+          console.log('[ws] max retries exceeded — switching to polling mode');
           startPolling();
           // Retry WebSocket every 60 s while in polling mode
           if (!wsRetryTimer.current) {
             wsRetryTimer.current = setInterval(() => {
               if (!mounted.current) return;
+              console.log('[ws] retrying WebSocket from polling mode...');
               retriesRef.current = 0;
               connect();
             }, WS_RETRY_MS);
@@ -111,7 +119,10 @@ export function useWebSocket() {
         reconnTimer.current = setTimeout(connect, delay);
       };
 
-      ws.onerror = () => ws.close(); // onclose fires after this
+      ws.onerror = (e) => {
+        console.log('[ws] onerror fired — event type:', e.type, '| readyState:', ws.readyState);
+        ws.close();
+      };
     } catch {
       // If WebSocket constructor throws (e.g. bad URL in test env), go straight to polling
       startPolling();
