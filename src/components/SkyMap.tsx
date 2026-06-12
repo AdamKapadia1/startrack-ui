@@ -1,16 +1,17 @@
-import { useState } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { createPortal } from 'react-dom';
-import type { Satellite } from '../types';
+import type { Satellite, SatellitePosition } from '../types';
 import type { Pass } from '../hooks/useRecommendation';
 
 interface Props {
-  satellites: Satellite[];
-  cloudCover?: number;
-  passes?: Pass[];
+  satellites:    Satellite[];
+  cloudCover?:   number;
+  passes?:       Pass[];
+  positions?:    SatellitePosition[];
+  posLastUpdate?: Date | null;
 }
 
 const CX = 210, CY = 210, R = 175;
-
 
 function toXY(az: number, el: number) {
   const r   = ((90 - el) / 90) * R;
@@ -59,9 +60,9 @@ function SatPopup({ sat, passes, onClose }: PopupProps) {
 
   const style: React.CSSProperties = {
     position: 'fixed',
-    bottom: '80px',
-    right: '20px',
-    zIndex: 1000,
+    bottom:   '80px',
+    right:    '20px',
+    zIndex:   1000,
     minWidth: '200px',
     maxWidth: '260px',
   };
@@ -121,18 +122,120 @@ function SatPopup({ sat, passes, onClose }: PopupProps) {
   );
 }
 
+// ── Trail + animation state ───────────────────────────────────────────────────
+
+interface TrailPos { el: number; az: number; }
+
 // ── Main component ────────────────────────────────────────────────────────────
 
-export function SkyMap({ satellites, cloudCover = 0, passes = [] }: Props) {
+export function SkyMap({ satellites, cloudCover = 0, passes = [], positions = [], posLastUpdate }: Props) {
   const [selected, setSelected] = useState<{ sat: Satellite; x: number; y: number } | null>(null);
+
+  // Trails: name → last 3 positions (oldest first), not including current
+  const trailRef = useRef<Map<string, TrailPos[]>>(new Map());
+  // Track previous satellite names to detect entering/exiting
+  const prevNamesRef = useRef<Set<string>>(new Set());
+  // Satellites currently fading out (below horizon since last update)
+  const [fadingOut, setFadingOut] = useState<Map<string, TrailPos>>(new Map());
+  // Satellites currently fading in (just appeared)
+  const [enteringNames, setEnteringNames] = useState<Set<string>>(new Set());
+  // "Xs ago" display
+  const [secsAgo, setSecsAgo] = useState<number | null>(null);
+
+  // Use positions (5s) when available, fall back to satellites (30s)
+  const displaySats: (SatellitePosition & { dopplerShiftHz?: number | null })[] =
+    positions.length > 0
+      ? positions.filter(p => p.elevation >= 30)
+      : satellites.filter(s => s.elevation >= 30).map(s => ({
+          satname:         s.satname,
+          elevation:       s.elevation,
+          azimuth:         s.azimuth,
+          range:           s.range,
+          dopplerShiftKHz: s.dopplerShiftKHz,
+          dopplerShiftHz:  s.dopplerShiftHz,
+        }));
+
+  // Update trails and entering/exiting state whenever displaySats changes
+  useEffect(() => {
+    if (displaySats.length === 0 && prevNamesRef.current.size === 0) return;
+
+    const currentNames = new Set(displaySats.map(s => s.satname));
+
+    // Detect entering satellites
+    const newEntering = new Set<string>();
+    for (const name of currentNames) {
+      if (!prevNamesRef.current.has(name)) newEntering.add(name);
+    }
+    if (newEntering.size > 0) {
+      setEnteringNames(prev => new Set([...prev, ...newEntering]));
+      // Clear entering state after 1.2s (animation duration)
+      const id = setTimeout(() => {
+        setEnteringNames(prev => {
+          const next = new Set(prev);
+          for (const n of newEntering) next.delete(n);
+          return next;
+        });
+      }, 1200);
+      return () => clearTimeout(id);
+    }
+
+    // Detect exiting satellites: save their last trail position
+    const newFading = new Map<string, TrailPos>();
+    for (const name of prevNamesRef.current) {
+      if (!currentNames.has(name)) {
+        const trail = trailRef.current.get(name);
+        const last  = trail && trail.length > 0 ? trail[trail.length - 1] : null;
+        if (last) newFading.set(name, last);
+        trailRef.current.delete(name);
+      }
+    }
+    if (newFading.size > 0) {
+      setFadingOut(prev => new Map([...prev, ...newFading]));
+      setTimeout(() => {
+        setFadingOut(prev => {
+          const next = new Map(prev);
+          for (const n of newFading.keys()) next.delete(n);
+          return next;
+        });
+      }, 1200);
+    }
+
+    // Update trails: append current position to each satellite's history
+    for (const sat of displaySats) {
+      const existing = trailRef.current.get(sat.satname) ?? [];
+      trailRef.current.set(
+        sat.satname,
+        [...existing, { el: sat.elevation, az: sat.azimuth }].slice(-4),
+      );
+    }
+
+    prevNamesRef.current = currentNames;
+  }, [positions, displaySats.length]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  // "Xs ago" ticker
+  useEffect(() => {
+    if (!posLastUpdate) return;
+    setSecsAgo(0);
+    const id = setInterval(() => {
+      setSecsAgo(Math.round((Date.now() - posLastUpdate.getTime()) / 1000));
+    }, 1000);
+    return () => clearInterval(id);
+  }, [posLastUpdate]);
 
   const cloudOpacity = cloudCover / 100 * 0.3;
 
-  function handleSatClick(e: React.MouseEvent, sat: Satellite) {
+  function handleSatClick(e: React.MouseEvent, satname: string) {
     e.stopPropagation();
-    const { x, y } = toXY(sat.azimuth, sat.elevation);
-    setSelected(prev => prev?.sat.satname === sat.satname ? null : { sat, x, y });
+    const full = satellites.find(s => s.satname === satname);
+    if (!full) return;
+    const { x, y } = toXY(full.azimuth, full.elevation);
+    setSelected(prev => prev?.sat.satname === satname ? null : { sat: full, x, y });
   }
+
+  const ageColor = secsAgo === null ? '#3a4f47'
+    : secsAgo < 10 ? '#1D9E75'
+    : secsAgo < 30 ? '#F59E0B'
+    : '#EF4444';
 
   return (
     <div className="sky-section">
@@ -190,26 +293,61 @@ export function SkyMap({ satellites, cloudCover = 0, passes = [] }: Props) {
             </text>
           ))}
 
-          {satellites.filter(sat => sat.elevation >= 30).map((sat) => {
-            const { x, y }  = toXY(sat.azimuth, sat.elevation);
-            const color      = dotColor(sat.elevation);
-            const isSelected = selected?.sat.satname === sat.satname;
-            const lx         = x < CX ? x + 9 : x - 9;
-            const anchor     = x < CX ? 'start' : 'end';
-            // CSS cx/cy transition — animates position smoothly when satellite data updates
-            const circleStyle = { transition: 'cx 2s ease, cy 2s ease' } as React.CSSProperties;
+          {/* Fading-out ghosts */}
+          {Array.from(fadingOut.entries()).map(([name, pos]) => {
+            const { x, y } = toXY(pos.az, pos.el);
+            return (
+              <circle key={`exit-${name}`} cx={x} cy={y} r="5"
+                fill="#6B7280" opacity="0" className="sat-fading-out"
+              />
+            );
+          })}
+
+          {/* Live satellite dots */}
+          {displaySats.map((sat) => {
+            const { x, y }   = toXY(sat.azimuth, sat.elevation);
+            const color       = dotColor(sat.elevation);
+            const isSelected  = selected?.sat.satname === sat.satname;
+            const isEntering  = enteringNames.has(sat.satname);
+            const lx          = x < CX ? x + 9 : x - 9;
+            const anchor      = x < CX ? 'start' : 'end';
+            const trail       = trailRef.current.get(sat.satname) ?? [];
+
+            const dotStyle = {
+              transition: 'cx 4s ease-in-out, cy 4s ease-in-out',
+              cx: x, cy: y,
+            } as React.CSSProperties;
+
             return (
               <g
                 key={sat.satname}
-                filter="url(#glow)"
                 style={{ cursor: 'pointer' }}
-                onClick={e => handleSatClick(e, sat)}
+                onClick={e => handleSatClick(e, sat.satname)}
+                className={isEntering ? 'sat-entering' : undefined}
               >
-                {/* enlarged transparent hit area */}
-                <circle style={{ ...circleStyle, cx: x, cy: y } as React.CSSProperties} r="14" fill="transparent"/>
-                <circle style={{ ...circleStyle, cx: x, cy: y } as React.CSSProperties} r="9"  fill={color} opacity={isSelected ? 0.28 : 0.12}/>
+                {/* Motion trail: oldest to newest with decreasing opacity */}
+                {trail.slice(-3).map((tp, i, arr) => {
+                  const opacity = [0.10, 0.18, 0.28][i + (3 - arr.length)];
+                  const { x: tx, y: ty } = toXY(tp.az, tp.el);
+                  return (
+                    <circle
+                      key={i}
+                      cx={tx} cy={ty}
+                      r="2.5"
+                      fill={color}
+                      opacity={opacity}
+                    />
+                  );
+                })}
+
+                {/* Hit area + glow rings + main dot */}
+                <circle style={{ ...dotStyle } as React.CSSProperties} r="14" fill="transparent"/>
                 <circle
-                  style={{ ...circleStyle, cx: x, cy: y } as React.CSSProperties}
+                  style={{ ...dotStyle, filter: 'url(#glow)' } as React.CSSProperties}
+                  r="9" fill={color} opacity={isSelected ? 0.28 : 0.12}
+                />
+                <circle
+                  style={{ ...dotStyle, filter: 'url(#glow)' } as React.CSSProperties}
                   r="5" fill={color} opacity="0.95"
                   stroke={isSelected ? '#fff' : 'none'} strokeWidth={isSelected ? 1 : 0}
                 />
@@ -223,18 +361,26 @@ export function SkyMap({ satellites, cloudCover = 0, passes = [] }: Props) {
             );
           })}
 
+          {/* Observer dot */}
           <circle cx={CX} cy={CY} r="5"  fill="#3b82f6" opacity="0.9" filter="url(#glow)"/>
           <circle cx={CX} cy={CY} r="10" fill="none" stroke="#3b82f6" strokeWidth="1" opacity="0.3"/>
           <text x={CX} y={CY + 20} textAnchor="middle" fill="#3b82f6" fontSize="9" fontFamily="monospace" opacity="0.8">You</text>
 
+          {/* Cloud cover badge */}
           <g>
             <rect x={332} y={37} width={50} height={19} rx={5} fill="rgba(0,0,0,0.55)"/>
             <text x={357} y={50} textAnchor="middle" fill={badgeColor(cloudCover)} fontSize="10" fontFamily="monospace" fontWeight="600">
               {String.fromCodePoint(0x2601)} {cloudCover}%
             </text>
           </g>
-        </svg>
 
+          {/* Position update age indicator */}
+          {secsAgo !== null && (
+            <text x={CX - R + 4} y={CY + R - 6} fill={ageColor} fontSize="8" fontFamily="monospace" opacity="0.8">
+              pos {secsAgo}s ago
+            </text>
+          )}
+        </svg>
       </div>
 
       {selected && (

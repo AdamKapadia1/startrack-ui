@@ -21,7 +21,7 @@ function App() {
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [chatOpen,     setChatOpen]     = useState(false);
 
-  const { data: satData, lastUpdated, status } = useSatellites(location);
+  const { data: satData, lastUpdated, status, positions, posLastUpdate } = useSatellites(location);
   const { data: recData, loading: recLoading }  = useRecommendation(location);
   const { data: weather }                       = useWeather(location);
 
@@ -74,7 +74,13 @@ function App() {
         <div className="right-col">
           <div className="section-label">Sky Map — Azimuth / Elevation</div>
 
-          <SkyMap satellites={satellites} cloudCover={weather?.cloudCover} passes={topPasses} />
+          <SkyMap
+            satellites={satellites}
+            cloudCover={weather?.cloudCover}
+            passes={topPasses}
+            positions={positions}
+            posLastUpdate={posLastUpdate}
+          />
 
           <div className="passes-section">
             <div className="section-label">Upcoming Passes — Next 7 Days</div>

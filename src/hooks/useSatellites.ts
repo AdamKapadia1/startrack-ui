@@ -14,7 +14,7 @@ function isDefaultLoc(loc: LocationSettings): boolean {
 
 export function useSatellites(location: LocationSettings) {
   // WebSocket provides real-time updates for the default (Tring) location
-  const { satData: wsData, status, lastUpdate: wsLastUpdate } = useWebSocket();
+  const { satData: wsData, positions, posLastUpdate, status, lastUpdate: wsLastUpdate } = useWebSocket();
 
   // For custom locations, layer a REST poll on top
   const [restData,        setRestData]        = useState<ApiResponse | null>(null);
@@ -51,9 +51,12 @@ export function useSatellites(location: LocationSettings) {
 
   return {
     data,
-    loading:     !data,
-    error:       null as string | null,
+    loading:      !data,
+    error:        null as string | null,
     lastUpdated,
-    status:      (restData ? 'polling' : status) as WsStatus,
+    status:       (restData ? 'polling' : status) as WsStatus,
+    // Positions are WS-only (default location); null for custom locations
+    positions:    isDefault ? positions : [],
+    posLastUpdate: isDefault ? posLastUpdate : null,
   };
 }

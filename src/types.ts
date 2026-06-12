@@ -1,3 +1,11 @@
+export interface SatellitePosition {
+  satname:         string;
+  elevation:       number;
+  azimuth:         number;
+  range:           number;
+  dopplerShiftKHz: number | null;
+}
+
 export interface Satellite {
   satname:         string;
   elevation:       number;

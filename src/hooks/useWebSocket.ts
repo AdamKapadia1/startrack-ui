@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
-import type { ApiResponse } from '../types';
+import type { ApiResponse, SatellitePosition } from '../types';
 import type { WeatherData } from './useWeather';
 
 export type WsStatus = 'connecting' | 'live' | 'reconnecting' | 'polling' | 'offline';
@@ -18,10 +18,12 @@ const MAX_RETRIES = 3;
 const BASE_DELAY  = 1_000; // ms, doubles each retry up to 30 s
 
 export function useWebSocket() {
-  const [satData,    setSatData]    = useState<ApiResponse | null>(null);
-  const [weather,    setWeather]    = useState<WeatherData | null>(null);
-  const [status,     setStatus]     = useState<WsStatus>('connecting');
-  const [lastUpdate, setLastUpdate] = useState<Date | null>(null);
+  const [satData,       setSatData]       = useState<ApiResponse | null>(null);
+  const [weather,       setWeather]       = useState<WeatherData | null>(null);
+  const [positions,     setPositions]     = useState<SatellitePosition[]>([]);
+  const [posLastUpdate, setPosLastUpdate] = useState<Date | null>(null);
+  const [status,        setStatus]        = useState<WsStatus>('connecting');
+  const [lastUpdate,    setLastUpdate]    = useState<Date | null>(null);
 
   const wsRef       = useRef<WebSocket | null>(null);
   const retriesRef  = useRef(0);
@@ -74,6 +76,9 @@ export function useWebSocket() {
             setLastUpdate(new Date());
           } else if (msg.type === 'weather') {
             setWeather(msg.data as WeatherData);
+          } else if (msg.type === 'positions') {
+            setPositions(msg.satellites as SatellitePosition[]);
+            setPosLastUpdate(new Date());
           }
         } catch { /* malformed message — ignore */ }
       };
@@ -112,5 +117,5 @@ export function useWebSocket() {
     };
   }, [connect]);
 
-  return { satData, weather, status, lastUpdate };
+  return { satData, weather, positions, posLastUpdate, status, lastUpdate };
 }

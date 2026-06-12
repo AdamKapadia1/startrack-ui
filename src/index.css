@@ -963,6 +963,20 @@ button { font-family: inherit; }
 }
 .sat-popup-pass span:last-child { color: var(--green); }
 
+/* ── Satellite entry / exit animations ───────────────────── */
+@keyframes sat-enter {
+  from { opacity: 0; transform: scale(0.4); }
+  to   { opacity: 1; transform: scale(1);   }
+}
+
+@keyframes sat-fade-out {
+  from { opacity: 0.6; }
+  to   { opacity: 0;   }
+}
+
+.sat-entering { animation: sat-enter 1s ease-out forwards; }
+.sat-fading-out { animation: sat-fade-out 1s ease-in forwards; }
+
 /* ── Install banner ──────────────────────────────────────── */
 .install-banner {
   position: fixed;
