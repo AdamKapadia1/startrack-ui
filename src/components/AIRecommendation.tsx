@@ -1,3 +1,5 @@
+import { Skeleton } from './Skeleton';
+
 interface Props {
   recommendation: string;
   loading: boolean;
@@ -27,7 +29,11 @@ export function AIRecommendation({ recommendation, loading }: Props) {
       </div>
 
       {loading && !recommendation && (
-        <div className="ai-loading"><span className="spinner" /> Analysing passes…</div>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', marginTop: '4px' }}>
+          <Skeleton width="100%" height="14px" />
+          <Skeleton width="90%"  height="14px" />
+          <Skeleton width="70%"  height="14px" />
+        </div>
       )}
 
       {first && (

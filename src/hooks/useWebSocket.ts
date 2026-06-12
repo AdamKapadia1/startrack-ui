@@ -4,17 +4,17 @@ import type { WeatherData } from './useWeather';
 
 export type WsStatus = 'connecting' | 'live' | 'reconnecting' | 'polling' | 'offline';
 
-// Derive WebSocket URL from VITE_API_URL at module init
+// Derive WebSocket URL — hardcoded fallback for production Vercel deployment
 const WS_URL = (() => {
-  const api = import.meta.env.VITE_API_URL as string | undefined;
-  console.log('[ws] VITE_API_URL env:', api ?? '(undefined — will fall back to window.location.host)');
-  if (!api) {
-    const proto = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
-    return `${proto}//${window.location.host}`;
+  // Production: always point directly at Railway regardless of env vars
+  if (window.location.hostname === 'startrackv1-ui.vercel.app') {
+    return 'wss://web-production-98c0d.up.railway.app';
   }
-  return api.replace(/^https:\/\//, 'wss://').replace(/^http:\/\//, 'ws://');
+  const apiUrl = import.meta.env.VITE_API_URL || 'https://web-production-98c0d.up.railway.app';
+  const wsUrl  = apiUrl.replace('https://', 'wss://').replace('http://', 'ws://');
+  console.log('[ws] connecting to:', wsUrl);
+  return wsUrl;
 })();
-console.log('[ws] WS_URL derived as:', WS_URL);
 
 const MAX_RETRIES  = 5;
 const BASE_DELAY   = 1_000; // ms, doubles each retry up to 30 s

@@ -2,11 +2,13 @@ import { useState, useEffect } from 'react';
 import type { Satellite } from '../types';
 import type { Pass } from '../hooks/useRecommendation';
 import { CONSTELLATION_LABELS } from '../utils/constellation';
+import { Skeleton } from './Skeleton';
 
 interface Props {
   satellites:          Satellite[];
   topPasses:           Pass[];
   activeConstellation: string;
+  loading?:            boolean;
 }
 
 function useNextPassCountdown(topPasses: Pass[]): string {
@@ -47,8 +49,24 @@ function signalScore(satellites: Satellite[]): number {
   return Math.min(100, Math.round(elevScore + countBonus + 28)); // 28 ≈ average weather baseline
 }
 
-export function MetricCards({ satellites, topPasses, activeConstellation }: Props) {
+export function MetricCards({ satellites, topPasses, activeConstellation, loading }: Props) {
   const countdown = useNextPassCountdown(topPasses);
+
+  if (loading) {
+    return (
+      <div className="metric-grid">
+        {[0, 1, 2, 3].map(i => (
+          <div key={i} className="metric-card">
+            <Skeleton height="12px" width="70%" />
+            <div style={{ margin: '8px 0 4px' }}>
+              <Skeleton height="40px" width="60%" />
+            </div>
+            <Skeleton height="10px" width="80%" />
+          </div>
+        ))}
+      </div>
+    );
+  }
 
   const count      = satellites.length;
   const bestEl     = count > 0 ? Math.max(...satellites.map(s => s.elevation)) : 0;

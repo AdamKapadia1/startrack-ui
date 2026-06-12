@@ -11,7 +11,13 @@ interface Props {
   positions?:          SatellitePosition[];
   posLastUpdate?:      Date | null;
   activeConstellation: string;
+  loading?:            boolean;
 }
+
+const SKEL_DOTS = [
+  { az:  30, el: 45 }, { az:  80, el: 65 }, { az: 130, el: 35 }, { az: 180, el: 55 },
+  { az: 230, el: 70 }, { az: 270, el: 40 }, { az: 310, el: 60 }, { az: 350, el: 50 },
+];
 
 const CX = 210, CY = 210, R = 175;
 
@@ -134,7 +140,7 @@ interface TrailPos { el: number; az: number; }
 
 // ── Main component ────────────────────────────────────────────────────────────
 
-export function SkyMap({ satellites, cloudCover = 0, passes = [], positions = [], posLastUpdate, activeConstellation }: Props) {
+export function SkyMap({ satellites, cloudCover = 0, passes = [], positions = [], posLastUpdate, activeConstellation, loading }: Props) {
   const [selected, setSelected] = useState<{ sat: Satellite; x: number; y: number } | null>(null);
 
   // Trails: name → last 3 positions (oldest first), not including current
@@ -303,6 +309,20 @@ export function SkyMap({ satellites, cloudCover = 0, passes = [], positions = []
               {label}
             </text>
           ))}
+
+          {/* Skeleton dots while loading */}
+          {loading && satellites.length === 0 && SKEL_DOTS.map((d, i) => {
+            const { x, y } = toXY(d.az, d.el);
+            return (
+              <circle
+                key={`skel-${i}`}
+                cx={x} cy={y} r="5"
+                fill="#4a6080"
+                className="sat-skel-dot"
+                style={{ animationDelay: `${i * 0.18}s` }}
+              />
+            );
+          })}
 
           {/* Fading-out ghosts */}
           {Array.from(fadingOut.entries())

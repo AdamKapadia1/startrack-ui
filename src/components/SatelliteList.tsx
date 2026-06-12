@@ -1,8 +1,10 @@
 import type { Satellite } from '../types';
+import { Skeleton } from './Skeleton';
 
 interface Props {
   satellites:        Satellite[];
   onSelectSatellite: (sat: Satellite) => void;
+  loading?:          boolean;
 }
 
 function elevColor(elevation: number) {
@@ -25,9 +27,39 @@ function dopplerVal(hz: number | null, kHz: number | null): string {
   return hz > 0 ? `+${val}` : `${val}`;
 }
 
-export function SatelliteList({ satellites, onSelectSatellite }: Props) {
+export function SatelliteList({ satellites, onSelectSatellite, loading }: Props) {
   const sorted = [...satellites].sort((a, b) => b.elevation - a.elevation);
   const hasAnyDoppler = sorted.some(s => s.dopplerShiftKHz !== null);
+
+  if (loading) {
+    return (
+      <div className="sat-list-section">
+        <div className="section-label">
+          Visible Satellites
+          <span className="sat-count-badge">—</span>
+        </div>
+        <div className="sat-table-wrap">
+          <table className="sat-table">
+            <thead>
+              <tr>
+                <th>Name</th><th>El°</th><th className="col-az">Az°</th><th>Range</th>
+              </tr>
+            </thead>
+            <tbody>
+              {[0, 1, 2, 3, 4].map(i => (
+                <tr key={i}>
+                  <td><Skeleton width="120px" height="12px" /></td>
+                  <td><Skeleton width="36px"  height="12px" /></td>
+                  <td className="col-az"><Skeleton width="36px" height="12px" /></td>
+                  <td><Skeleton width="48px"  height="12px" /></td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="sat-list-section">

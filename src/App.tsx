@@ -99,7 +99,7 @@ function App() {
         <div className="left-col">
           <div className="section-label">Live Overview</div>
 
-          <MetricCards satellites={filteredSatellites} topPasses={topPasses} activeConstellation={activeConstellation} />
+          <MetricCards satellites={filteredSatellites} topPasses={topPasses} activeConstellation={activeConstellation} loading={!satData} />
 
           <ConnectivityGauge
             satellites={satellites}
@@ -115,7 +115,7 @@ function App() {
 
           {starlinkSat && <DtcCard satellite={starlinkSat} />}
 
-          <SatelliteList satellites={filteredSatellites} onSelectSatellite={setSelectedSatellite} />
+          <SatelliteList satellites={filteredSatellites} onSelectSatellite={setSelectedSatellite} loading={!satData} />
         </div>
 
         {/* ── Right column ── */}
@@ -135,11 +135,12 @@ function App() {
             positions={positions}
             posLastUpdate={posLastUpdate}
             activeConstellation={activeConstellation}
+            loading={!satData}
           />
 
           <div className="passes-section">
             <div className="section-label">Upcoming Passes — Next 7 Days</div>
-            <PassList passes={topPasses} satname={satname} locationName={location.name} />
+            <PassList passes={topPasses} satname={satname} locationName={location.name} loading={recLoading} />
           </div>
 
           <SignalHistory signalScore={signalScore} />

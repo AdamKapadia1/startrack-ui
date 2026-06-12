@@ -3,11 +3,13 @@ import type { Pass } from '../hooks/useRecommendation';
 import { CalendarButton, BulkExportButton } from './CalendarExport';
 import { ElevationArcChart } from './ElevationArcChart';
 import { PassShare } from './PassShare';
+import { Skeleton } from './Skeleton';
 
 interface Props {
   passes:       Pass[];
   satname:      string;
   locationName: string;
+  loading?:     boolean;
 }
 
 function elevColor(el: number) {
@@ -43,7 +45,7 @@ function shortName(name: string) {
   return name.replace('STARLINK-', 'SL-').replace('SPACE STATION', 'ISS').slice(0, 14);
 }
 
-export function PassList({ passes, satname, locationName }: Props) {
+export function PassList({ passes, satname, locationName, loading }: Props) {
   const [selectedIdx, setSelectedIdx] = useState<number | null>(null);
   const chartRefs = useRef<Map<number, HTMLDivElement | null>>(new Map());
 
@@ -53,6 +55,16 @@ export function PassList({ passes, satname, locationName }: Props) {
     const el = chartRefs.current.get(selectedIdx);
     if (el) el.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
   }, [selectedIdx]);
+
+  if (loading && !passes.length) {
+    return (
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+        {[0, 1, 2].map(i => (
+          <Skeleton key={i} width="100%" height="48px" borderRadius="6px" />
+        ))}
+      </div>
+    );
+  }
 
   if (!passes.length) {
     return <div className="pass-empty">No passes in the next 7 days</div>;
