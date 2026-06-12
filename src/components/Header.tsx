@@ -34,9 +34,10 @@ interface Props {
   onOpenSettings: () => void;
   wsStatus:       WsStatus;
   lastUpdated:    Date | null;
+  gpsAccuracy?:   number | null;
 }
 
-export function Header({ location, onOpenSettings, wsStatus, lastUpdated }: Props) {
+export function Header({ location, onOpenSettings, wsStatus, lastUpdated, gpsAccuracy }: Props) {
   const cfg      = STATUS[wsStatus] ?? STATUS.connecting;
   const agoText  = useAgoText(lastUpdated);
   const [flashing, setFlashing] = useState(false);
@@ -83,6 +84,16 @@ export function Header({ location, onOpenSettings, wsStatus, lastUpdated }: Prop
         {location.name}&nbsp;|&nbsp;
         {Math.abs(location.lat).toFixed(2)}°{location.lat >= 0 ? 'N' : 'S'},&nbsp;
         {Math.abs(location.lon).toFixed(2)}°{location.lon >= 0 ? 'E' : 'W'}
+        {gpsAccuracy !== null && gpsAccuracy !== undefined && (
+          <span
+            className="gps-accuracy"
+            style={{
+              color: gpsAccuracy < 50 ? '#1D9E75' : gpsAccuracy < 200 ? '#F59E0B' : '#6B7280',
+            }}
+          >
+            ±{gpsAccuracy}m
+          </span>
+        )}
         {agoText && (
           <span className="header-ago">&nbsp;· {agoText}</span>
         )}

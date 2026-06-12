@@ -1052,6 +1052,68 @@ button { font-family: inherit; }
 }
 .header-location-flash { animation: loc-flash 1.2s ease-out; }
 
+.gps-accuracy {
+  font-size:   9px;
+  font-weight: 700;
+  font-family: var(--mono);
+  letter-spacing: 0.3px;
+}
+
+/* ── Location permission banner ──────────────────────────── */
+.loc-perm-bar {
+  display:     flex;
+  align-items: center;
+  gap:         10px;
+  padding:     8px 16px;
+  background:  rgba(29,158,117,0.08);
+  border-bottom: 1px solid rgba(29,158,117,0.2);
+  font-size:   11px;
+  color:       var(--text-dim);
+  flex-shrink: 0;
+}
+
+.loc-perm-denied {
+  background:    rgba(239,68,68,0.07);
+  border-color:  rgba(239,68,68,0.18);
+  color:         var(--text-muted);
+}
+
+.loc-perm-text {
+  flex: 1;
+}
+
+.loc-perm-actions {
+  display: flex;
+  gap:     6px;
+  flex-shrink: 0;
+}
+
+.loc-perm-allow,
+.loc-perm-decline {
+  padding:       4px 10px;
+  border-radius: 5px;
+  font-size:     10px;
+  font-weight:   600;
+  font-family:   inherit;
+  cursor:        pointer;
+  border:        1px solid;
+  transition:    background 0.15s;
+}
+
+.loc-perm-allow {
+  background:   var(--green);
+  border-color: var(--green);
+  color:        #fff;
+}
+.loc-perm-allow:hover { background: #17835f; }
+
+.loc-perm-decline {
+  background:   none;
+  border-color: var(--border);
+  color:        var(--text-muted);
+}
+.loc-perm-decline:hover { background: var(--surface-2); }
+
 /* ── Sky map satellite popup ─────────────────────────────── */
 .sky-svg-wrap { position: relative; }
 

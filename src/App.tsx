@@ -9,15 +9,16 @@ import { PassList }          from './components/PassList';
 import { SatelliteList }     from './components/SatelliteList';
 import { SignalHistory }     from './components/SignalHistory';
 import { Footer }            from './components/Footer';
-import { SettingsPanel }     from './components/SettingsPanel';
-import { ChatPanel }         from './components/ChatPanel';
+import { SettingsPanel }      from './components/SettingsPanel';
+import { ChatPanel }          from './components/ChatPanel';
+import { LocationPermission } from './components/LocationPermission';
 import { useSatellites }     from './hooks/useSatellites';
 import { useRecommendation } from './hooks/useRecommendation';
 import { useWeather }        from './hooks/useWeather';
 import { useLocation }       from './hooks/useLocation';
 
 function App() {
-  const { location, saveLocation } = useLocation();
+  const { location, saveLocation, gpsAccuracy, permState, requestGPS, declineGPS } = useLocation();
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [chatOpen,     setChatOpen]     = useState(false);
 
@@ -38,6 +39,7 @@ function App() {
         onOpenSettings={() => setSettingsOpen(true)}
         wsStatus={status}
         lastUpdated={lastUpdated}
+        gpsAccuracy={gpsAccuracy}
       />
 
       <SettingsPanel
@@ -46,6 +48,8 @@ function App() {
         location={location}
         onSave={saveLocation}
       />
+
+      <LocationPermission permState={permState} onAllow={requestGPS} onDecline={declineGPS} />
 
       <div className="dashboard">
         {/* ── Left column ── */}
