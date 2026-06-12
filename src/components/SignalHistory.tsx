@@ -42,6 +42,13 @@ export function SignalHistory() {
 
   const hours = isMobile ? 24 : 48;
   const label = `Signal History — Last ${hours} Hours`;
+  const cutoff = Date.now() - hours * 60 * 60 * 1000;
+  const chartData = useMemo(() =>
+    data
+      .filter(d => new Date(d.computed_at).getTime() >= cutoff)
+      .map(d => ({ time: formatTime(d.computed_at), score: d.signal_score })),
+    [data, hours]
+  );
 
   if (loading) {
     return (
@@ -60,14 +67,6 @@ export function SignalHistory() {
       </div>
     );
   }
-
-  const cutoff = Date.now() - hours * 60 * 60 * 1000;
-  const chartData = useMemo(() =>
-    data
-      .filter(d => new Date(d.computed_at).getTime() >= cutoff)
-      .map(d => ({ time: formatTime(d.computed_at), score: d.signal_score })),
-    [data, cutoff]
-  );
 
   return (
     <div className="history-section">
