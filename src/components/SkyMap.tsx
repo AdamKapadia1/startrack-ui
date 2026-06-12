@@ -198,7 +198,7 @@ export function SkyMap({ satellites, cloudCover = 0, passes = [] }: Props) {
             </text>
           ))}
 
-          {satellites.map((sat) => {
+          {satellites.filter(sat => sat.elevation >= 30).map((sat) => {
             const { x, y }  = toXY(sat.azimuth, sat.elevation);
             const color      = dotColor(sat.elevation);
             const isSelected = selected?.sat.satname === sat.satname;
@@ -257,7 +257,6 @@ export function SkyMap({ satellites, cloudCover = 0, passes = [] }: Props) {
       <div className="sky-legend">
         <span className="legend-item"><span className="legend-dot" style={{ background: '#1D9E75' }}/> High signal</span>
         <span className="legend-item"><span className="legend-dot" style={{ background: '#34d399' }}/> Good</span>
-        <span className="legend-item"><span className="legend-dot" style={{ background: '#6B7280' }}/> Weak</span>
       </div>
     </div>
   );
