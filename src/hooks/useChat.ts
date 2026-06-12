@@ -1,22 +1,46 @@
 import { useState, useCallback } from 'react';
 
 export interface ChatMessage {
-  role: 'user' | 'assistant';
-  content: string;
-  timestamp: Date;
+  role:        'user' | 'assistant';
+  content:     string;
+  timestamp:   Date;
   isStreaming?: boolean;
+}
+
+export interface LiveContext {
+  satelliteCount:   number;
+  bestElevation:    number;
+  signalScore:      number;
+  cloudCover?:      number;
+  temp?:            number;
+  topSatName?:      string;
+  topSatElevation?: number;
+  hasDtcSat:        boolean;
 }
 
 const BASE = import.meta.env.VITE_API_URL ?? '';
 
-export function useChat() {
-  const [messages, setMessages] = useState<ChatMessage[]>([]);
+function buildContextNote(ctx: LiveContext): string {
+  const weather = [
+    ctx.cloudCover != null ? `cloud ${ctx.cloudCover}%` : null,
+    ctx.temp != null       ? `temp ${ctx.temp}°C`       : null,
+  ].filter(Boolean).join(', ');
+  const topSat = ctx.topSatName
+    ? `. Top satellite: ${ctx.topSatName} at ${ctx.topSatElevation ?? 0}°`
+    : '';
+  return `[Live context: ${ctx.satelliteCount} satellites overhead, best elevation ${ctx.bestElevation}°, signal score ${ctx.signalScore}/100${weather ? `, weather: ${weather}` : ''}${topSat}]`;
+}
+
+export function useChat(context?: LiveContext) {
+  const [messages,    setMessages]    = useState<ChatMessage[]>([]);
   const [isStreaming, setIsStreaming] = useState(false);
 
   const sendMessage = useCallback(async (text: string) => {
     if (isStreaming) return;
 
-    const history = messages.map(m => ({ role: m.role, content: m.content }));
+    const contextNote  = context ? buildContextNote(context) : '';
+    const textWithCtx  = contextNote ? `${text}\n\n${contextNote}` : text;
+    const history      = messages.map(m => ({ role: m.role, content: m.content }));
     const userMsg: ChatMessage = { role: 'user', content: text, timestamp: new Date() };
 
     setMessages(prev => [
@@ -28,9 +52,9 @@ export function useChat() {
 
     try {
       const res = await fetch(`${BASE}/api/chat`, {
-        method: 'POST',
+        method:  'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ message: text, history }),
+        body:    JSON.stringify({ message: textWithCtx, history }),
       });
 
       if (!res.ok || !res.body) throw new Error('Network error');
@@ -88,7 +112,7 @@ export function useChat() {
     } finally {
       setIsStreaming(false);
     }
-  }, [messages, isStreaming]);
+  }, [messages, isStreaming, context]);
 
   const clearHistory = useCallback(() => setMessages([]), []);
 

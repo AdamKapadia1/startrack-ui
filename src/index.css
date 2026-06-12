@@ -3576,3 +3576,184 @@ circle[fill="#7b61ff"] { filter: drop-shadow(0 0 6px #7b61ff); }
 
 /* ── Selection colour ── */
 ::selection { background: rgba(0, 212, 255, 0.25); color: var(--text-primary); }
+
+/* ── Signal history clear button ── */
+.history-clear-btn {
+  display:      block;
+  margin:       6px auto 0;
+  padding:      2px 10px;
+  background:   transparent;
+  border:       none;
+  color:        var(--text-tertiary);
+  font-family:  'Inter', sans-serif;
+  font-size:    10px;
+  cursor:       pointer;
+  letter-spacing: 0.2px;
+  transition:   color 0.15s;
+}
+.history-clear-btn:hover { color: var(--accent-danger); }
+
+/* ── Pass Landing Page ── */
+.pass-landing {
+  min-height:      100vh;
+  background:      radial-gradient(ellipse at 50% 0%, #0d1f3c 0%, #080c14 70%);
+  display:         flex;
+  align-items:     flex-start;
+  justify-content: center;
+  padding:         40px 16px 60px;
+}
+
+.pass-landing-card {
+  width:        100%;
+  max-width:    520px;
+  background:   var(--bg-secondary);
+  border:       1px solid var(--border-primary);
+  border-radius: 16px;
+  padding:      40px 32px;
+  text-align:   center;
+}
+
+.pass-landing-icon {
+  margin-bottom: 20px;
+  opacity: 0.9;
+  filter: drop-shadow(0 0 12px rgba(0, 212, 255, 0.35));
+}
+
+.pass-landing-heading {
+  font-family:     'Inter', sans-serif;
+  font-size:       11px;
+  font-weight:     600;
+  letter-spacing:  2px;
+  text-transform:  uppercase;
+  color:           var(--text-tertiary);
+  margin-bottom:   12px;
+}
+
+.pass-landing-satname {
+  font-family:   'JetBrains Mono', monospace;
+  font-size:     26px;
+  font-weight:   600;
+  color:         var(--accent-primary);
+  margin-bottom: 28px;
+  letter-spacing: -0.5px;
+  word-break:    break-all;
+  text-shadow:   0 0 24px rgba(0, 212, 255, 0.3);
+}
+
+.pass-landing-details {
+  background:    var(--bg-primary);
+  border:        1px solid var(--border-primary);
+  border-radius: 10px;
+  padding:       14px 18px;
+  margin-bottom: 20px;
+  text-align:    left;
+}
+
+.pass-landing-row {
+  display:         flex;
+  justify-content: space-between;
+  align-items:     center;
+  padding:         7px 0;
+  border-bottom:   1px solid rgba(26, 45, 69, 0.5);
+}
+.pass-landing-row:last-child { border-bottom: none; }
+
+.pass-landing-label {
+  font-family:    'Inter', sans-serif;
+  font-size:      11px;
+  color:          var(--text-tertiary);
+  font-weight:    500;
+  letter-spacing: 0.3px;
+}
+
+.pass-landing-value {
+  font-family: 'JetBrains Mono', monospace;
+  font-size:   12px;
+  color:       var(--text-primary);
+  font-weight: 500;
+}
+
+.pass-landing-countdown {
+  font-family: 'JetBrains Mono', monospace;
+  font-size:   20px;
+  font-weight: 600;
+  color:       var(--accent-primary);
+  margin:      20px 0;
+  padding:     12px 20px;
+  background:  rgba(0, 212, 255, 0.06);
+  border:      1px solid rgba(0, 212, 255, 0.18);
+  border-radius: 8px;
+  text-shadow: 0 0 16px rgba(0, 212, 255, 0.3);
+}
+.pass-landing-countdown.past {
+  color:       var(--text-tertiary);
+  background:  rgba(26, 45, 69, 0.3);
+  border-color: var(--border-primary);
+  text-shadow: none;
+}
+
+.pass-landing-chart {
+  margin:     20px 0;
+  text-align: left;
+}
+
+.pass-landing-buttons {
+  display:        flex;
+  gap:            10px;
+  margin:         24px 0 16px;
+}
+
+.pass-landing-btn {
+  flex:            1;
+  padding:         12px 16px;
+  border-radius:   8px;
+  font-family:     'Inter', sans-serif;
+  font-size:       13px;
+  font-weight:     600;
+  text-decoration: none;
+  display:         inline-flex;
+  align-items:     center;
+  justify-content: center;
+  cursor:          pointer;
+  border:          none;
+  transition:      opacity 0.15s, transform 0.1s;
+}
+.pass-landing-btn:hover { opacity: 0.85; transform: translateY(-1px); }
+
+.pass-landing-btn--primary {
+  background: var(--accent-primary);
+  color:      #080c14;
+}
+.pass-landing-btn--secondary {
+  background:   rgba(0, 212, 255, 0.1);
+  color:        var(--accent-primary);
+  border:       1px solid rgba(0, 212, 255, 0.25);
+}
+
+.pass-landing-share {
+  display:         flex;
+  gap:             8px;
+  justify-content: center;
+  flex-wrap:       wrap;
+  margin-bottom:   24px;
+}
+
+.pass-landing-footer {
+  font-family:  'Inter', sans-serif;
+  font-size:    11px;
+  color:        var(--text-tertiary);
+  padding-top:  16px;
+  border-top:   1px solid var(--border-primary);
+}
+.pass-landing-link {
+  color:           var(--accent-primary);
+  text-decoration: none;
+}
+.pass-landing-link:hover { text-decoration: underline; }
+
+@media (max-width: 520px) {
+  .pass-landing-card     { padding: 28px 16px; }
+  .pass-landing-satname  { font-size: 20px; }
+  .pass-landing-countdown { font-size: 15px; padding: 10px 14px; }
+  .pass-landing-buttons  { flex-direction: column; }
+}

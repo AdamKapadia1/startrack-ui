@@ -1,9 +1,19 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import type { ApiResponse } from '../types';
 import type { LocationSettings } from './useLocation';
 import { DEFAULT_LOCATION } from './useLocation';
 import { useWebSocket } from './useWebSocket';
 import type { WsStatus } from './useWebSocket';
+
+export const SIGNAL_HISTORY_KEY = 'startrack-signal-history';
+const HISTORY_MAX     = 200;
+const MIN_INTERVAL_MS = 60_000;
+
+export interface SignalHistoryPoint {
+  timestamp: number;
+  score:     number;
+  elevation: number;
+}
 
 function isDefaultLoc(loc: LocationSettings): boolean {
   return (
@@ -20,7 +30,8 @@ export function useSatellites(location: LocationSettings) {
   const [restData,        setRestData]        = useState<ApiResponse | null>(null);
   const [restLastUpdated, setRestLastUpdated] = useState<Date | null>(null);
 
-  const isDefault = isDefaultLoc(location);
+  const isDefault   = isDefaultLoc(location);
+  const lastSaveRef = useRef<number>(0);
 
   useEffect(() => {
     if (isDefault) { setRestData(null); return; }
@@ -44,6 +55,25 @@ export function useSatellites(location: LocationSettings) {
     const id = setInterval(fetchRest, 30_000);
     return () => { cancelled = true; clearInterval(id); };
   }, [location.lat, location.lon, location.alt, location.name, isDefault]);
+
+  // Persist signal history to localStorage (max 200 pts, 1-min minimum interval)
+  useEffect(() => {
+    const score = (restData ?? wsData)?.signalScore;
+    if (!score) return;
+    const now = Date.now();
+    if (now - lastSaveRef.current < MIN_INTERVAL_MS) return;
+    lastSaveRef.current = now;
+
+    const maxEl = (restData ?? wsData)?.satellites?.[0]?.elevation ?? 0;
+    const point: SignalHistoryPoint = { timestamp: now, score, elevation: maxEl };
+    try {
+      const raw     = localStorage.getItem(SIGNAL_HISTORY_KEY);
+      const history: SignalHistoryPoint[] = raw ? JSON.parse(raw) : [];
+      history.push(point);
+      if (history.length > HISTORY_MAX) history.splice(0, history.length - HISTORY_MAX);
+      localStorage.setItem(SIGNAL_HISTORY_KEY, JSON.stringify(history));
+    } catch { /* storage unavailable */ }
+  }, [restData, wsData]);
 
   // Custom location data takes precedence over WS default-location data
   const data        = restData ?? wsData;

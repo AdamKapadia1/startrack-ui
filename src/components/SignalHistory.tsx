@@ -3,6 +3,8 @@ import {
   LineChart, Line, XAxis, YAxis, Tooltip,
   ResponsiveContainer, CartesianGrid,
 } from 'recharts';
+import { SIGNAL_HISTORY_KEY } from '../hooks/useSatellites';
+import type { SignalHistoryPoint } from '../hooks/useSatellites';
 
 function useIsMobile(): boolean {
   const [mobile, setMobile] = useState(() =>
@@ -17,46 +19,47 @@ function useIsMobile(): boolean {
   return mobile;
 }
 
-interface HistoryPoint {
-  computed_at:  string;
-  signal_score: number;
-  max_elevation: number;
+function formatTime(ts: number) {
+  return new Date(ts).toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' });
 }
 
-function formatTime(iso: string) {
-  return new Date(iso).toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' });
+function loadHistory(): SignalHistoryPoint[] {
+  try {
+    const raw = localStorage.getItem(SIGNAL_HISTORY_KEY);
+    return raw ? JSON.parse(raw) : [];
+  } catch {
+    return [];
+  }
 }
 
-export function SignalHistory() {
-  const [data, setData]   = useState<HistoryPoint[]>([]);
-  const [loading, setLoading] = useState(true);
-  const isMobile = useIsMobile();
+interface Props {
+  signalScore?: number;
+}
 
+export function SignalHistory({ signalScore }: Props) {
+  const [data, setData] = useState<SignalHistoryPoint[]>(() => loadHistory());
+  const isMobile        = useIsMobile();
+
+  // Re-read localStorage whenever a new score arrives
   useEffect(() => {
-    const base = import.meta.env.VITE_API_URL ?? '';
-    fetch(`${base}/api/history`)
-      .then(r => r.json())
-      .then((rows: HistoryPoint[]) => { setData(rows); setLoading(false); })
-      .catch(() => setLoading(false));
-  }, []);
+    if (signalScore == null) return;
+    setData(loadHistory());
+  }, [signalScore]);
 
-  const hours = isMobile ? 24 : 48;
-  const label = `Signal History — Last ${hours} Hours`;
-  const cutoff = Date.now() - hours * 60 * 60 * 1000;
+  const hours   = isMobile ? 24 : 48;
+  const label   = `Signal History — Last ${hours} Hours`;
+  const cutoff  = Date.now() - hours * 60 * 60 * 1_000;
+
   const chartData = useMemo(() =>
     data
-      .filter(d => new Date(d.computed_at).getTime() >= cutoff)
-      .map(d => ({ time: formatTime(d.computed_at), score: d.signal_score })),
-    [data, hours]
+      .filter(d => d.timestamp >= cutoff)
+      .map(d => ({ time: formatTime(d.timestamp), score: d.score })),
+    [data, cutoff],
   );
 
-  if (loading) {
-    return (
-      <div className="history-section">
-        <div className="section-label">{label}</div>
-        <div className="history-empty">Loading…</div>
-      </div>
-    );
+  function clearHistory() {
+    try { localStorage.removeItem(SIGNAL_HISTORY_KEY); } catch { /* ignore */ }
+    setData([]);
   }
 
   if (!data.length) {
@@ -80,7 +83,7 @@ export function SignalHistory() {
               tick={{ fill: '#3a4f47', fontSize: 9, fontFamily: 'monospace' }}
               tickLine={false}
               axisLine={false}
-              interval={5}
+              interval={Math.max(1, Math.floor(chartData.length / 6))}
             />
             <YAxis
               domain={[0, 100]}
@@ -107,6 +110,7 @@ export function SignalHistory() {
           </LineChart>
         </ResponsiveContainer>
       </div>
+      <button className="history-clear-btn" onClick={clearHistory}>Clear history</button>
     </div>
   );
 }

@@ -18,6 +18,7 @@ import { CountdownBanner }      from './components/CountdownBanner';
 import { SatelliteDetail }      from './components/SatelliteDetail';
 import { Onboarding, ONBOARDING_KEY } from './components/Onboarding';
 import { HelpPanel }            from './components/HelpPanel';
+import { PassLandingPage }      from './components/PassLandingPage';
 import { getConstellation }     from './utils/constellation';
 import type { Satellite }       from './types';
 import { useSatellites }     from './hooks/useSatellites';
@@ -26,6 +27,7 @@ import { useWeather }        from './hooks/useWeather';
 import { useLocation }       from './hooks/useLocation';
 
 function App() {
+  const isPassRoute = window.location.pathname === '/pass';
   const { location, saveLocation, gpsAccuracy, permState, requestGPS, declineGPS } = useLocation();
   const [settingsOpen,         setSettingsOpen]         = useState(false);
   const [chatOpen,             setChatOpen]             = useState(false);
@@ -44,10 +46,24 @@ function App() {
   const signalScore    = satData?.signalScore;
   const scoreBreakdown = satData?.scoreBreakdown;
   const starlinkSat    = satellites.find(s => s.satname.toUpperCase().includes('STARLINK'));
+  const topSat         = satellites.reduce<Satellite | null>((best, s) => !best || s.elevation > best.elevation ? s : best, null);
 
   const filteredSatellites = activeConstellation === 'ALL'
     ? satellites
     : satellites.filter(s => getConstellation(s.satname) === activeConstellation);
+
+  if (isPassRoute) return <PassLandingPage />;
+
+  const liveContext = {
+    satelliteCount:   filteredSatellites.length,
+    bestElevation:    Math.round(topSat?.elevation ?? 0),
+    signalScore:      Math.round(signalScore ?? 0),
+    cloudCover:       weather?.cloudCover,
+    temp:             weather?.temp,
+    topSatName:       topSat?.satname,
+    topSatElevation:  topSat ? Math.round(topSat.elevation) : undefined,
+    hasDtcSat:        !!starlinkSat,
+  };
 
   return (
     <div className="app">
@@ -120,14 +136,14 @@ function App() {
             <PassList passes={topPasses} satname={satname} locationName={location.name} />
           </div>
 
-          <SignalHistory />
+          <SignalHistory signalScore={signalScore} />
         </div>
       </div>
 
       <Footer lastUpdated={lastUpdated} />
       <InstallBanner />
 
-      <ChatPanel open={chatOpen} onClose={() => setChatOpen(false)} />
+      <ChatPanel open={chatOpen} onClose={() => setChatOpen(false)} context={liveContext} />
 
       <HelpPanel open={helpOpen} onClose={() => setHelpOpen(false)} />
 

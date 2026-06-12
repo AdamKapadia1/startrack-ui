@@ -1,0 +1,3 @@
+{
+  "rewrites": [{ "source": "/pass", "destination": "/index.html" }]
+}

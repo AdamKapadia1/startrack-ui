@@ -1,29 +1,42 @@
 import { useState, useEffect, useRef } from 'react';
 import type { KeyboardEvent } from 'react';
 import { useChat } from '../hooks/useChat';
+import type { LiveContext } from '../hooks/useChat';
 
-const SUGGESTIONS = [
-  'When is the next high-elevation pass?',
-  'Is the signal good right now?',
-  'Best time for a video call today?',
-  'Which satellite is closest overhead?',
-  'Will cloud cover affect my connection tonight?',
-];
+function getDynamicSuggestions(ctx?: LiveContext): string[] {
+  const out: string[] = [];
+  if (ctx) {
+    if (ctx.signalScore > 70) {
+      out.push('Signal looks good — what can I do right now?');
+    } else if (ctx.signalScore < 50 && ctx.signalScore > 0) {
+      out.push('Signal is weak — when will it improve?');
+    }
+    if (ctx.hasDtcSat) {
+      out.push('Can I connect directly with my phone right now?');
+    }
+  }
+  out.push('When is my best pass this week?');
+  if (out.length < 4) out.push('Which satellite is closest overhead?');
+  if (out.length < 4) out.push('Will cloud cover affect my connection tonight?');
+  return out.slice(0, 4);
+}
 
 function formatTime(d: Date): string {
   return d.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' });
 }
 
 interface Props {
-  open: boolean;
-  onClose: () => void;
+  open:     boolean;
+  onClose:  () => void;
+  context?: LiveContext;
 }
 
-export function ChatPanel({ open, onClose }: Props) {
-  const { messages, sendMessage, isStreaming, clearHistory } = useChat();
+export function ChatPanel({ open, onClose, context }: Props) {
+  const { messages, sendMessage, isStreaming, clearHistory } = useChat(context);
   const [input, setInput] = useState('');
   const bottomRef         = useRef<HTMLDivElement>(null);
   const inputRef          = useRef<HTMLInputElement>(null);
+  const suggestions       = getDynamicSuggestions(context);
 
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -80,7 +93,7 @@ export function ChatPanel({ open, onClose }: Props) {
         {messages.length === 0 ? (
           <div className="chat-suggestions">
             <p className="chat-suggestions-label">Ask me anything about your satellite connection</p>
-            {SUGGESTIONS.map(s => (
+            {suggestions.map(s => (
               <button key={s} className="chat-suggestion-chip" onClick={() => sendMessage(s)}>
                 {s}
               </button>
