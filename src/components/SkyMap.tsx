@@ -22,9 +22,9 @@ const SKEL_DOTS = [
 const CX = 210, CY = 210, R = 175;
 
 function toXY(az: number, el: number) {
-  const r   = ((90 - el) / 90) * R;
-  const rad = (az * Math.PI) / 180;
-  return { x: CX + r * Math.sin(rad), y: CY - r * Math.cos(rad) };
+  const r     = R * (1 - el / 90);
+  const angle = (az - 90) * Math.PI / 180;
+  return { x: CX + r * Math.cos(angle), y: CY + r * Math.sin(angle) };
 }
 
 function constellationColor(name: string): string {
@@ -157,8 +157,8 @@ export function SkyMap({ satellites, cloudCover = 0, passes = [], positions = []
   // Use positions (5s) when available, fall back to satellites (30s)
   const displaySats: (SatellitePosition & { dopplerShiftHz?: number | null })[] =
     positions.length > 0
-      ? positions.filter(p => p.elevation >= 30)
-      : satellites.filter(s => s.elevation >= 30).map(s => ({
+      ? positions.filter(p => p.elevation >= 0)
+      : satellites.filter(s => s.elevation >= 0).map(s => ({
           satname:         s.satname,
           elevation:       s.elevation,
           azimuth:         s.azimuth,
@@ -336,14 +336,16 @@ export function SkyMap({ satellites, cloudCover = 0, passes = [], positions = []
               );
             })}
 
-          {/* Live satellite dots */}
+          {/* Live satellite dots — clipped to sky circle */}
+          <g clipPath="url(#skyClip)">
           {renderSats.map((sat) => {
             const { x, y }  = toXY(sat.azimuth, sat.elevation);
             const color      = constellationColor(sat.satname);
             const isSelected = selected?.sat.satname === sat.satname;
             const isEntering = enteringNames.has(sat.satname);
             const isIss      = getConstellation(sat.satname) === 'ISS';
-            const dotR       = isIss ? 8 : 5;
+            const dotR       = isIss ? 8 : sat.elevation >= 60 ? 5 : sat.elevation >= 30 ? 4 : 3;
+            const dotOpacity = sat.elevation >= 60 ? 1.0 : sat.elevation >= 30 ? 0.8 : 0.6;
             const lx         = x < CX ? x + 9 : x - 9;
             const anchor     = x < CX ? 'start' : 'end';
             const trail      = trailRef.current.get(sat.satname) ?? [];
@@ -371,7 +373,7 @@ export function SkyMap({ satellites, cloudCover = 0, passes = [], positions = []
                 {/* Main dot */}
                 <circle
                   cx={x} cy={y} r={dotR}
-                  fill={color} opacity="0.95"
+                  fill={color} opacity={dotOpacity}
                   filter="url(#glow)"
                   stroke={isSelected ? (isIss ? '#aaa' : '#fff') : 'none'}
                   strokeWidth={isSelected ? 1 : 0}
@@ -389,6 +391,7 @@ export function SkyMap({ satellites, cloudCover = 0, passes = [], positions = []
               </g>
             );
           })}
+          </g>
 
           {/* Observer dot */}
           <circle cx={CX} cy={CY} r="5"  fill="#7b61ff" opacity="0.95" filter="url(#glow)"/>

@@ -1,7 +1,7 @@
 import { useState, useEffect, useMemo } from 'react';
 import {
   LineChart, Line, XAxis, YAxis, Tooltip,
-  ResponsiveContainer, CartesianGrid,
+  ResponsiveContainer, CartesianGrid, type DotProps,
 } from 'recharts';
 import { SIGNAL_HISTORY_KEY } from '../hooks/useSatellites';
 import type { SignalHistoryPoint } from '../hooks/useSatellites';
@@ -57,6 +57,19 @@ export function SignalHistory({ signalScore }: Props) {
     [data, cutoff],
   );
 
+  const ticks = useMemo(() => {
+    if (chartData.length === 0) return [];
+    if (chartData.length <= 4) return chartData.map(d => d.time);
+    const n = chartData.length - 1;
+    return [0, Math.round(n / 3), Math.round(2 * n / 3), n].map(i => chartData[i].time);
+  }, [chartData]);
+
+  function LatestDot(props: DotProps & { index?: number }) {
+    const { cx, cy, index } = props;
+    if (index !== chartData.length - 1 || cx == null || cy == null) return null;
+    return <circle cx={cx} cy={cy} r={4} fill="#00d4ff" stroke="var(--bg-primary)" strokeWidth={1.5}/>;
+  }
+
   function clearHistory() {
     try { localStorage.removeItem(SIGNAL_HISTORY_KEY); } catch { /* ignore */ }
     setData([]);
@@ -75,36 +88,36 @@ export function SignalHistory({ signalScore }: Props) {
     <div className="history-section">
       <div className="section-label">{label}</div>
       <div className="history-chart-wrap">
-        <ResponsiveContainer width="100%" height={120}>
+        <ResponsiveContainer width="100%" height={140}>
           <LineChart data={chartData} margin={{ top: 8, right: 16, left: 4, bottom: 0 }}>
             <CartesianGrid strokeDasharray="3 3" stroke="rgba(0,212,255,0.07)" vertical={false}/>
             <XAxis
               dataKey="time"
-              tick={{ fill: '#3a4f47', fontSize: 9, fontFamily: 'monospace' }}
+              ticks={ticks}
+              tick={{ fill: 'var(--text-tertiary)', fontSize: 9, fontFamily: 'monospace' }}
               tickLine={false}
               axisLine={false}
-              interval={Math.max(1, Math.floor(chartData.length / 6))}
             />
             <YAxis
               domain={[0, 100]}
-              tick={{ fill: '#3a4f47', fontSize: 9, fontFamily: 'monospace' }}
+              tick={{ fill: 'var(--text-tertiary)', fontSize: 9, fontFamily: 'monospace' }}
               tickLine={false}
               axisLine={false}
               tickCount={4}
               width={36}
-              label={{ value: 'Signal', angle: -90, position: 'insideLeft', fill: '#3a4f47', fontSize: 8, dx: 10 }}
+              label={{ value: 'Signal', angle: -90, position: 'insideLeft', fill: 'var(--text-tertiary)', fontSize: 8, dx: 10 }}
             />
             <Tooltip
-              contentStyle={{ background: '#0f1512', border: '1px solid rgba(0,212,255,0.2)', borderRadius: 6, fontSize: 11 }}
-              labelStyle={{ color: '#7a9187' }}
+              contentStyle={{ background: 'var(--bg-secondary)', border: '1px solid rgba(0,212,255,0.2)', borderRadius: 6, fontSize: 11 }}
+              labelStyle={{ color: 'var(--text-secondary)' }}
               itemStyle={{ color: '#00d4ff' }}
             />
             <Line
               type="monotone"
               dataKey="score"
               stroke="var(--accent-primary)"
-              strokeWidth={isMobile ? 2.5 : 2}
-              dot={false}
+              strokeWidth={2}
+              dot={<LatestDot/>}
               activeDot={{ r: 3, fill: '#00d4ff' }}
             />
           </LineChart>

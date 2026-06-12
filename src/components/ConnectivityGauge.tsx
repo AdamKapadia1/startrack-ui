@@ -107,7 +107,15 @@ export function ConnectivityGauge({ satellites, lastUpdated, signalScore, scoreB
         <div className="gauge-updated">
           {lastUpdated ? `Updated ${secsAgo}s ago` : 'Waiting for data…'}
         </div>
-        {bd && <div className="gauge-updated" style={{ color: 'var(--green)', marginTop: 2 }}>Hover ring for breakdown</div>}
+        {bd && (
+          <div className="gauge-updated" style={{ marginTop: 2, display: 'flex', alignItems: 'center', gap: 4, color: 'var(--text-muted)' }}>
+            <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" style={{ opacity: 0.7 }}>
+              <circle cx="12" cy="12" r="10"/>
+              <path d="M12 8v1M12 12v4" strokeLinecap="round"/>
+            </svg>
+            Hover for breakdown
+          </div>
+        )}
       </div>
     </div>
   );
