@@ -16,9 +16,10 @@ export interface SignalHistoryPoint {
 }
 
 function isDefaultLoc(loc: LocationSettings): boolean {
+  // 0.05° ≈ 5 km — treats GPS-varying Tring coords as "default" to avoid pointless REST polls
   return (
-    Math.abs(loc.lat - DEFAULT_LOCATION.lat) < 0.001 &&
-    Math.abs(loc.lon - DEFAULT_LOCATION.lon) < 0.001
+    Math.abs(loc.lat - DEFAULT_LOCATION.lat) < 0.05 &&
+    Math.abs(loc.lon - DEFAULT_LOCATION.lon) < 0.05
   );
 }
 
@@ -84,7 +85,8 @@ export function useSatellites(location: LocationSettings) {
     loading:      !data,
     error:        null as string | null,
     lastUpdated,
-    status:       (restData ? 'polling' : status) as WsStatus,
+    // Always reflect the real WebSocket status — REST polling is supplementary
+    status:       status as WsStatus,
     // Positions are WS-only (default location); null for custom locations
     positions:    isDefault ? positions : [],
     posLastUpdate: isDefault ? posLastUpdate : null,
