@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Header }               from './components/Header';
 import { InstallBanner }        from './components/InstallBanner';
 import { MetricCards }          from './components/MetricCards';
@@ -34,6 +34,18 @@ function App() {
   const { theme, toggleTheme } = useTheme();
   const [settingsOpen,         setSettingsOpen]         = useState(false);
   const [chatOpen,             setChatOpen]             = useState(false);
+
+  // Cmd+K / Ctrl+K toggles chat
+  useEffect(() => {
+    function onKey(e: KeyboardEvent) {
+      if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
+        e.preventDefault();
+        setChatOpen(o => !o);
+      }
+    }
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, []);
   const [helpOpen,             setHelpOpen]             = useState(false);
   const [changelogOpen,        setChangelogOpen]        = useState(false);
   const [activeConstellation,  setActiveConstellation]  = useState('ALL');
