@@ -98,12 +98,13 @@ function formatTime(d: Date): string {
 // ── Component ─────────────────────────────────────────────────────────────────
 
 interface Props {
-  open:     boolean;
-  onClose:  () => void;
-  context?: LiveContext;
+  open:           boolean;
+  onClose:        () => void;
+  context?:       LiveContext;
+  initialInput?:  string;
 }
 
-export function ChatPanel({ open, onClose, context }: Props) {
+export function ChatPanel({ open, onClose, context, initialInput }: Props) {
   const { messages, sendMessage, isStreaming, clearHistory } = useChat(context);
   const [input,    setInput]    = useState('');
   const bottomRef               = useRef<HTMLDivElement>(null);
@@ -115,10 +116,16 @@ export function ChatPanel({ open, onClose, context }: Props) {
     bottomRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages]);
 
-  // Focus input on open
+  // Focus input on open; pre-fill if initialInput provided
   useEffect(() => {
-    if (open) setTimeout(() => textareaRef.current?.focus(), 280);
-  }, [open]);
+    if (open) {
+      if (initialInput) {
+        setInput(initialInput);
+        setTimeout(() => adjustHeight(), 0);
+      }
+      setTimeout(() => textareaRef.current?.focus(), 280);
+    }
+  }, [open]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // Cmd+K / Ctrl+K closes; Esc closes
   useEffect(() => {

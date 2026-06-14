@@ -5,6 +5,7 @@ interface Props {
   satellites:        Satellite[];
   onSelectSatellite: (sat: Satellite) => void;
   loading?:          boolean;
+  fullHeight?:       boolean;
 }
 
 function elevColor(elevation: number) {
@@ -27,13 +28,13 @@ function dopplerVal(hz: number | null, kHz: number | null): string {
   return hz > 0 ? `+${val}` : `${val}`;
 }
 
-export function SatelliteList({ satellites, onSelectSatellite, loading }: Props) {
+export function SatelliteList({ satellites, onSelectSatellite, loading, fullHeight }: Props) {
   const sorted = [...satellites].sort((a, b) => b.elevation - a.elevation);
   const hasAnyDoppler = sorted.some(s => s.dopplerShiftKHz !== null);
 
   if (loading) {
     return (
-      <div className="sat-list-section">
+      <div className={`sat-list-section${fullHeight ? ' sat-list-full' : ''}`}>
         <div className="section-label">
           Visible Satellites
           <span className="sat-count-badge">—</span>
@@ -62,7 +63,7 @@ export function SatelliteList({ satellites, onSelectSatellite, loading }: Props)
   }
 
   return (
-    <div className="sat-list-section">
+    <div className={`sat-list-section${fullHeight ? ' sat-list-full' : ''}`}>
       <div className="section-label">
         Visible Satellites
         <span className="sat-count-badge">{satellites.length}</span>

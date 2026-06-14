@@ -12,6 +12,7 @@ interface Props {
   posLastUpdate?:      Date | null;
   activeConstellation: string;
   loading?:            boolean;
+  compact?:            boolean;
 }
 
 const CX = 210, CY = 210, R = 175;
@@ -114,7 +115,7 @@ interface TrailPos { el: number; az: number; }
 
 export function SkyMap({
   satellites, cloudCover = 0, passes = [], positions = [],
-  posLastUpdate, activeConstellation, loading,
+  posLastUpdate, activeConstellation, loading, compact = false,
 }: Props) {
   const [selected, setSelected] = useState<{ sat: Satellite } | null>(null);
 
@@ -218,7 +219,7 @@ export function SkyMap({
 
   return (
     <div className="sky-section">
-      <div className="sky-svg-wrap">
+      <div className={`sky-svg-wrap${compact ? ' sky-svg-compact' : ''}`}>
         <svg
           className="sky-svg"
           viewBox="0 0 420 420"
@@ -351,8 +352,8 @@ export function SkyMap({
                   {/* Main dot — no glow filter */}
                   <circle cx={0} cy={0} r={ds.r} fill={ds.color} opacity={ds.opacity}/>
 
-                  {/* Label only above 70° */}
-                  {sat.elevation >= 70 && (
+                  {/* Label only above 70° and not in compact mode */}
+                  {!compact && sat.elevation >= 70 && (
                     <text
                       x={lxOff} y={-ds.r - 3}
                       fill="#4a6080" fontSize="8"
@@ -383,8 +384,8 @@ export function SkyMap({
             </text>
           )}
 
-          {/* ── Legend (bottom-right, with background) ── */}
-          {activeConstellation === 'ALL' ? (() => {
+          {/* ── Legend (bottom-right, hidden in compact mode) ── */}
+          {!compact && (activeConstellation === 'ALL' ? (() => {
             const lx = CX + R - 6;
             const ly = CY + R - 6;
             const rowH = 13, pad = 6;
@@ -402,18 +403,16 @@ export function SkyMap({
                 ))}
               </g>
             );
-          })() : (
-            (() => {
-              const { color } = dotStyle(activeConstellation, 45);
-              return (
-                <g transform={`translate(${CX + R - 70}, ${CY + R - 22})`}>
-                  <rect width={66} height={16} rx={3} fill="rgba(6,10,16,0.85)" stroke="#1a3050" strokeWidth="0.5"/>
-                  <circle cx={9} cy={8} r={3} fill={color} opacity={0.8}/>
-                  <text x={16} y={11.5} fill="#3a5878" fontSize="9" fontFamily="JetBrains Mono, monospace">{activeConstellation} only</text>
-                </g>
-              );
-            })()
-          )}
+          })() : (() => {
+            const { color } = dotStyle(activeConstellation, 45);
+            return (
+              <g transform={`translate(${CX + R - 70}, ${CY + R - 22})`}>
+                <rect width={66} height={16} rx={3} fill="rgba(6,10,16,0.85)" stroke="#1a3050" strokeWidth="0.5"/>
+                <circle cx={9} cy={8} r={3} fill={color} opacity={0.8}/>
+                <text x={16} y={11.5} fill="#3a5878" fontSize="9" fontFamily="JetBrains Mono, monospace">{activeConstellation} only</text>
+              </g>
+            );
+          })())}
         </svg>
       </div>
 

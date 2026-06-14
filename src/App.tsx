@@ -10,7 +10,7 @@ import { ConstellationFilter }  from './components/ConstellationFilter';
 import { PassList }             from './components/PassList';
 import { SatelliteList }        from './components/SatelliteList';
 import { SignalHistory }        from './components/SignalHistory';
-import { HistoricalInsight }   from './components/HistoricalInsight';
+import { HistoricalInsight }    from './components/HistoricalInsight';
 import { Footer }               from './components/Footer';
 import { SettingsPanel }        from './components/SettingsPanel';
 import { ChatPanel }            from './components/ChatPanel';
@@ -24,17 +24,59 @@ import { ChangelogPanel }       from './components/ChangelogPanel';
 import { useTheme }             from './hooks/useTheme';
 import { getConstellation }     from './utils/constellation';
 import type { Satellite }       from './types';
-import { useSatellites }     from './hooks/useSatellites';
-import { useRecommendation } from './hooks/useRecommendation';
-import { useWeather }        from './hooks/useWeather';
-import { useLocation }       from './hooks/useLocation';
+import { useSatellites }        from './hooks/useSatellites';
+import { useRecommendation }    from './hooks/useRecommendation';
+import { useWeather }           from './hooks/useWeather';
+import { useLocation }          from './hooks/useLocation';
+
+// ── Tab definition ────────────────────────────────────────────────────────────
+
+type Tab = 'overview' | 'skymap' | 'passes' | 'insights';
+const TABS: { id: Tab; label: string }[] = [
+  { id: 'overview',  label: 'Overview' },
+  { id: 'skymap',    label: 'Sky Map'  },
+  { id: 'passes',    label: 'Passes'   },
+  { id: 'insights',  label: 'Insights' },
+];
+const TAB_KEY = 'startrack-active-tab';
+
+function readStoredTab(): Tab {
+  const v = localStorage.getItem(TAB_KEY) as Tab | null;
+  return v && TABS.some(t => t.id === v) ? v : 'overview';
+}
+
+// ── AI chat insight prompts (Insights tab) ────────────────────────────────────
+
+const CHAT_INSIGHTS = [
+  "When's my best connectivity window today?",
+  "Why is my signal strongest late at night?",
+  "What pattern do you see in my signal data this week?",
+];
 
 function App() {
   const isPassRoute = window.location.pathname === '/pass';
   const { location, saveLocation, gpsAccuracy, permState, requestGPS, declineGPS } = useLocation();
   const { theme, toggleTheme } = useTheme();
-  const [settingsOpen,         setSettingsOpen]         = useState(false);
-  const [chatOpen,             setChatOpen]             = useState(false);
+
+  const [settingsOpen,        setSettingsOpen]        = useState(false);
+  const [chatOpen,            setChatOpen]            = useState(false);
+  const [chatInitialInput,    setChatInitialInput]    = useState('');
+  const [helpOpen,            setHelpOpen]            = useState(false);
+  const [changelogOpen,       setChangelogOpen]       = useState(false);
+  const [activeConstellation, setActiveConstellation] = useState('ALL');
+  const [selectedSatellite,   setSelectedSatellite]   = useState<Satellite | null>(null);
+  const [onboarded,           setOnboarded]           = useState(() => !!localStorage.getItem(ONBOARDING_KEY));
+  const [activeTab,           setActiveTab]           = useState<Tab>(readStoredTab);
+
+  function switchTab(tab: Tab) {
+    setActiveTab(tab);
+    localStorage.setItem(TAB_KEY, tab);
+  }
+
+  function openChatWithQuestion(q: string) {
+    setChatInitialInput(q);
+    setChatOpen(true);
+  }
 
   // Cmd+K / Ctrl+K toggles chat
   useEffect(() => {
@@ -47,11 +89,6 @@ function App() {
     window.addEventListener('keydown', onKey);
     return () => window.removeEventListener('keydown', onKey);
   }, []);
-  const [helpOpen,             setHelpOpen]             = useState(false);
-  const [changelogOpen,        setChangelogOpen]        = useState(false);
-  const [activeConstellation,  setActiveConstellation]  = useState('ALL');
-  const [selectedSatellite,    setSelectedSatellite]    = useState<Satellite | null>(null);
-  const [onboarded,            setOnboarded]            = useState(() => !!localStorage.getItem(ONBOARDING_KEY));
 
   const { data: satData, lastUpdated, status, positions, posLastUpdate } = useSatellites(location);
   const { data: recData, loading: recLoading }  = useRecommendation(location);
@@ -82,6 +119,18 @@ function App() {
     hasDtcSat:        !!starlinkSat,
   };
 
+  // Shared sky map header (used in overview + skymap tabs)
+  const skyMapHeader = (
+    <div className="section-label sky-header">
+      <span>Sky Map{weather?.cloudCover != null ? ` · ☁ ${weather.cloudCover}%` : ' — Azimuth / Elevation'}</span>
+      <ConstellationFilter
+        satellites={satellites}
+        active={activeConstellation}
+        onChange={setActiveConstellation}
+      />
+    </div>
+  );
+
   return (
     <div className="app">
       <Header
@@ -98,6 +147,138 @@ function App() {
 
       <CountdownBanner passes={topPasses} />
 
+      {/* ── Tab bar ── */}
+      <nav className="tab-bar" aria-label="Main navigation">
+        {TABS.map(t => (
+          <button
+            key={t.id}
+            className={`tab-btn${activeTab === t.id ? ' tab-btn--active' : ''}`}
+            onClick={() => switchTab(t.id)}
+          >
+            {t.label}
+          </button>
+        ))}
+      </nav>
+
+      {/* ── Tab content ── */}
+      <div className="tab-content">
+
+        {/* ── OVERVIEW ── */}
+        {activeTab === 'overview' && (
+          <div className="tab-pane tab-overview">
+            <div className="section-label">Live Overview</div>
+            <MetricCards
+              satellites={filteredSatellites}
+              topPasses={topPasses}
+              activeConstellation={activeConstellation}
+              loading={!satData}
+            />
+            <ConnectivityGauge
+              satellites={satellites}
+              lastUpdated={lastUpdated}
+              signalScore={signalScore}
+              scoreBreakdown={scoreBreakdown}
+            />
+            <AIRecommendation
+              recommendation={recData?.recommendation ?? ''}
+              loading={recLoading}
+            />
+            {starlinkSat && <DtcCard satellite={starlinkSat} />}
+
+            {/* Compact sky map in overview */}
+            {skyMapHeader}
+            <SkyMap
+              satellites={satellites}
+              cloudCover={weather?.cloudCover}
+              passes={topPasses}
+              positions={positions}
+              posLastUpdate={posLastUpdate}
+              activeConstellation={activeConstellation}
+              loading={!satData}
+              compact={true}
+            />
+            <button
+              className="tab-skymap-link"
+              onClick={() => switchTab('skymap')}
+            >
+              View full sky map →
+            </button>
+          </div>
+        )}
+
+        {/* ── SKY MAP ── */}
+        {activeTab === 'skymap' && (
+          <div className="tab-pane tab-skymap">
+            {skyMapHeader}
+            <SkyMap
+              satellites={satellites}
+              cloudCover={weather?.cloudCover}
+              passes={topPasses}
+              positions={positions}
+              posLastUpdate={posLastUpdate}
+              activeConstellation={activeConstellation}
+              loading={!satData}
+              compact={false}
+            />
+            <SatelliteList
+              satellites={filteredSatellites}
+              onSelectSatellite={setSelectedSatellite}
+              loading={!satData}
+              fullHeight={true}
+            />
+          </div>
+        )}
+
+        {/* ── PASSES ── */}
+        {activeTab === 'passes' && (
+          <div className="tab-pane tab-passes">
+            <div className="section-label">Upcoming Passes — Next 7 Days</div>
+            <PassList
+              passes={topPasses}
+              satname={satname}
+              locationName={location.name}
+              loading={recLoading}
+            />
+          </div>
+        )}
+
+        {/* ── INSIGHTS ── */}
+        {activeTab === 'insights' && (
+          <div className="tab-pane tab-insights">
+            {/* AI Chat Insights */}
+            <div className="insight-chat-section">
+              <div className="section-label">AI Chat Insights</div>
+              <div className="insight-prompt-chips">
+                {CHAT_INSIGHTS.map(q => (
+                  <button
+                    key={q}
+                    className="insight-prompt-chip"
+                    onClick={() => openChatWithQuestion(q)}
+                  >
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" style={{ flexShrink: 0 }}>
+                      <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+                    </svg>
+                    {q}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* Signal history — wider, taller */}
+            <div className="insights-signal-wrap">
+              <SignalHistory signalScore={signalScore} />
+            </div>
+
+            {/* Pattern insight — full width */}
+            <HistoricalInsight />
+          </div>
+        )}
+      </div>
+
+      {/* ── Always-visible globals ── */}
+      <Footer lastUpdated={lastUpdated} onOpenChangelog={() => setChangelogOpen(true)} />
+      <InstallBanner />
+
       <SettingsPanel
         open={settingsOpen}
         onClose={() => setSettingsOpen(false)}
@@ -107,65 +288,12 @@ function App() {
 
       <LocationPermission permState={permState} onAllow={requestGPS} onDecline={declineGPS} />
 
-      <div className="dashboard">
-        {/* ── Left column ── */}
-        <div className="left-col">
-          <div className="section-label">Live Overview</div>
-
-          <MetricCards satellites={filteredSatellites} topPasses={topPasses} activeConstellation={activeConstellation} loading={!satData} />
-
-          <ConnectivityGauge
-            satellites={satellites}
-            lastUpdated={lastUpdated}
-            signalScore={signalScore}
-            scoreBreakdown={scoreBreakdown}
-          />
-
-          <AIRecommendation
-            recommendation={recData?.recommendation ?? ''}
-            loading={recLoading}
-          />
-
-          {starlinkSat && <DtcCard satellite={starlinkSat} />}
-
-          <SatelliteList satellites={filteredSatellites} onSelectSatellite={setSelectedSatellite} loading={!satData} />
-        </div>
-
-        {/* ── Right column ── */}
-        <div className="right-col">
-          <div className="section-label sky-header">
-            <span>Sky Map{weather?.cloudCover != null ? ` · ☁ ${weather.cloudCover}%` : ' — Azimuth / Elevation'}</span>
-            <ConstellationFilter
-              satellites={satellites}
-              active={activeConstellation}
-              onChange={setActiveConstellation}
-            />
-          </div>
-
-          <SkyMap
-            satellites={satellites}
-            cloudCover={weather?.cloudCover}
-            passes={topPasses}
-            positions={positions}
-            posLastUpdate={posLastUpdate}
-            activeConstellation={activeConstellation}
-            loading={!satData}
-          />
-
-          <div className="passes-section">
-            <div className="section-label">Upcoming Passes — Next 7 Days</div>
-            <PassList passes={topPasses} satname={satname} locationName={location.name} loading={recLoading} />
-          </div>
-
-          <SignalHistory signalScore={signalScore} />
-          <HistoricalInsight />
-        </div>
-      </div>
-
-      <Footer lastUpdated={lastUpdated} onOpenChangelog={() => setChangelogOpen(true)} />
-      <InstallBanner />
-
-      <ChatPanel open={chatOpen} onClose={() => setChatOpen(false)} context={liveContext} />
+      <ChatPanel
+        open={chatOpen}
+        onClose={() => { setChatOpen(false); setChatInitialInput(''); }}
+        context={liveContext}
+        initialInput={chatInitialInput}
+      />
 
       <HelpPanel open={helpOpen} onClose={() => setHelpOpen(false)} />
       <ChangelogPanel open={changelogOpen} onClose={() => setChangelogOpen(false)} />
@@ -189,7 +317,7 @@ function App() {
 
       <button
         className={`chat-bubble-btn${chatOpen ? ' open' : ''}`}
-        onClick={() => setChatOpen(o => !o)}
+        onClick={() => { setChatInitialInput(''); setChatOpen(o => !o); }}
         aria-label={chatOpen ? 'Close AI chat' : 'Open AI chat'}
       >
         {chatOpen ? (
