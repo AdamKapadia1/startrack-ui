@@ -4,7 +4,8 @@ import type { WeatherData } from './useWeather';
 
 export type WsStatus = 'connecting' | 'live' | 'reconnecting' | 'polling' | 'offline';
 
-const WS_URL = 'wss://web-production-98c0d.up.railway.app';
+const WS_URL   = 'wss://web-production-98c0d.up.railway.app';
+const REST_URL = 'https://web-production-98c0d.up.railway.app';
 
 const MAX_RETRIES  = 5;
 const BASE_DELAY   = 1_000; // ms, doubles each retry up to 30 s
@@ -33,13 +34,16 @@ export function useWebSocket() {
     async function poll() {
       if (!mounted.current) return;
       try {
-        const base = import.meta.env.VITE_API_URL ?? '';
-        const res  = await fetch(`${base}/api/satellites/visible`);
+        console.log('[ws] polling REST fallback:', `${REST_URL}/api/satellites/visible`);
+        const res = await fetch(`${REST_URL}/api/satellites/visible`);
+        console.log('[ws] poll response status:', res.status);
         if (!res.ok) return;
         const json: ApiResponse = await res.json();
         setSatData(json);
         setLastUpdate(new Date());
-      } catch { /* network down, stay in polling state */ }
+      } catch (err: any) {
+        console.warn('[ws] poll failed:', err.message);
+      }
     }
 
     poll();
@@ -57,17 +61,16 @@ export function useWebSocket() {
 
       ws.onopen = () => {
         if (!mounted.current) return;
-        console.log('[ws] onopen fired — connection established! readyState:', ws.readyState);
+        console.log('[ws] ✅ CONNECTED to', WS_URL, '| readyState:', ws.readyState);
         retriesRef.current = 0;
         setStatus('live');
-        // Kill REST fallback and WS retry timer if WS reconnected
         if (pollTimer.current)    { clearInterval(pollTimer.current);    pollTimer.current    = null; }
         if (wsRetryTimer.current) { clearInterval(wsRetryTimer.current); wsRetryTimer.current = null; }
       };
 
       ws.onmessage = event => {
         if (!mounted.current) return;
-        // Confirm live status on every received message — guards against state drift
+        console.log('[ws] message received:', (event.data as string).substring(0, 100));
         setStatus('live');
         try {
           const msg = JSON.parse(event.data as string);
@@ -85,14 +88,13 @@ export function useWebSocket() {
 
       ws.onclose = (e) => {
         if (!mounted.current) return;
-        console.log('[ws] onclose fired — code:', e.code, '| reason:', e.reason || '(none)', '| wasClean:', e.wasClean, '| retry count now:', retriesRef.current + 1);
+        console.warn('[ws] CLOSED — code:', e.code, '| reason:', e.reason || '(none)', '| wasClean:', e.wasClean, '| retry #', retriesRef.current + 1);
         wsRef.current = null;
         retriesRef.current++;
 
         if (retriesRef.current > MAX_RETRIES) {
-          console.log('[ws] max retries exceeded — switching to polling mode');
+          console.warn('[ws] max retries exceeded — switching to REST polling mode');
           startPolling();
-          // Retry WebSocket every 60 s while in polling mode
           if (!wsRetryTimer.current) {
             wsRetryTimer.current = setInterval(() => {
               if (!mounted.current) return;
@@ -105,12 +107,13 @@ export function useWebSocket() {
         }
 
         const delay = Math.min(BASE_DELAY * Math.pow(2, retriesRef.current - 1), 30_000);
+        console.log('[ws] reconnecting in', delay, 'ms...');
         setStatus('reconnecting');
         reconnTimer.current = setTimeout(connect, delay);
       };
 
       ws.onerror = (e) => {
-        console.log('[ws] onerror fired — event type:', e.type, '| readyState:', ws.readyState);
+        console.error('[ws] ❌ ERROR — type:', e.type, '| readyState:', ws.readyState, '| url:', WS_URL);
         ws.close();
       };
     } catch {
