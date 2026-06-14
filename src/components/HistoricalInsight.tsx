@@ -3,7 +3,8 @@ import {
   BarChart, Bar, XAxis, YAxis, Tooltip, Cell, ResponsiveContainer,
 } from 'recharts';
 
-const API_BASE = import.meta.env.VITE_API_URL ?? 'https://web-production-98c0d.up.railway.app';
+const API_BASE     = import.meta.env.VITE_API_URL ?? 'https://web-production-98c0d.up.railway.app';
+const DATA_GOAL    = 500; // show progress toward this point count
 
 interface HourScore { hour: number; avgScore: number; }
 
@@ -33,26 +34,33 @@ function fmtHour(h: number): string {
 export function HistoricalInsight() {
   const [result,  setResult]  = useState<PatternResult | null>(null);
   const [loading, setLoading] = useState(true);
-  const [error,   setError]   = useState<string | null>(null);
+  const [netError, setNetError] = useState<string | null>(null);
 
   useEffect(() => {
     let cancelled = false;
     setLoading(true);
+    setNetError(null);
 
     fetch(`${API_BASE}/api/insights/patterns`)
-      .then(r => { if (!r.ok) throw new Error(`HTTP ${r.status}`); return r.json(); })
+      .then(async r => {
+        // Always parse JSON — even error responses from our API carry available:false
+        const json = await r.json().catch(() => null);
+        if (!json) throw new Error(`HTTP ${r.status} — no JSON body`);
+        return json as PatternResult;
+      })
       .then((d: PatternResult) => { if (!cancelled) { setResult(d); setLoading(false); } })
-      .catch((e: Error) => { if (!cancelled) { setError(e.message); setLoading(false); } });
+      .catch((e: Error) => {
+        if (!cancelled) { setNetError(e.message); setLoading(false); }
+      });
 
     return () => { cancelled = true; };
   }, []);
 
+  // ── Loading ──────────────────────────────────────────────────────────────────
   if (loading) {
     return (
       <div className="insight-section">
-        <div className="section-label">
-          <span>Pattern Insight</span>
-        </div>
+        <div className="section-label"><span>Pattern Insight</span></div>
         <div className="insight-body insight-loading">
           <div className="skeleton" style={{ height: 12, width: '80%', borderRadius: 4, marginBottom: 8 }}/>
           <div className="skeleton" style={{ height: 12, width: '60%', borderRadius: 4, marginBottom: 8 }}/>
@@ -62,25 +70,27 @@ export function HistoricalInsight() {
     );
   }
 
-  if (error || !result) {
+  // ── Genuine network failure (fetch threw — no response at all) ────────────────
+  if (netError && !result) {
     return (
       <div className="insight-section">
         <div className="section-label">Pattern Insight</div>
         <div className="insight-body insight-unavail">
-          <p>Could not load pattern data.</p>
+          <p className="insight-unavail-text" style={{ color: 'var(--text-tertiary)', fontSize: 11 }}>
+            Could not load pattern data.
+          </p>
         </div>
       </div>
     );
   }
 
-  if (!result.available) {
-    const pts  = result.dataPoints ?? 0;
-    const days = Math.min(6, Math.floor(pts / 48)); // ~48 polls per day
+  // ── Building / insufficient data ──────────────────────────────────────────────
+  if (!result || !result.available) {
+    const pts     = result?.dataPoints ?? 0;
+    const pct     = Math.min(100, Math.round((pts / DATA_GOAL) * 100));
     return (
       <div className="insight-section">
-        <div className="section-label">
-          <span>Pattern Insight</span>
-        </div>
+        <div className="section-label"><span>Pattern Insight</span></div>
         <div className="insight-body insight-unavail">
           <div className="insight-building-icon">
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--accent-purple)" strokeWidth="1.5">
@@ -88,30 +98,31 @@ export function HistoricalInsight() {
               <polyline points="12 6 12 12 16 14"/>
             </svg>
           </div>
-          <p className="insight-unavail-text">Building your personal insights — check back in a few days.</p>
-          <div className="insight-progress-row">
-            {Array.from({ length: 7 }, (_, i) => (
-              <div
-                key={i}
-                className={`insight-day-pip${i < days ? ' filled' : ''}`}
-                title={`Day ${i + 1}`}
-              />
-            ))}
-            <span className="insight-progress-label">{days}/7 days collected</span>
+          <p className="insight-unavail-text">
+            Building your personal insights — check back in a few days.
+          </p>
+          <p className="insight-unavail-sub">
+            {pts.toLocaleString()} data points collected — patterns appear after ~{DATA_GOAL.toLocaleString()}
+          </p>
+          <div className="insight-progress-bar-wrap">
+            <div className="insight-progress-bar-track">
+              <div className="insight-progress-bar-fill" style={{ width: `${pct}%` }}/>
+            </div>
+            <span className="insight-progress-label">{pct}%</span>
           </div>
         </div>
       </div>
     );
   }
 
-  // available: true — render insight + bar chart
+  // ── Full analysis ─────────────────────────────────────────────────────────────
   const bestSet  = new Set(result.bestHours.map(b => b.hour));
   const worstSet = new Set(result.worstHours.map(w => w.hour));
 
   function barColor(hour: number): string {
-    if (bestSet.has(hour))  return '#4a8a6a';  // muted green
-    if (worstSet.has(hour)) return '#7a3a3a';  // muted red
-    return '#1a3050';                           // neutral
+    if (bestSet.has(hour))  return '#4a8a6a';
+    if (worstSet.has(hour)) return '#7a3a3a';
+    return '#1a3050';
   }
 
   return (

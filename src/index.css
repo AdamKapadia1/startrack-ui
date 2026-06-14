@@ -4170,32 +4170,43 @@ circle[fill="#7b61ff"] { filter: drop-shadow(0 0 6px #7b61ff); }
   margin:      0;
 }
 
-.insight-progress-row {
+.insight-unavail-sub {
+  font-size:   10px;
+  color:       var(--text-tertiary);
+  font-family: var(--mono);
+  margin:      0;
+  letter-spacing: 0.2px;
+}
+
+.insight-progress-bar-wrap {
   display:     flex;
   align-items: center;
-  gap:         5px;
-  flex-wrap:   wrap;
-  justify-content: center;
+  gap:         8px;
+  width:       100%;
+  max-width:   240px;
 }
 
-.insight-day-pip {
-  width:         8px;
-  height:        8px;
-  border-radius: 50%;
+.insight-progress-bar-track {
+  flex:          1;
+  height:        4px;
   background:    var(--border-primary);
-  transition:    background 0.2s;
+  border-radius: 2px;
+  overflow:      hidden;
 }
 
-.insight-day-pip.filled {
-  background: var(--accent-purple);
-  opacity:    0.8;
+.insight-progress-bar-fill {
+  height:        100%;
+  background:    var(--accent-purple);
+  border-radius: 2px;
+  transition:    width 0.4s ease;
+  opacity:       0.75;
 }
 
 .insight-progress-label {
   font-size:   9px;
   color:       var(--text-tertiary);
   font-family: var(--mono);
-  margin-left: 4px;
+  flex-shrink: 0;
 }
 
 /* ── Pass Landing Page ── */
