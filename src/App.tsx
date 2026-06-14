@@ -133,7 +133,7 @@ function App() {
         {/* ── Right column ── */}
         <div className="right-col">
           <div className="section-label sky-header">
-            <span>Sky Map — Azimuth / Elevation</span>
+            <span>Sky Map{weather?.cloudCover != null ? ` · ☁ ${weather.cloudCover}%` : ' — Azimuth / Elevation'}</span>
             <ConstellationFilter
               satellites={satellites}
               active={activeConstellation}

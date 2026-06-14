@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from 'react';
 import { createPortal } from 'react-dom';
 import type { Satellite, SatellitePosition } from '../types';
 import type { Pass } from '../hooks/useRecommendation';
-import { getConstellation, CONSTELLATION_COLORS } from '../utils/constellation';
+import { getConstellation } from '../utils/constellation';
 
 interface Props {
   satellites:          Satellite[];
@@ -14,12 +14,8 @@ interface Props {
   loading?:            boolean;
 }
 
-const SKEL_DOTS = [
-  { az:  30, el: 45 }, { az:  80, el: 65 }, { az: 130, el: 35 }, { az: 180, el: 55 },
-  { az: 230, el: 70 }, { az: 270, el: 40 }, { az: 310, el: 60 }, { az: 350, el: 50 },
-];
-
 const CX = 210, CY = 210, R = 175;
+const MIN_EL = 10; // Only render satellites above this elevation
 
 function toXY(az: number, el: number) {
   const r     = R * (1 - el / 90);
@@ -27,19 +23,28 @@ function toXY(az: number, el: number) {
   return { x: CX + r * Math.cos(angle), y: CY + r * Math.sin(angle) };
 }
 
-function constellationColor(name: string): string {
-  return CONSTELLATION_COLORS[getConstellation(name)] ?? '#4a6080';
+// Muted radar-style palette — no saturated glow colours
+function dotStyle(name: string, el: number): { color: string; opacity: number; r: number } {
+  const c = getConstellation(name);
+  switch (c) {
+    case 'STARLINK':
+      return el >= 60
+        ? { color: '#6fb894', opacity: 0.85, r: 3 }
+        : { color: '#5a8a6e', opacity: 0.60, r: 2 };
+    case 'ONEWEB':
+      return { color: '#4a7a9e', opacity: 0.60, r: 2 };
+    case 'ISS':
+      return { color: '#ffffff', opacity: 0.90, r: 4 };
+    case 'GPS':
+      return { color: '#a8915a', opacity: 0.60, r: 2 };
+    default:
+      return { color: '#6a7a8a', opacity: 0.50, r: 2 };
+  }
 }
 
 function elevColor(el: number): string {
-  if (el >= 60) return '#00ff88';
-  if (el >= 30) return '#00d4ff';
-  return '#4a6080';
-}
-
-function badgeColor(cc: number) {
-  if (cc <= 30) return '#00ff88';
-  if (cc <= 70) return '#ffb800';
+  if (el >= 60) return '#6fb894';
+  if (el >= 30) return '#5a8a9e';
   return '#4a6080';
 }
 
@@ -55,73 +60,41 @@ function formatPassTime(utc: number): string {
 
 // ── Satellite detail popup ────────────────────────────────────────────────────
 
-interface PopupProps {
-  sat:     Satellite;
-  passes:  Pass[];
-  onClose: () => void;
-}
+interface PopupProps { sat: Satellite; passes: Pass[]; onClose: () => void; }
 
 function SatPopup({ sat, passes, onClose }: PopupProps) {
-  const altKm = Math.round(sat.range * Math.sin(sat.elevation * Math.PI / 180));
-  const isDtc = sat.satname.includes('[DTC]');
-
+  const altKm   = Math.round(sat.range * Math.sin(sat.elevation * Math.PI / 180));
+  const isDtc   = sat.satname.includes('[DTC]');
   const nextPass = passes.find(p =>
     p.satname === sat.satname ||
     p.satname?.toUpperCase().startsWith(sat.satname.toUpperCase()),
   );
-
-  const style: React.CSSProperties = {
-    position: 'fixed',
-    bottom:   '80px',
-    right:    '20px',
-    zIndex:   1000,
-    minWidth: '200px',
-    maxWidth: '260px',
-  };
-
   const dHz = sat.dopplerShiftHz;
   const dopplerColor = dHz === null ? 'var(--text-tertiary)'
-    : dHz > 0 ? '#00ff88'
-    : dHz < 0 ? '#ff4444'
-    : '#4a6080';
+    : dHz > 0 ? '#6fb894' : dHz < 0 ? '#c46a6a' : '#4a6080';
   const dopplerLabel = dHz === null ? '—'
     : dHz === 0 ? '0 kHz'
     : `${(dHz / 1000).toFixed(1)} kHz`;
 
   return createPortal(
-    <div className="sat-popup" style={style} onClick={e => e.stopPropagation()}>
+    <div
+      className="sat-popup"
+      style={{ position: 'fixed', bottom: '80px', right: '20px', zIndex: 1000, minWidth: '200px', maxWidth: '260px' }}
+      onClick={e => e.stopPropagation()}
+    >
       <button className="sat-popup-close icon-btn" onClick={onClose} aria-label="Close">
         <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
           <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
         </svg>
       </button>
-
-      <div className="sat-popup-name">
-        {sat.satname}
-        {isDtc && <span className="dtc-badge">DTC</span>}
-      </div>
-
+      <div className="sat-popup-name">{sat.satname}{isDtc && <span className="dtc-badge">DTC</span>}</div>
       <div className="sat-popup-rows">
-        <div className="sat-popup-row">
-          <span>Elevation</span>
-          <span style={{ color: elevColor(sat.elevation) }}>{sat.elevation.toFixed(1)}°</span>
-        </div>
-        <div className="sat-popup-row">
-          <span>Azimuth</span><span>{sat.azimuth.toFixed(1)}°</span>
-        </div>
-        <div className="sat-popup-row">
-          <span>Range</span><span>{sat.range.toLocaleString()} km</span>
-        </div>
-        <div className="sat-popup-row">
-          <span>Altitude</span><span>~{altKm.toLocaleString()} km</span>
-        </div>
-        <div className="sat-popup-row">
-          <span>Speed</span><span>~7.5 km/s</span>
-        </div>
-        <div className="sat-popup-row">
-          <span>Ku-band</span>
-          <span style={{ color: dopplerColor, fontWeight: 600 }}>{dopplerLabel}</span>
-        </div>
+        <div className="sat-popup-row"><span>Elevation</span><span style={{ color: elevColor(sat.elevation) }}>{sat.elevation.toFixed(1)}°</span></div>
+        <div className="sat-popup-row"><span>Azimuth</span><span>{sat.azimuth.toFixed(1)}°</span></div>
+        <div className="sat-popup-row"><span>Range</span><span>{sat.range.toLocaleString()} km</span></div>
+        <div className="sat-popup-row"><span>Altitude</span><span>~{altKm.toLocaleString()} km</span></div>
+        <div className="sat-popup-row"><span>Speed</span><span>~7.5 km/s</span></div>
+        <div className="sat-popup-row"><span>Ku-band</span><span style={{ color: dopplerColor, fontWeight: 600 }}>{dopplerLabel}</span></div>
         {nextPass && (
           <div className="sat-popup-row sat-popup-pass">
             <span>Next pass</span>
@@ -134,31 +107,38 @@ function SatPopup({ sat, passes, onClose }: PopupProps) {
   );
 }
 
-// ── Trail + animation state ───────────────────────────────────────────────────
-
+// ── Trail position store ──────────────────────────────────────────────────────
 interface TrailPos { el: number; az: number; }
 
 // ── Main component ────────────────────────────────────────────────────────────
 
-export function SkyMap({ satellites, cloudCover = 0, passes = [], positions = [], posLastUpdate, activeConstellation, loading }: Props) {
-  const [selected, setSelected] = useState<{ sat: Satellite; x: number; y: number } | null>(null);
+export function SkyMap({
+  satellites, cloudCover = 0, passes = [], positions = [],
+  posLastUpdate, activeConstellation, loading,
+}: Props) {
+  const [selected, setSelected] = useState<{ sat: Satellite } | null>(null);
 
-  // Trails: name → last 3 positions (oldest first), not including current
-  const trailRef = useRef<Map<string, TrailPos[]>>(new Map());
-  // Track previous satellite names to detect entering/exiting
-  const prevNamesRef = useRef<Set<string>>(new Set());
-  // Satellites currently fading out (below horizon since last update)
+  // Trail: name → last 3 positions (oldest first), not including current
+  const trailRef    = useRef<Map<string, TrailPos[]>>(new Map());
+  const prevNames   = useRef<Set<string>>(new Set());
   const [fadingOut, setFadingOut] = useState<Map<string, TrailPos>>(new Map());
-  // Satellites currently fading in (just appeared)
-  const [enteringNames, setEnteringNames] = useState<Set<string>>(new Set());
-  // "Xs ago" display
-  const [secsAgo, setSecsAgo] = useState<number | null>(null);
+  const [secsAgo,   setSecsAgo]   = useState<number | null>(null);
 
-  // Use positions (5s) when available, fall back to satellites (30s)
-  const displaySats: (SatellitePosition & { dopplerShiftHz?: number | null })[] =
+  // "pos Xs ago" ticker
+  useEffect(() => {
+    if (!posLastUpdate) return;
+    setSecsAgo(0);
+    const id = setInterval(() => {
+      setSecsAgo(Math.round((Date.now() - posLastUpdate.getTime()) / 1000));
+    }, 1_000);
+    return () => clearInterval(id);
+  }, [posLastUpdate]);
+
+  // Merge positions + satellites data, filtered to MIN_EL
+  const allSats: (SatellitePosition & { dopplerShiftHz?: number | null })[] =
     positions.length > 0
-      ? positions.filter(p => p.elevation >= 0)
-      : satellites.filter(s => s.elevation >= 0).map(s => ({
+      ? positions.filter(p => p.elevation >= MIN_EL)
+      : satellites.filter(s => s.elevation >= MIN_EL).map(s => ({
           satname:         s.satname,
           elevation:       s.elevation,
           azimuth:         s.azimuth,
@@ -167,38 +147,21 @@ export function SkyMap({ satellites, cloudCover = 0, passes = [], positions = []
           dopplerShiftHz:  s.dopplerShiftHz,
         }));
 
-  // Apply constellation filter at render time (trails still track all)
+  // Total above horizon (before MIN_EL filter) for the "Showing X of Y" label
+  const totalAboveHorizon = positions.length > 0
+    ? positions.filter(p => p.elevation >= 0).length
+    : satellites.filter(s => s.elevation >= 0).length;
+
   const renderSats = activeConstellation === 'ALL'
-    ? displaySats
-    : displaySats.filter(s => getConstellation(s.satname) === activeConstellation);
+    ? allSats
+    : allSats.filter(s => getConstellation(s.satname) === activeConstellation);
 
-  // Update trails and entering/exiting state whenever displaySats changes
+  // Update trails and fading-out ghosts
   useEffect(() => {
-    if (displaySats.length === 0 && prevNamesRef.current.size === 0) return;
+    const currentNames = new Set(allSats.map(s => s.satname));
 
-    const currentNames = new Set(displaySats.map(s => s.satname));
-
-    // Detect entering satellites
-    const newEntering = new Set<string>();
-    for (const name of currentNames) {
-      if (!prevNamesRef.current.has(name)) newEntering.add(name);
-    }
-    if (newEntering.size > 0) {
-      setEnteringNames(prev => new Set([...prev, ...newEntering]));
-      // Clear entering state after 1.2s (animation duration)
-      const id = setTimeout(() => {
-        setEnteringNames(prev => {
-          const next = new Set(prev);
-          for (const n of newEntering) next.delete(n);
-          return next;
-        });
-      }, 1200);
-      return () => clearTimeout(id);
-    }
-
-    // Detect exiting satellites: save their last trail position
     const newFading = new Map<string, TrailPos>();
-    for (const name of prevNamesRef.current) {
+    for (const name of prevNames.current) {
       if (!currentNames.has(name)) {
         const trail = trailRef.current.get(name);
         const last  = trail && trail.length > 0 ? trail[trail.length - 1] : null;
@@ -214,45 +177,44 @@ export function SkyMap({ satellites, cloudCover = 0, passes = [], positions = []
           for (const n of newFading.keys()) next.delete(n);
           return next;
         });
-      }, 1200);
+      }, 1_200);
     }
 
-    // Update trails: append current position to each satellite's history
-    for (const sat of displaySats) {
+    for (const sat of allSats) {
       const existing = trailRef.current.get(sat.satname) ?? [];
       trailRef.current.set(
         sat.satname,
         [...existing, { el: sat.elevation, az: sat.azimuth }].slice(-4),
       );
     }
+    prevNames.current = currentNames;
+  }, [positions, allSats.length]); // eslint-disable-line react-hooks/exhaustive-deps
 
-    prevNamesRef.current = currentNames;
-  }, [positions, displaySats.length]); // eslint-disable-line react-hooks/exhaustive-deps
-
-  // "Xs ago" ticker
-  useEffect(() => {
-    if (!posLastUpdate) return;
-    setSecsAgo(0);
-    const id = setInterval(() => {
-      setSecsAgo(Math.round((Date.now() - posLastUpdate.getTime()) / 1000));
-    }, 1000);
-    return () => clearInterval(id);
-  }, [posLastUpdate]);
-
-  const cloudOpacity = cloudCover / 100 * 0.3;
-
-  function handleSatClick(e: React.MouseEvent, satname: string) {
+  function handleClick(e: React.MouseEvent, satname: string) {
     e.stopPropagation();
     const full = satellites.find(s => s.satname === satname);
     if (!full) return;
-    const { x, y } = toXY(full.azimuth, full.elevation);
-    setSelected(prev => prev?.sat.satname === satname ? null : { sat: full, x, y });
+    setSelected(prev => prev?.sat.satname === satname ? null : { sat: full });
   }
 
-  const ageColor = secsAgo === null ? '#4a6080'
-    : secsAgo < 10 ? '#00ff88'
-    : secsAgo < 30 ? '#ffb800'
-    : '#ff4444';
+  const ageColor = secsAgo === null ? '#2a4060'
+    : secsAgo < 10 ? '#4a7a5e'
+    : secsAgo < 30 ? '#7a6a3a'
+    : '#7a3a3a';
+
+  // Skeleton dot positions for loading state
+  const SKEL = [
+    { az: 30, el: 55 }, { az: 80, el: 70 }, { az: 130, el: 40 },
+    { az: 200, el: 60 }, { az: 270, el: 45 }, { az: 330, el: 65 },
+  ];
+
+  // Legend items
+  const LEGEND = [
+    { color: '#5a8a6e', label: 'Starlink' },
+    { color: '#4a7a9e', label: 'OneWeb' },
+    { color: '#ffffff', label: 'ISS' },
+    { color: '#a8915a', label: 'GPS' },
+  ];
 
   return (
     <div className="sky-section">
@@ -264,180 +226,205 @@ export function SkyMap({ satellites, cloudCover = 0, passes = [], positions = []
           onClick={() => setSelected(null)}
         >
           <defs>
-            <radialGradient id="skyBg" cx="50%" cy="50%" r="50%">
-              <stop offset="0%"   stopColor="#0d1f3c"/>
-              <stop offset="100%" stopColor="#080c14"/>
-            </radialGradient>
-            <filter id="glow">
-              <feGaussianBlur stdDeviation="2.5" result="blur"/>
-              <feMerge>
-                <feMergeNode in="blur"/>
-                <feMergeNode in="SourceGraphic"/>
-              </feMerge>
-            </filter>
+            {/* Radar grid pattern */}
+            <pattern id="radarGrid" width="40" height="40" patternUnits="userSpaceOnUse" x={CX % 40} y={CY % 40}>
+              <path d="M 40 0 L 0 0 0 40" fill="none" stroke="rgba(74,128,160,0.04)" strokeWidth="1"/>
+            </pattern>
             <clipPath id="skyClip">
               <circle cx={CX} cy={CY} r={R}/>
             </clipPath>
           </defs>
 
-          <circle cx={CX} cy={CY} r={R} fill="url(#skyBg)" stroke="rgba(0,212,255,0.18)" strokeWidth="1"/>
+          {/* ── Background ── */}
+          <circle cx={CX} cy={CY} r={R} fill="#060a10"/>
+          <rect x={CX - R} y={CY - R} width={R * 2} height={R * 2} fill="url(#radarGrid)" clipPath="url(#skyClip)"/>
 
-          {cloudOpacity > 0 && (
-            <circle cx={CX} cy={CY} r={R} fill="#4a6080" opacity={cloudOpacity}/>
+          {/* Cloud cover overlay */}
+          {cloudCover > 30 && (
+            <circle cx={CX} cy={CY} r={R} fill="#1a2a3a" opacity={cloudCover / 100 * 0.18} clipPath="url(#skyClip)"/>
           )}
 
+          {/* ── Elevation rings (solid, no dash) ── */}
           {[30, 60].map(el => {
-            const r = ((90 - el) / 90) * R;
+            const r = R * (1 - el / 90);
             return (
               <g key={el}>
-                <circle cx={CX} cy={CY} r={r} fill="none" stroke="rgba(0,212,255,0.12)" strokeWidth="0.75" strokeDasharray="4 3"/>
-                <text x={CX + 3} y={CY - r + 11} fill="rgba(74,96,128,0.8)" fontSize="8" fontFamily="monospace">{el}°</text>
+                <circle cx={CX} cy={CY} r={r} fill="none" stroke="#1a3050" strokeWidth="0.75" opacity="0.5"/>
+                <text x={CX + 3} y={CY - r + 10} fill="#2a4060" fontSize="8" fontFamily="JetBrains Mono, monospace">{el}°</text>
               </g>
             );
           })}
 
-          <line x1={CX} y1={CY - R} x2={CX} y2={CY + R} stroke="rgba(26,45,69,0.8)" strokeWidth="0.75"/>
-          <line x1={CX - R} y1={CY} x2={CX + R} y2={CY} stroke="rgba(26,45,69,0.8)" strokeWidth="0.75"/>
+          {/* ── Cross hairs ── */}
+          <line x1={CX} y1={CY - R} x2={CX} y2={CY + R} stroke="#1a3050" strokeWidth="0.75" opacity="0.6"/>
+          <line x1={CX - R} y1={CY} x2={CX + R} y2={CY} stroke="#1a3050" strokeWidth="0.75" opacity="0.6"/>
 
+          {/* ── Outer ring ── */}
+          <circle cx={CX} cy={CY} r={R} fill="none" stroke="#1a3050" strokeWidth="1" opacity="0.8"/>
+
+          {/* ── Compass labels ── */}
           {[
             { label: 'N', x: CX,          y: CY - R - 10 },
             { label: 'S', x: CX,          y: CY + R + 18 },
-            { label: 'E', x: CX + R + 12, y: CY + 4 },
-            { label: 'W', x: CX - R - 12, y: CY + 4 },
+            { label: 'E', x: CX + R + 13, y: CY + 4      },
+            { label: 'W', x: CX - R - 13, y: CY + 4      },
           ].map(({ label, x, y }) => (
-            <text key={label} x={x} y={y} textAnchor="middle" fill="#4a6080" fontSize="11" fontFamily="JetBrains Mono, monospace" fontWeight="500">
+            <text key={label} x={x} y={y} textAnchor="middle"
+              fill="#3a5878" fontSize="11" fontFamily="JetBrains Mono, monospace"
+              fontWeight="400" letterSpacing="2">
               {label}
             </text>
           ))}
 
-          {/* Skeleton dots while loading */}
-          {loading && satellites.length === 0 && SKEL_DOTS.map((d, i) => {
+          {/* ── Skeleton loading dots ── */}
+          {loading && satellites.length === 0 && SKEL.map((d, i) => {
             const { x, y } = toXY(d.az, d.el);
             return (
-              <circle
-                key={`skel-${i}`}
-                cx={x} cy={y} r="5"
-                fill="#4a6080"
-                className="sat-skel-dot"
-                style={{ animationDelay: `${i * 0.18}s` }}
+              <circle key={`skel-${i}`} cx={x} cy={y} r="2"
+                fill="#3a5878" className="sat-skel-dot"
+                style={{ animationDelay: `${i * 0.2}s` }}
               />
             );
           })}
 
-          {/* Fading-out ghosts */}
-          {Array.from(fadingOut.entries())
-            .filter(([name]) => activeConstellation === 'ALL' || getConstellation(name) === activeConstellation)
-            .map(([name, pos]) => {
-              const { x, y } = toXY(pos.az, pos.el);
-              return (
-                <circle key={`exit-${name}`} cx={x} cy={y} r="5"
-                  fill={constellationColor(name)} opacity="0" className="sat-fading-out"
-                />
-              );
-            })}
-
-          {/* Live satellite dots — clipped to sky circle */}
+          {/* ── Fading-out ghosts ── */}
           <g clipPath="url(#skyClip)">
-          {renderSats.map((sat) => {
-            const { x, y }  = toXY(sat.azimuth, sat.elevation);
-            const color      = constellationColor(sat.satname);
-            const isSelected = selected?.sat.satname === sat.satname;
-            const isEntering = enteringNames.has(sat.satname);
-            const isIss      = getConstellation(sat.satname) === 'ISS';
-            const dotR       = isIss ? 8 : sat.elevation >= 60 ? 5 : sat.elevation >= 30 ? 4 : 3;
-            const dotOpacity = sat.elevation >= 60 ? 1.0 : sat.elevation >= 30 ? 0.8 : 0.6;
-            const lx         = x < CX ? x + 9 : x - 9;
-            const anchor     = x < CX ? 'start' : 'end';
-            const trail      = trailRef.current.get(sat.satname) ?? [];
+            {Array.from(fadingOut.entries())
+              .filter(([name]) => activeConstellation === 'ALL' || getConstellation(name) === activeConstellation)
+              .map(([name, pos]) => {
+                const { x, y } = toXY(pos.az, pos.el);
+                const { color } = dotStyle(name, pos.el);
+                return <circle key={`exit-${name}`} cx={x} cy={y} r={2} fill={color} opacity={0} className="sat-fading-out"/>;
+              })}
+          </g>
 
-            return (
-              <g
-                key={sat.satname}
-                style={{ cursor: 'pointer' }}
-                onClick={e => handleSatClick(e, sat.satname)}
-                className={isEntering ? 'sat-entering' : undefined}
-              >
-                {/* Motion trail: oldest to newest with decreasing opacity */}
-                {trail.slice(-3).map((tp, i, arr) => {
-                  const opacity = [0.10, 0.18, 0.28][i + (3 - arr.length)];
-                  const { x: tx, y: ty } = toXY(tp.az, tp.el);
-                  return (
-                    <circle key={i} cx={tx} cy={ty} r="2.5" fill={color} opacity={opacity}/>
+          {/* ── Live satellite dots — CSS-transitioned transforms prevent position jumps ── */}
+          <g clipPath="url(#skyClip)">
+            {renderSats.map(sat => {
+              const { x, y }    = toXY(sat.azimuth, sat.elevation);
+              const ds          = dotStyle(sat.satname, sat.elevation);
+              const isSelected  = selected?.sat.satname === sat.satname;
+              const trail       = trailRef.current.get(sat.satname) ?? [];
+              const prevPos     = trail.length > 0 ? trail[trail.length - 1] : null;
+              const lxOff       = x < CX ? 7 : -7;
+              const anchor      = x < CX ? 'start' : 'end';
+
+              // Forward orbit trail for high-elevation satellites
+              let trailLine: React.ReactNode = null;
+              if (sat.elevation >= 60 && prevPos) {
+                const { x: px, y: py } = toXY(prevPos.az, prevPos.el);
+                const dx = x - px, dy = y - py;
+                const len = Math.sqrt(dx * dx + dy * dy);
+                if (len > 0.5) {
+                  const ext = 20;
+                  trailLine = (
+                    <line
+                      x1={0} y1={0}
+                      x2={(dx / len) * ext} y2={(dy / len) * ext}
+                      stroke={ds.color} strokeWidth={0.8} opacity={0.18}
+                    />
                   );
-                })}
+                }
+              }
 
-                {/* Hit area */}
-                <circle cx={x} cy={y} r="14" fill="transparent"/>
-                {/* Glow ring */}
-                <circle cx={x} cy={y} r="9" fill={color} opacity={isSelected ? 0.28 : 0.12} filter="url(#glow)"/>
-                {/* Main dot */}
-                <circle
-                  cx={x} cy={y} r={dotR}
-                  fill={color} opacity={dotOpacity}
-                  filter="url(#glow)"
-                  stroke={isSelected ? (isIss ? '#aaa' : '#fff') : 'none'}
-                  strokeWidth={isSelected ? 1 : 0}
-                />
-                {sat.elevation >= 60 && (
-                  <>
-                    <text x={lx} y={y - 7} fill="rgba(139,163,196,0.9)" fontSize="9" fontFamily="JetBrains Mono, monospace" textAnchor={anchor}>
+              return (
+                <g
+                  key={sat.satname}
+                  style={{
+                    // CSS transform for smooth animated movement — 5s matches position broadcast interval
+                    transform: `translate(${x}px, ${y}px)`,
+                    transition: 'transform 5s linear',
+                    cursor: 'pointer',
+                  }}
+                  onClick={e => handleClick(e, sat.satname)}
+                >
+                  {trailLine}
+
+                  {/* Large invisible hit area */}
+                  <circle cx={0} cy={0} r={12} fill="transparent"/>
+
+                  {/* Selection ring */}
+                  {isSelected && (
+                    <circle cx={0} cy={0} r={ds.r + 4} fill="none" stroke="#8a9ab8" strokeWidth={0.8} opacity={0.6}/>
+                  )}
+
+                  {/* Main dot — no glow filter */}
+                  <circle cx={0} cy={0} r={ds.r} fill={ds.color} opacity={ds.opacity}/>
+
+                  {/* Label only above 70° */}
+                  {sat.elevation >= 70 && (
+                    <text
+                      x={lxOff} y={-ds.r - 3}
+                      fill="#4a6080" fontSize="8"
+                      fontFamily="JetBrains Mono, monospace"
+                      textAnchor={anchor} opacity="0.85"
+                    >
                       {shortName(sat.satname)}
                     </text>
-                    <text x={lx} y={y + 3} fill={color} fontSize="8" fontFamily="JetBrains Mono, monospace" textAnchor={anchor} opacity="0.85">
-                      {sat.elevation.toFixed(0)}°
-                    </text>
-                  </>
-                )}
-              </g>
-            );
-          })}
+                  )}
+                </g>
+              );
+            })}
           </g>
 
-          {/* Observer dot */}
-          <circle cx={CX} cy={CY} r="5"  fill="#7b61ff" opacity="0.95" filter="url(#glow)"/>
-          <circle cx={CX} cy={CY} r="11" fill="none" stroke="#7b61ff" strokeWidth="1" opacity="0.35"/>
-          <text x={CX} y={CY + 22} textAnchor="middle" fill="#7b61ff" fontSize="9" fontFamily="JetBrains Mono, monospace" opacity="0.85">YOU</text>
+          {/* ── Observer dot (muted purple, no pulsing ring) ── */}
+          <circle cx={CX} cy={CY} r={4} fill="#8a7ab8" opacity="0.9"/>
+          <circle cx={CX} cy={CY} r={8} fill="none" stroke="#8a7ab8" strokeWidth="0.75" opacity="0.25"/>
+          <text x={CX} y={CY + 20} textAnchor="middle" fill="#8a7ab8" fontSize="8"
+            fontFamily="JetBrains Mono, monospace" letterSpacing="1" opacity="0.7">
+            YOU
+          </text>
 
-          {/* Cloud cover badge */}
-          <g>
-            <rect x={332} y={37} width={50} height={19} rx={5} fill="rgba(0,0,0,0.55)"/>
-            <text x={357} y={50} textAnchor="middle" fill={badgeColor(cloudCover)} fontSize="10" fontFamily="monospace" fontWeight="600">
-              {String.fromCodePoint(0x2601)} {cloudCover}%
-            </text>
-          </g>
-
-          {/* Position update age indicator */}
+          {/* ── Position age indicator (bottom-left) ── */}
           {secsAgo !== null && (
-            <text x={CX - R + 4} y={CY + R - 6} fill={ageColor} fontSize="8" fontFamily="monospace" opacity="0.8">
+            <text x={CX - R + 5} y={CY + R - 7} fill={ageColor} fontSize="8"
+              fontFamily="JetBrains Mono, monospace" opacity="0.7">
               pos {secsAgo}s ago
             </text>
+          )}
+
+          {/* ── Legend (bottom-right, with background) ── */}
+          {activeConstellation === 'ALL' ? (() => {
+            const lx = CX + R - 6;
+            const ly = CY + R - 6;
+            const rowH = 13, pad = 6;
+            const rows = LEGEND;
+            const boxH = rows.length * rowH + pad * 1.5;
+            const boxW = 64;
+            return (
+              <g transform={`translate(${lx - boxW}, ${ly - boxH})`}>
+                <rect width={boxW} height={boxH} rx={3} fill="rgba(6,10,16,0.85)" stroke="#1a3050" strokeWidth="0.5"/>
+                {rows.map((item, i) => (
+                  <g key={item.label} transform={`translate(${pad}, ${pad + i * rowH})`}>
+                    <circle cx={3} cy={0} r={3} fill={item.color} opacity={0.8}/>
+                    <text x={9} y={3.5} fill="#3a5878" fontSize="9" fontFamily="JetBrains Mono, monospace">{item.label}</text>
+                  </g>
+                ))}
+              </g>
+            );
+          })() : (
+            (() => {
+              const { color } = dotStyle(activeConstellation, 45);
+              return (
+                <g transform={`translate(${CX + R - 70}, ${CY + R - 22})`}>
+                  <rect width={66} height={16} rx={3} fill="rgba(6,10,16,0.85)" stroke="#1a3050" strokeWidth="0.5"/>
+                  <circle cx={9} cy={8} r={3} fill={color} opacity={0.8}/>
+                  <text x={16} y={11.5} fill="#3a5878" fontSize="9" fontFamily="JetBrains Mono, monospace">{activeConstellation} only</text>
+                </g>
+              );
+            })()
           )}
         </svg>
       </div>
 
-      {selected && (
-        <SatPopup
-          sat={selected.sat}
-          passes={passes}
-          onClose={() => setSelected(null)}
-        />
-      )}
-
-      <div className="sky-legend">
-        {activeConstellation === 'ALL' ? (
-          <>
-            <span className="legend-item"><span className="legend-dot" style={{ background: '#00ff88', boxShadow: '0 0 4px rgba(0,255,136,0.5)' }}/> Starlink</span>
-            <span className="legend-item"><span className="legend-dot" style={{ background: '#00d4ff', boxShadow: '0 0 4px rgba(0,212,255,0.5)' }}/> OneWeb</span>
-            <span className="legend-item"><span className="legend-dot" style={{ background: '#e8f4fd', boxShadow: '0 0 4px rgba(255,255,255,0.3)' }}/> ISS</span>
-            <span className="legend-item"><span className="legend-dot" style={{ background: '#ffb800', boxShadow: '0 0 4px rgba(255,184,0,0.5)' }}/> GPS</span>
-          </>
-        ) : (
-          <span className="legend-item" style={{ color: CONSTELLATION_COLORS[activeConstellation] }}>
-            <span className="legend-dot" style={{ background: CONSTELLATION_COLORS[activeConstellation] }}/>
-            {activeConstellation} only
-          </span>
-        )}
+      {/* Showing X of Y indicator */}
+      <div className="sky-density-note">
+        {renderSats.length} of {totalAboveHorizon} satellites visible (above {MIN_EL}°)
       </div>
+
+      {selected && (
+        <SatPopup sat={selected.sat} passes={passes} onClose={() => setSelected(null)}/>
+      )}
     </div>
   );
 }
