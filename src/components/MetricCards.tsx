@@ -75,13 +75,25 @@ export function MetricCards({ satellites, topPasses, activeConstellation, loadin
     ? 'All constellations'
     : CONSTELLATION_LABELS[activeConstellation] ?? `${activeConstellation} only`;
 
+  const slCount  = satellites.filter(s => s.satname.includes('STARLINK')).length;
+  const owCount  = satellites.filter(s => s.satname.includes('ONEWEB')).length;
+  const gpsCount = satellites.filter(s => s.satname.includes('GPS') || s.satname.includes('NAVSTAR')).length;
+  const issCount = satellites.filter(s => s.satname.includes('ISS') || s.satname.includes('ZARYA')).length;
+
+  const contextParts: string[] = [];
+  if (slCount  > 0) contextParts.push(`SL ${slCount}`);
+  if (owCount  > 0) contextParts.push(`OW ${owCount}`);
+  if (gpsCount > 0) contextParts.push(`GPS ${gpsCount}`);
+  if (issCount > 0) contextParts.push(`ISS ${issCount}`);
+  const contextText = contextParts.join(' · ') || 'No satellites tracked';
+
   return (
     <div className="metric-grid">
       <div className="metric-card">
         <div className="metric-label">Satellites Overhead</div>
         <div className={`metric-value${count > 0 ? ' metric-value--green' : ''}`}>{count}</div>
         <div className="metric-sublabel">{filterLabel}</div>
-        <div className="metric-context">of ~6,000 Starlink satellites</div>
+        <div className="metric-context">{contextText}</div>
       </div>
 
       <div className="metric-card">
