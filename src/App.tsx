@@ -10,6 +10,7 @@ import { ConstellationFilter }  from './components/ConstellationFilter';
 import { PassList }             from './components/PassList';
 import { SatelliteList }        from './components/SatelliteList';
 import { SignalHistory }        from './components/SignalHistory';
+import { HistoricalInsight }   from './components/HistoricalInsight';
 import { Footer }               from './components/Footer';
 import { SettingsPanel }        from './components/SettingsPanel';
 import { ChatPanel }            from './components/ChatPanel';
@@ -157,6 +158,7 @@ function App() {
           </div>
 
           <SignalHistory signalScore={signalScore} />
+          <HistoricalInsight />
         </div>
       </div>
 
