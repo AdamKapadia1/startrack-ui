@@ -99,10 +99,10 @@ export function HistoricalInsight() {
             </svg>
           </div>
           <p className="insight-unavail-text">
-            Building your personal insights — check back in a few days.
+            Building your personal insights. Check back in a few days.
           </p>
           <p className="insight-unavail-sub">
-            {pts.toLocaleString()} data points collected — patterns appear after ~{DATA_GOAL.toLocaleString()}
+            {pts.toLocaleString()} data points collected. Patterns appear after ~{DATA_GOAL.toLocaleString()}
           </p>
           <div className="insight-progress-bar-wrap">
             <div className="insight-progress-bar-track">

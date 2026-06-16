@@ -70,9 +70,9 @@ export function Onboarding({ onComplete }: Props) {
       );
       const data: NominatimResult[] = await res.json();
       setResults(data);
-      if (!data.length) setSearchError('No results found — try a different search');
+      if (!data.length) setSearchError('No results found. Try a different search');
     } catch {
-      setSearchError('Search failed — check your connection');
+      setSearchError('Search failed. Check your connection');
     } finally {
       setSearching(false);
     }
@@ -93,7 +93,7 @@ export function Onboarding({ onComplete }: Props) {
   }
 
   function handleGPS() {
-    if (!navigator.geolocation) { setSearchError('GPS not supported — search for your city'); return; }
+    if (!navigator.geolocation) { setSearchError('GPS not supported. Search for your city'); return; }
     setGpsLoading(true);
     setSearchError('');
     navigator.geolocation.getCurrentPosition(
@@ -117,7 +117,7 @@ export function Onboarding({ onComplete }: Props) {
       },
       () => {
         setGpsLoading(false);
-        setSearchError('GPS access denied — search for your city instead');
+        setSearchError('GPS access denied. Search for your city instead');
       },
       { enableHighAccuracy: true, timeout: 10_000 },
     );
@@ -165,7 +165,7 @@ export function Onboarding({ onComplete }: Props) {
           {[
             { icon: '🛰', title: 'Track 400+ satellites live overhead',   desc: 'Every satellite above your horizon, right now' },
             { icon: '🤖', title: 'AI tells you your best connectivity windows', desc: 'Best times for Starlink signal quality' },
-            { icon: '📱', title: 'Works anywhere — your exact GPS location', desc: 'No account needed' },
+            { icon: '📱', title: 'Works anywhere with your exact GPS location', desc: 'No account needed' },
           ].map(f => (
             <div key={f.icon} className="ob-feature">
               <span className="ob-feature-icon">{f.icon}</span>
@@ -250,7 +250,7 @@ export function Onboarding({ onComplete }: Props) {
           <div className={`ob-notif-card${notifMethod === 'ntfy' ? ' ob-notif-card--active' : ''}`} onClick={() => setNotifMethod('ntfy')}>
             <div className="ob-notif-icon">📱</div>
             <div className="ob-notif-title">Phone notifications via ntfy.sh</div>
-            <div className="ob-notif-desc">No account needed — just install the free app</div>
+            <div className="ob-notif-desc">No account needed. Just install the free app</div>
             {notifMethod === 'ntfy' && (
               <div className="ob-ntfy-box">
                 <code className="ob-ntfy-topic">startrack-alerts</code>
@@ -266,7 +266,7 @@ export function Onboarding({ onComplete }: Props) {
             <div className="ob-notif-title">Browser notifications</div>
             <div className="ob-notif-desc">Works on desktop and Android Chrome</div>
             {notifGranted               && <div className="ob-ntfy-inst ob-ntfy-ok">✓ Enabled</div>}
-            {notifMethod === 'browser-denied' && <div className="ob-ntfy-inst ob-ntfy-err">Permission denied — enable in browser settings</div>}
+            {notifMethod === 'browser-denied' && <div className="ob-ntfy-inst ob-ntfy-err">Permission denied. Enable in browser settings</div>}
           </div>
         </div>
 

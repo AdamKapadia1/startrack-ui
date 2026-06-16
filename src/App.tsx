@@ -122,7 +122,7 @@ function App() {
   // Shared sky map header (used in overview + skymap tabs)
   const skyMapHeader = (
     <div className="section-label sky-header">
-      <span>Sky Map{weather?.cloudCover != null ? ` · ☁ ${weather.cloudCover}%` : ' — Azimuth / Elevation'}</span>
+      <span>Sky Map{weather?.cloudCover != null ? ` · ☁ ${weather.cloudCover}%` : ': Azimuth / Elevation'}</span>
       <ConstellationFilter
         satellites={satellites}
         active={activeConstellation}
@@ -232,7 +232,7 @@ function App() {
         {/* ── PASSES ── */}
         {activeTab === 'passes' && (
           <div className="tab-pane tab-passes">
-            <div className="section-label">Upcoming Passes — Next 7 Days</div>
+            <div className="section-label">Upcoming Passes: Next 7 Days</div>
             <PassList
               passes={topPasses}
               satname={satname}

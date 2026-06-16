@@ -18,7 +18,7 @@ function buildShare(startUTC: number, maxEl: number, satname: string, locationNa
   const date = d.toLocaleDateString('en-GB', { weekday: 'short', day: 'numeric', month: 'short', timeZone: 'Europe/London' });
   const time = d.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit', timeZone: 'Europe/London' });
   const quality = el >= 60 ? 'nearly directly overhead' : el >= 30 ? 'at a good angle' : 'at low elevation';
-  const text = `🛰 ${satname} passes overhead at ${el}° on ${date} at ${time} BST — ${quality}! Track it live: ${url} #StarTrack #Starlink`;
+  const text = `🛰 ${satname} passes overhead at ${el}° on ${date} at ${time} BST, ${quality}! Track it live: ${url} #StarTrack #Starlink`;
   return { url, text };
 }
 

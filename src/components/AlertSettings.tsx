@@ -243,7 +243,7 @@ export function AlertSettings({ passes }: Props) {
                   <div className="alert-browser-status ok">Browser notifications enabled</div>
                 )}
                 {browserPerm === 'denied' && (
-                  <div className="alert-browser-status denied">Blocked — allow in browser settings</div>
+                  <div className="alert-browser-status denied">Blocked. Allow in browser settings</div>
                 )}
                 {browserPerm === 'default' && (
                   <button className="alert-browser-req" onClick={requestBrowserNotif}>

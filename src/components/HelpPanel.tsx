@@ -27,13 +27,13 @@ export function HelpPanel({ open, onClose }: Props) {
         <>
           <p className="help-p">The circular map shows your sky as if lying flat looking straight up:</p>
           <ul className="help-ul">
-            <li><strong>Three rings</strong> — 30°, 60°, and 90° (zenith) elevation</li>
-            <li><strong>Each dot</strong> — one satellite above your horizon right now</li>
-            <li><strong>Higher = stronger signal</strong> — less atmosphere to pass through</li>
-            <li><span className="help-badge help-badge--green">Bright green</span> — high signal (Starlink)</li>
-            <li><span className="help-badge help-badge--blue">Blue</span> — OneWeb</li>
-            <li><span className="help-badge help-badge--white">White</span> — ISS (larger dot)</li>
-            <li><span className="help-badge help-badge--amber">Amber</span> — GPS</li>
+            <li><strong>Three rings</strong>: 30°, 60°, and 90° (zenith) elevation</li>
+            <li><strong>Each dot</strong>: one satellite above your horizon right now</li>
+            <li><strong>Higher = stronger signal</strong>, with less atmosphere to pass through</li>
+            <li><span className="help-badge help-badge--green">Bright green</span>: high signal (Starlink)</li>
+            <li><span className="help-badge help-badge--blue">Blue</span>: OneWeb</li>
+            <li><span className="help-badge help-badge--white">White</span>: ISS (larger dot)</li>
+            <li><span className="help-badge help-badge--amber">Amber</span>: GPS</li>
           </ul>
         </>
       ),
@@ -44,12 +44,12 @@ export function HelpPanel({ open, onClose }: Props) {
         <>
           <p className="help-p">A 0–100 score calculated from:</p>
           <ul className="help-ul">
-            <li><strong>Elevation</strong> — up to 40 pts (max at 85°+)</li>
-            <li><strong>Cloud cover</strong> — up to 20 pts</li>
-            <li><strong>Visibility</strong> — up to 15 pts</li>
-            <li><strong>Wind speed</strong> — up to 10 pts</li>
-            <li><strong>Range</strong> — up to 5 pts</li>
-            <li><strong>Satellite count bonus</strong> — up to 10 pts</li>
+            <li><strong>Elevation</strong>: up to 40 pts (max at 85°+)</li>
+            <li><strong>Cloud cover</strong>: up to 20 pts</li>
+            <li><strong>Visibility</strong>: up to 15 pts</li>
+            <li><strong>Wind speed</strong>: up to 10 pts</li>
+            <li><strong>Range</strong>: up to 5 pts</li>
+            <li><strong>Satellite count bonus</strong>: up to 10 pts</li>
           </ul>
           <div className="help-badge-row">
             <span className="help-badge help-badge--green">70+ = Good</span>
@@ -57,7 +57,7 @@ export function HelpPanel({ open, onClose }: Props) {
             <span className="help-badge help-badge--grey">Below 50 = Poor</span>
           </div>
           <p className="help-p" style={{ marginTop: '8px' }}>
-            Scores above 80% cloud cover are capped at 70 — heavy cloud degrades signal quality significantly.
+            Scores above 80% cloud cover are capped at 70. Heavy cloud degrades signal quality significantly.
           </p>
         </>
       ),
@@ -67,11 +67,11 @@ export function HelpPanel({ open, onClose }: Props) {
       content: (
         <>
           <p className="help-p">
-            A <strong>pass</strong> is when a satellite rises above the horizon, crosses the sky, and sets again —
-            typically 3–8 minutes. StarTrack predicts passes for the next 7 days.
+            A <strong>pass</strong> is when a satellite rises above the horizon, crosses the sky, and sets again,
+            typically over 3 to 8 minutes. StarTrack predicts passes for the next 7 days.
           </p>
           <ul className="help-ul">
-            <li>Passes above <strong>60°</strong> give the shortest signal path — best quality</li>
+            <li>Passes above <strong>60°</strong> give the shortest signal path, giving the best quality</li>
             <li>Times shown in <strong>BST</strong> (British Summer Time)</li>
             <li>Click any row to see the <strong>elevation arc chart</strong></li>
             <li>Use <strong>Cal</strong> to add the pass to your phone calendar (.ics)</li>
@@ -85,11 +85,11 @@ export function HelpPanel({ open, onClose }: Props) {
       content: (
         <>
           <p className="help-p">
-            As a satellite approaches you, its signal frequency shifts <em>higher</em> (+kHz) —
+            As a satellite approaches you, its signal frequency shifts <em>higher</em> (+kHz),
             like a car horn as it nears. As it moves away, frequency drops below zero (−kHz).
           </p>
           <p className="help-p" style={{ marginTop: '8px' }}>
-            The <strong>zero crossing</strong> on the Doppler chart marks peak elevation —
+            The <strong>zero crossing</strong> on the Doppler chart marks peak elevation:
             the closest point of the pass and strongest signal moment.
           </p>
         </>
@@ -100,7 +100,7 @@ export function HelpPanel({ open, onClose }: Props) {
       content: (
         <>
           <p className="help-p" style={{ fontWeight: 600, color: 'var(--text)', marginBottom: '6px' }}>
-            📱 ntfy.sh (phone — recommended)
+            📱 ntfy.sh (phone, recommended)
           </p>
           <ol className="help-ol">
             <li>Install the free <code className="help-code">ntfy</code> app (iOS or Android)</li>
@@ -125,11 +125,11 @@ export function HelpPanel({ open, onClose }: Props) {
           {[
             {
               q: 'Why does the satellite count change so much?',
-              a: 'Satellites orbit at ~7.5 km/s completing a full orbit every ~95 minutes. The count shows only those above 0° right now — this changes constantly as they rise and set.',
+              a: 'Satellites orbit at ~7.5 km/s completing a full orbit every ~95 minutes. The count shows only those above 0° right now; this changes constantly as they rise and set.',
             },
             {
               q: 'What is Direct-to-Cell?',
-              a: 'Newer Starlink Gen 2 satellites connect directly to standard smartphones — no ground dish or special equipment needed. Like a cell tower in orbit.',
+              a: 'Newer Starlink Gen 2 satellites connect directly to standard smartphones. No ground dish or special equipment needed. Like a cell tower in orbit.',
             },
             {
               q: 'How accurate are the positions?',

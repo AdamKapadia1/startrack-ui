@@ -29,7 +29,7 @@ function useCountdown(startMs: number, endMs: number) {
       const now = Date.now();
       if (now > endMs) { setText('This pass has ended'); return; }
       const target = now < startMs ? startMs : endMs;
-      const prefix = now < startMs ? 'Starts in' : 'In progress — ends in';
+      const prefix = now < startMs ? 'Starts in' : 'In progress, ends in';
       const diff   = Math.max(0, target - now);
       const mins   = Math.floor(diff / 60_000);
       const secs   = Math.floor((diff % 60_000) / 1_000);
@@ -59,14 +59,14 @@ export function PassLandingPage() {
         })
       : '';
 
-    document.title = `${satname} Pass Alert — StarTrack AI`;
+    document.title = `${satname} Pass Alert | StarTrack AI`;
 
     function setMeta(selector: string, content: string) {
       const el = document.querySelector(selector);
       if (el) el.setAttribute('content', content);
     }
 
-    const ogTitle   = `${satname} passes at ${Math.round(el)}° — StarTrack AI`;
+    const ogTitle   = `${satname} passes at ${Math.round(el)}° | StarTrack AI`;
     const ogDesc    = `${satname} will pass overhead at ${Math.round(el)}° elevation over ${loc}${formattedTime ? ` at ${formattedTime}` : ''}. Track it live on StarTrack AI.`;
     const twDesc    = `${satname} overhead at ${Math.round(el)}° over ${loc}${formattedTime ? ` at ${formattedTime}` : ''}. Track it live.`;
 
@@ -89,7 +89,7 @@ export function PassLandingPage() {
 
   const scoreParam = score !== null ? `&score=${score}` : '';
   const shareUrl   = `${SITE}/pass?sat=${encodeURIComponent(satname)}&time=${encodeURIComponent(timeStr)}&el=${Math.round(el)}&loc=${encodeURIComponent(loc)}${scoreParam}`;
-  const tweetText  = `🛰 ${satname} passes overhead at ${Math.round(el)}° — ${quality.label} pass! Track it live: ${shareUrl} #StarTrack`;
+  const tweetText  = `🛰 ${satname} passes overhead at ${Math.round(el)}°, ${quality.label} pass! Track it live: ${shareUrl} #StarTrack`;
 
   const [copied, setCopied] = useState(false);
 
@@ -200,7 +200,7 @@ export function PassLandingPage() {
 
         {/* Footer */}
         <div className="pass-landing-footer">
-          Powered by <strong>StarTrack AI</strong> —{' '}
+          Powered by <strong>StarTrack AI</strong>.{' '}
           <a href={SITE} className="pass-landing-link">{SITE.replace('https://', '')}</a>
         </div>
       </div>

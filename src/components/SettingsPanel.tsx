@@ -94,9 +94,9 @@ export function SettingsPanel({ open, onClose, location, onSave }: Props) {
       });
       const data: NominatimResult[] = await res.json();
       setResults(data);
-      if (data.length === 0) setSearchError('No results found — try a different search');
+      if (data.length === 0) setSearchError('No results found. Try a different search');
     } catch {
-      setSearchError('Search failed — check your connection');
+      setSearchError('Search failed. Check your connection');
     } finally {
       setSearching(false);
     }

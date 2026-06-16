@@ -12,7 +12,7 @@ export function DtcCard({ satellite }: Props) {
       <div>
         <div className="dtc-title">{satellite.satname} · Direct-to-Cell capable</div>
         <div className="dtc-body">
-          Currently at {satellite.elevation.toFixed(1)}° — standard cellular devices can connect directly without ground infrastructure.
+          Currently at {satellite.elevation.toFixed(1)}°. Standard cellular devices can connect directly without ground infrastructure.
         </div>
       </div>
     </div>

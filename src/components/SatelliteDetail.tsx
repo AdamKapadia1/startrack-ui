@@ -85,7 +85,7 @@ function downloadICS(pass: SatPass, satname: string) {
   const ics = [
     'BEGIN:VCALENDAR', 'VERSION:2.0', 'BEGIN:VEVENT',
     `DTSTART:${fmt(start)}`, `DTEND:${fmt(end)}`,
-    `SUMMARY:${satname} — ${Math.round(pass.maxEl)}° pass`,
+    `SUMMARY:${satname}: ${Math.round(pass.maxEl)}° pass`,
     `DESCRIPTION:Signal score: ${pass.score}/100. Duration: ${formatDuration(pass.duration)}`,
     'END:VEVENT', 'END:VCALENDAR',
   ].join('\r\n');
@@ -479,7 +479,7 @@ export function SatelliteDetail({ satellite, allSatellites, positions, location,
 
           {/* § 4 — Upcoming Passes */}
           <div className="sd-section">
-            <div className="sd-section-title">Upcoming Passes — Next 7 Days</div>
+            <div className="sd-section-title">Upcoming Passes: Next 7 Days</div>
             <PassTimeline passes={passes} loading={passesLoading} satname={satellite.satname} locationName={location.name}/>
           </div>
 
@@ -487,7 +487,7 @@ export function SatelliteDetail({ satellite, allSatellites, positions, location,
           {nextPass && (
             <div className="sd-section">
               <div className="sd-section-title">
-                Next Pass — Elevation Profile
+                Next Pass: Elevation Profile
                 <span className="sd-section-sub">{formatBST(nextPass.startUTC)} BST</span>
               </div>
               <ElevationChart pass={nextPass}/>

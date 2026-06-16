@@ -72,7 +72,7 @@ export function CountdownBanner({ passes }: Props) {
       <span className="countdown-text">
         <strong>{imminentPass.satname ?? 'Starlink'}</strong> passes overhead in{' '}
         <span className="countdown-timer">{countdown}</span>
-        {' '}— signal score {score}/100
+        {' '}, signal score {score}/100
       </span>
       <button
         className="countdown-dismiss"

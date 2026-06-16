@@ -2150,7 +2150,7 @@ button { font-family: inherit; }
   word-break: break-word;
 }
 .chat-msg-user .chat-bubble {
-  background: var(--green);
+  background: #1f9d6e;
   color: #fff;
   border-bottom-right-radius: 4px;
 }

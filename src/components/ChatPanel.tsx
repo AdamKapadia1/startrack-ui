@@ -81,10 +81,10 @@ const BASE_CHIPS = [
 function getChips(ctx?: LiveContext): typeof BASE_CHIPS {
   const extra: typeof BASE_CHIPS = [];
   if (ctx?.signalScore && ctx.signalScore < 50) {
-    extra.unshift({ icon: '📉', text: "Signal is low — when will it improve?" });
+    extra.unshift({ icon: '📉', text: "Signal is low, when will it improve?" });
   }
   if (ctx?.hasDtcSat) {
-    extra.unshift({ icon: '📲', text: "There's a DTC satellite overhead — how do I connect?" });
+    extra.unshift({ icon: '📲', text: "There's a DTC satellite overhead, how do I connect?" });
   }
   return [...extra, ...BASE_CHIPS].slice(0, 6);
 }
@@ -277,7 +277,7 @@ export function ChatPanel({ open, onClose, context, initialInput }: Props) {
           rows={1}
           onChange={e => { setInput(e.target.value); adjustHeight(); }}
           onKeyDown={onKeyDown}
-          placeholder="Ask anything — when's the next pass above 70°?"
+          placeholder="Ask anything, when's the next pass above 70°?"
           disabled={isStreaming}
           aria-label="Chat input"
         />

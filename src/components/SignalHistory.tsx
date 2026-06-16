@@ -47,7 +47,7 @@ export function SignalHistory({ signalScore }: Props) {
   }, [signalScore]);
 
   const hours   = isMobile ? 24 : 48;
-  const label   = `Signal History — Last ${hours} Hours`;
+  const label   = `Signal History: Last ${hours} Hours`;
   const cutoff  = Date.now() - hours * 60 * 60 * 1_000;
 
   const chartData = useMemo(() =>
@@ -79,7 +79,7 @@ export function SignalHistory({ signalScore }: Props) {
     return (
       <div className="history-section">
         <div className="section-label">{label}</div>
-        <div className="history-empty">No history yet — data appears after the first satellite scan.</div>
+        <div className="history-empty">No history yet. Data appears after the first satellite scan.</div>
       </div>
     );
   }

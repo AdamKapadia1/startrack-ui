@@ -13,7 +13,7 @@ const ENTRIES = [
       'Weather-adjusted signal scoring (0–100)',
       'GPS auto-detection with Nominatim reverse geocoding',
       'WebSocket live updates every 5 seconds',
-      'PWA — installable on iPhone and Android',
+      'PWA: installable on iPhone and Android',
       'Constellation filtering (Starlink / OneWeb / ISS / GPS)',
       'Satellite detail panel with orbital elements',
       'Configurable alert system with ntfy.sh and browser notifications',
@@ -22,7 +22,7 @@ const ENTRIES = [
       'Help panel with FAQ',
       'Dark / light mode toggle',
       'Persistent signal history across page reloads',
-      'Chat context injection — AI knows your live conditions',
+      'Chat context injection: AI knows your live conditions',
     ],
   },
 ];
