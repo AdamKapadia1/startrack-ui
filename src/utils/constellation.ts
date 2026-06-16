@@ -19,8 +19,8 @@ export const CONSTELLATION_COLORS: Record<string, string> = {
   ONEWEB:   '#00d4ff',  // ice blue
   ISS:      '#e8f4fd',  // near white
   GPS:      '#ffb800',  // amber
-  GALILEO:  '#b888d4',  // muted lavender
-  GLONASS:  '#d4a888',  // muted orange-brown
+  GALILEO:  '#c77dff',  // light purple
+  GLONASS:  '#ff7d7d',  // soft red
   OTHER:    '#4a6080',  // muted blue-grey
 };
 

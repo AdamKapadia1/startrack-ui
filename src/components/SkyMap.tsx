@@ -62,9 +62,9 @@ function dotStyle(name: string, el: number, constellation?: string | null): { co
     case 'GPS':
       return { color: '#a8915a', opacity: 0.60, r: 2 };
     case 'GALILEO':
-      return { color: '#b888d4', opacity: 0.60, r: 2 };
+      return { color: '#c77dff', opacity: 0.60, r: 2 };
     case 'GLONASS':
-      return { color: '#d4a888', opacity: 0.60, r: 2 };
+      return { color: '#ff7d7d', opacity: 0.60, r: 2 };
     default:
       return { color: '#6a7a8a', opacity: 0.50, r: 2 };
   }
@@ -247,8 +247,8 @@ export function SkyMap({
     { color: '#4a7a9e', label: 'OneWeb' },
     { color: '#ffffff', label: 'ISS' },
     { color: '#a8915a', label: 'GPS' },
-    { color: '#b888d4', label: 'Galileo' },
-    { color: '#d4a888', label: 'GLONASS' },
+    { color: '#c77dff', label: 'Galileo' },
+    { color: '#ff7d7d', label: 'GLONASS' },
   ];
 
   return (
