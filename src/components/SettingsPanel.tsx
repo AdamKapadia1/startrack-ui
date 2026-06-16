@@ -5,12 +5,14 @@ import { HORIZON_PRESET_INFO, COMPASS_DIRECTIONS } from '../utils/horizonProfile
 import type { HorizonSettings, HorizonPresetKey } from '../utils/horizonProfile';
 
 interface Props {
-  open:            boolean;
-  onClose:         () => void;
-  location:        LocationSettings;
-  onSave:          (loc: LocationSettings) => void;
-  horizonSettings: HorizonSettings;
-  onSaveHorizon:   (settings: HorizonSettings) => void;
+  open:              boolean;
+  onClose:           () => void;
+  location:          LocationSettings;
+  onSave:            (loc: LocationSettings) => void;
+  horizonSettings:   HorizonSettings;
+  onSaveHorizon:     (settings: HorizonSettings) => void;
+  isLoggedIn?:       boolean;
+  onSaveToProfile?:  (label: string, loc: LocationSettings) => Promise<void>;
 }
 
 const HORIZON_PRESET_ORDER: HorizonPresetKey[] = ['flat', 'suburban', 'urban', 'valley', 'custom'];
@@ -56,15 +58,19 @@ function regionText(r: NominatimResult): string {
   return [a.state ?? a.county, a.country].filter(Boolean).join(', ');
 }
 
-export function SettingsPanel({ open, onClose, location, onSave, horizonSettings, onSaveHorizon }: Props) {
-  const [form,         setForm]         = useState<LocationSettings>(location);
-  const [query,        setQuery]        = useState('');
-  const [results,      setResults]      = useState<NominatimResult[]>([]);
-  const [searching,    setSearching]    = useState(false);
-  const [searchError,  setSearchError]  = useState('');
-  const [confirmed,    setConfirmed]    = useState('');
-  const [showAdvanced, setShowAdvanced] = useState(false);
-  const [geoError,     setGeoError]     = useState('');
+export function SettingsPanel({ open, onClose, location, onSave, horizonSettings, onSaveHorizon, isLoggedIn, onSaveToProfile }: Props) {
+  const [form,            setForm]            = useState<LocationSettings>(location);
+  const [query,           setQuery]           = useState('');
+  const [results,         setResults]         = useState<NominatimResult[]>([]);
+  const [searching,       setSearching]       = useState(false);
+  const [searchError,     setSearchError]     = useState('');
+  const [confirmed,       setConfirmed]       = useState('');
+  const [showAdvanced,    setShowAdvanced]    = useState(false);
+  const [geoError,        setGeoError]        = useState('');
+  const [savePrompt,      setSavePrompt]      = useState(false);
+  const [customLabel,     setCustomLabel]     = useState('');
+  const [showCustomInput, setShowCustomInput] = useState(false);
+  const [profileSaved,    setProfileSaved]    = useState('');
   const confirmTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   useEffect(() => {
@@ -75,6 +81,10 @@ export function SettingsPanel({ open, onClose, location, onSave, horizonSettings
       setSearchError('');
       setConfirmed('');
       setGeoError('');
+      setSavePrompt(false);
+      setProfileSaved('');
+      setCustomLabel('');
+      setShowCustomInput(false);
     }
   }, [open]); // eslint-disable-line react-hooks/exhaustive-deps
 
@@ -120,6 +130,7 @@ export function SettingsPanel({ open, onClose, location, onSave, horizonSettings
     setResults([]);
     setQuery('');
     showConfirm(`✓ Location set to ${name}`);
+    if (isLoggedIn && onSaveToProfile) { setSavePrompt(true); setProfileSaved(''); setCustomLabel(''); setShowCustomInput(false); }
   }
 
   function selectPopular(loc: typeof POPULAR[0]) {
@@ -127,6 +138,7 @@ export function SettingsPanel({ open, onClose, location, onSave, horizonSettings
     setResults([]);
     setQuery('');
     showConfirm(`✓ Location set to ${loc.name}`);
+    if (isLoggedIn && onSaveToProfile) { setSavePrompt(true); setProfileSaved(''); setCustomLabel(''); setShowCustomInput(false); }
   }
 
   function handleGeolocate() {
@@ -154,6 +166,13 @@ export function SettingsPanel({ open, onClose, location, onSave, horizonSettings
     const custom = [...horizonSettings.custom];
     custom[index] = value;
     onSaveHorizon({ ...horizonSettings, preset: 'custom', custom });
+  }
+
+  async function doSaveToProfile(label: string) {
+    if (!onSaveToProfile) return;
+    await onSaveToProfile(label, form);
+    setSavePrompt(false);
+    setProfileSaved(`Saved as "${label}"`);
   }
 
   function handleSave() {
@@ -237,6 +256,40 @@ export function SettingsPanel({ open, onClose, location, onSave, horizonSettings
 
           {/* ── Confirmation ── */}
           {confirmed && <div className="loc-confirmed">{confirmed}</div>}
+
+          {/* ── Save to profile prompt (logged-in users only) ── */}
+          {savePrompt && (
+            <div className="loc-save-prompt">
+              <span className="loc-save-prompt-label">Save to your locations?</span>
+              <div className="loc-save-prompt-btns">
+                <button className="loc-save-quick" onClick={() => doSaveToProfile('Home')}>Home</button>
+                <button className="loc-save-quick" onClick={() => doSaveToProfile('Work')}>Work</button>
+                <button className="loc-save-quick" onClick={() => { setShowCustomInput(true); }}>Custom…</button>
+                <button className="loc-save-skip"  onClick={() => setSavePrompt(false)}>Skip</button>
+              </div>
+              {showCustomInput && (
+                <div className="loc-save-custom-row">
+                  <input
+                    className="settings-input loc-save-custom-input"
+                    type="text"
+                    placeholder="Label (e.g. Parents, Cabin…)"
+                    value={customLabel}
+                    onChange={e => setCustomLabel(e.target.value)}
+                    onKeyDown={e => e.key === 'Enter' && customLabel.trim() && doSaveToProfile(customLabel.trim())}
+                    autoFocus
+                  />
+                  <button
+                    className="loc-save-quick"
+                    onClick={() => customLabel.trim() && doSaveToProfile(customLabel.trim())}
+                    disabled={!customLabel.trim()}
+                  >
+                    Save
+                  </button>
+                </div>
+              )}
+            </div>
+          )}
+          {profileSaved && <div className="loc-confirmed">{profileSaved}</div>}
 
           {/* ── Popular locations ── */}
           {showPopular && (

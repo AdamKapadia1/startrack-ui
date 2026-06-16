@@ -4829,3 +4829,177 @@ circle[fill="#7b61ff"] { filter: drop-shadow(0 0 6px #7b61ff); }
 
 .user-dropdown-item--danger { color: var(--accent-danger); }
 .user-dropdown-item--danger:hover { background: rgba(255, 68, 68, 0.08); }
+
+/* ── Location switcher ────────────────────────────────────── */
+.loc-switcher-wrap {
+  position: relative;
+}
+
+.header-location-btn {
+  background:   none;
+  border:       none;
+  cursor:       pointer;
+  padding:      0;
+  font-size:    inherit;
+  font-family:  inherit;
+  color:        inherit;
+  display:      flex;
+  align-items:  center;
+  gap:          5px;
+  transition:   opacity 0.15s;
+}
+
+.header-location-btn:hover { opacity: 0.75; }
+
+.loc-switcher-chevron {
+  opacity:    0.5;
+  transition: transform 0.15s;
+  flex-shrink: 0;
+}
+
+.loc-switcher-chevron--open { transform: rotate(180deg); }
+
+.loc-switcher-dropdown {
+  position:      absolute;
+  top:           calc(100% + 8px);
+  left:          50%;
+  transform:     translateX(-50%);
+  background:    var(--bg-secondary);
+  border:        1px solid var(--border-primary);
+  border-radius: 10px;
+  min-width:     240px;
+  box-shadow:    0 10px 32px rgba(0, 0, 0, 0.55);
+  overflow:      hidden;
+  z-index:       900;
+}
+
+.loc-switcher-item {
+  display:        flex;
+  flex-direction: column;
+  gap:            3px;
+  width:          100%;
+  text-align:     left;
+  background:     none;
+  border:         none;
+  padding:        10px 14px;
+  cursor:         pointer;
+  transition:     background 0.12s;
+}
+
+.loc-switcher-item:hover { background: var(--bg-tertiary); }
+
+.loc-switcher-item--active { background: rgba(0, 212, 255, 0.06); }
+.loc-switcher-item--active:hover { background: rgba(0, 212, 255, 0.10); }
+
+.loc-switcher-item-top {
+  display:     flex;
+  align-items: center;
+  gap:         6px;
+}
+
+.loc-switcher-item-label {
+  font-size:   12px;
+  font-weight: 600;
+  color:       var(--text-primary);
+}
+
+.loc-switcher-item-coords {
+  font-size: 10px;
+  color:     var(--text-tertiary);
+}
+
+.loc-switcher-empty {
+  padding:   16px 14px;
+  font-size: 12px;
+  color:     var(--text-tertiary);
+  text-align: center;
+}
+
+.loc-switcher-divider {
+  height:     1px;
+  background: var(--border-primary);
+}
+
+.loc-switcher-manage {
+  display:     flex;
+  align-items: center;
+  gap:         6px;
+  width:       100%;
+  text-align:  left;
+  background:  none;
+  border:      none;
+  padding:     10px 14px;
+  font-size:   11px;
+  color:       var(--text-secondary);
+  cursor:      pointer;
+  transition:  color 0.12s;
+}
+
+.loc-switcher-manage:hover { color: var(--accent-primary); }
+
+/* ── SettingsPanel: Save-to-profile prompt ─────────────────── */
+.loc-save-prompt {
+  background:    rgba(0, 212, 255, 0.05);
+  border:        1px solid rgba(0, 212, 255, 0.15);
+  border-radius: 8px;
+  padding:       10px 12px;
+  display:       flex;
+  flex-direction: column;
+  gap:           8px;
+}
+
+.loc-save-prompt-label {
+  font-size:   11px;
+  font-weight: 600;
+  color:       var(--text-secondary);
+  letter-spacing: 0.3px;
+}
+
+.loc-save-prompt-btns {
+  display: flex;
+  gap:     6px;
+  flex-wrap: wrap;
+}
+
+.loc-save-quick {
+  background:    rgba(0, 212, 255, 0.10);
+  border:        1px solid rgba(0, 212, 255, 0.25);
+  border-radius: 5px;
+  color:         var(--accent-primary);
+  font-size:     11px;
+  font-weight:   600;
+  padding:       4px 10px;
+  cursor:        pointer;
+  transition:    background 0.12s, border-color 0.12s;
+}
+
+.loc-save-quick:hover:not(:disabled) {
+  background:   rgba(0, 212, 255, 0.18);
+  border-color: rgba(0, 212, 255, 0.45);
+}
+
+.loc-save-quick:disabled { opacity: 0.4; cursor: not-allowed; }
+
+.loc-save-skip {
+  background:  none;
+  border:      none;
+  color:       var(--text-tertiary);
+  font-size:   11px;
+  padding:     4px 6px;
+  cursor:      pointer;
+  margin-left: auto;
+}
+
+.loc-save-skip:hover { color: var(--text-secondary); }
+
+.loc-save-custom-row {
+  display: flex;
+  gap:     6px;
+  align-items: center;
+}
+
+.loc-save-custom-input {
+  flex: 1;
+  font-size: 12px !important;
+  padding:   6px 10px !important;
+}

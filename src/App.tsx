@@ -23,6 +23,8 @@ import { PassLandingPage }      from './components/PassLandingPage';
 import { ChangelogPanel }       from './components/ChangelogPanel';
 import { useTheme }             from './hooks/useTheme';
 import { useAuth }              from './hooks/useAuth';
+import { useProfile }           from './hooks/useProfile';
+import type { SavedLocation }   from './hooks/useProfile';
 import { AuthModal }            from './components/AuthModal';
 import { getConstellation }     from './utils/constellation';
 import { loadHorizonSettings, saveHorizonSettings } from './utils/horizonProfile';
@@ -60,8 +62,9 @@ const CHAT_INSIGHTS = [
 function App() {
   const isPassRoute = window.location.pathname === '/pass';
   const { location, saveLocation, gpsAccuracy, permState, requestGPS, declineGPS } = useLocation();
-  const { theme, toggleTheme } = useTheme();
-  const { user, signOut }      = useAuth();
+  const { theme, toggleTheme }                  = useTheme();
+  const { user, signOut }                       = useAuth();
+  const { locations: savedLocations, addLocation } = useProfile(user?.id);
 
   const [authOpen,            setAuthOpen]            = useState(false);
   const [settingsOpen,        setSettingsOpen]        = useState(false);
@@ -83,6 +86,14 @@ function App() {
   function updateHorizonSettings(settings: HorizonSettings) {
     setHorizonSettings(settings);
     saveHorizonSettings(settings);
+  }
+
+  function switchToLocation(loc: SavedLocation) {
+    saveLocation({ name: loc.label, lat: loc.lat, lon: loc.lon, alt: loc.alt });
+  }
+
+  async function saveLocationToProfile(label: string, loc: { name: string; lat: number; lon: number; alt: number }) {
+    await addLocation({ label, name: loc.name, lat: loc.lat, lon: loc.lon, alt: loc.alt });
   }
 
   function openChatWithQuestion(q: string) {
@@ -158,6 +169,9 @@ function App() {
         gpsAccuracy={gpsAccuracy}
         topPasses={topPasses}
         user={user}
+        savedLocations={savedLocations}
+        onSwitchLocation={switchToLocation}
+        onManageLocations={() => setSettingsOpen(true)}
       />
 
       <CountdownBanner passes={topPasses} />
@@ -303,6 +317,8 @@ function App() {
         onSave={saveLocation}
         horizonSettings={horizonSettings}
         onSaveHorizon={updateHorizonSettings}
+        isLoggedIn={!!user}
+        onSaveToProfile={saveLocationToProfile}
       />
 
       <LocationPermission permState={permState} onAllow={requestGPS} onDecline={declineGPS} />
@@ -323,6 +339,7 @@ function App() {
             saveLocation(loc);
             setOnboarded(true);
           }}
+          onAutoSave={user ? loc => addLocation({ label: 'Home', name: loc.name, lat: loc.lat, lon: loc.lon, alt: loc.alt }) : undefined}
         />
       )}
 

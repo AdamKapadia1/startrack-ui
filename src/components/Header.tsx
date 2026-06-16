@@ -3,7 +3,9 @@ import type { LocationSettings } from '../hooks/useLocation';
 import type { WsStatus } from '../hooks/useWebSocket';
 import type { Pass } from '../hooks/useRecommendation';
 import type { User } from '@supabase/supabase-js';
+import type { SavedLocation } from '../hooks/useProfile';
 import { AlertSettings } from './AlertSettings';
+import { LocationSwitcher } from './LocationSwitcher';
 
 interface StatusCfg { label: string; color: string; pulse: boolean }
 
@@ -32,21 +34,24 @@ function useAgoText(date: Date | null): string {
 }
 
 interface Props {
-  location:       LocationSettings;
-  onOpenSettings: () => void;
-  onOpenHelp:     () => void;
-  onToggleTheme:  () => void;
-  onOpenAuth:     () => void;
-  onSignOut:      () => void;
-  theme:          string;
-  wsStatus:       WsStatus;
-  lastUpdated:    Date | null;
-  gpsAccuracy?:   number | null;
-  topPasses:      Pass[];
-  user:           User | null;
+  location:           LocationSettings;
+  onOpenSettings:     () => void;
+  onOpenHelp:         () => void;
+  onToggleTheme:      () => void;
+  onOpenAuth:         () => void;
+  onSignOut:          () => void;
+  theme:              string;
+  wsStatus:           WsStatus;
+  lastUpdated:        Date | null;
+  gpsAccuracy?:       number | null;
+  topPasses:          Pass[];
+  user:               User | null;
+  savedLocations:     SavedLocation[];
+  onSwitchLocation:   (loc: SavedLocation) => void;
+  onManageLocations:  () => void;
 }
 
-export function Header({ location, onOpenSettings, onOpenHelp, onToggleTheme, onOpenAuth, onSignOut, theme, wsStatus, lastUpdated, gpsAccuracy, topPasses, user }: Props) {
+export function Header({ location, onOpenSettings, onOpenHelp, onToggleTheme, onOpenAuth, onSignOut, theme, wsStatus, lastUpdated, gpsAccuracy, topPasses, user, savedLocations, onSwitchLocation, onManageLocations }: Props) {
   const cfg      = STATUS[wsStatus] ?? STATUS.connecting;
   const agoText  = useAgoText(lastUpdated);
   const [flashing,      setFlashing]      = useState(false);
@@ -98,28 +103,40 @@ export function Header({ location, onOpenSettings, onOpenHelp, onToggleTheme, on
         </span>
       </div>
 
-      <div className={`header-location${flashing ? ' header-location-flash' : ''}`}>
-        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-          <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/>
-          <circle cx="12" cy="10" r="3"/>
-        </svg>
-        {location.name}&nbsp;|&nbsp;
-        {Math.abs(location.lat).toFixed(2)}°{location.lat >= 0 ? 'N' : 'S'},&nbsp;
-        {Math.abs(location.lon).toFixed(2)}°{location.lon >= 0 ? 'E' : 'W'}
-        {gpsAccuracy !== null && gpsAccuracy !== undefined && (
-          <span
-            className="gps-accuracy"
-            style={{
-              color: gpsAccuracy < 50 ? '#00d4ff' : gpsAccuracy < 200 ? '#ffb800' : '#4a6080',
-            }}
-          >
-            ±{gpsAccuracy}m
-          </span>
-        )}
-        {agoText && (
-          <span className="header-ago">&nbsp;· {agoText}</span>
-        )}
-      </div>
+      {user ? (
+        <LocationSwitcher
+          location={location}
+          savedLocations={savedLocations}
+          onSwitch={onSwitchLocation}
+          onManage={onManageLocations}
+          flashing={flashing}
+          gpsAccuracy={gpsAccuracy}
+          agoText={agoText}
+        />
+      ) : (
+        <div className={`header-location${flashing ? ' header-location-flash' : ''}`}>
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+            <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/>
+            <circle cx="12" cy="10" r="3"/>
+          </svg>
+          {location.name}&nbsp;|&nbsp;
+          {Math.abs(location.lat).toFixed(2)}°{location.lat >= 0 ? 'N' : 'S'},&nbsp;
+          {Math.abs(location.lon).toFixed(2)}°{location.lon >= 0 ? 'E' : 'W'}
+          {gpsAccuracy !== null && gpsAccuracy !== undefined && (
+            <span
+              className="gps-accuracy"
+              style={{
+                color: gpsAccuracy < 50 ? '#00d4ff' : gpsAccuracy < 200 ? '#ffb800' : '#4a6080',
+              }}
+            >
+              ±{gpsAccuracy}m
+            </span>
+          )}
+          {agoText && (
+            <span className="header-ago">&nbsp;· {agoText}</span>
+          )}
+        </div>
+      )}
 
       <div className="header-actions">
         <AlertSettings passes={topPasses} />

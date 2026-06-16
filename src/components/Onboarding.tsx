@@ -5,7 +5,8 @@ import { DEFAULT_LOCATION } from '../hooks/useLocation';
 export const ONBOARDING_KEY = 'startrack-onboarded';
 
 interface Props {
-  onComplete: (loc: LocationSettings) => void;
+  onComplete:    (loc: LocationSettings) => void;
+  onAutoSave?:   (loc: LocationSettings) => void;
 }
 
 interface NominatimResult {
@@ -39,7 +40,7 @@ function SatSVG() {
   );
 }
 
-export function Onboarding({ onComplete }: Props) {
+export function Onboarding({ onComplete, onAutoSave }: Props) {
   const [step,         setStep]         = useState(1);
   const [leaving,      setLeaving]      = useState(false);
   const [chosenLoc,    setChosenLoc]    = useState<LocationSettings | null>(null);
@@ -90,6 +91,7 @@ export function Onboarding({ onComplete }: Props) {
     setResults([]);
     setQuery('');
     setLocConfirmed(name);
+    onAutoSave?.(loc);
   }
 
   function handleGPS() {
@@ -107,11 +109,15 @@ export function Onboarding({ onComplete }: Props) {
           const data = await res.json();
           const a    = data.address ?? {};
           const name = a.city ?? a.town ?? a.village ?? a.suburb ?? 'Current location';
-          setChosenLoc({ name, lat: parseFloat(latitude.toFixed(4)), lon: parseFloat(longitude.toFixed(4)), alt: Math.round(altitude ?? 0) });
+          const loc  = { name, lat: parseFloat(latitude.toFixed(4)), lon: parseFloat(longitude.toFixed(4)), alt: Math.round(altitude ?? 0) };
+          setChosenLoc(loc);
           setLocConfirmed(name);
+          onAutoSave?.(loc);
         } catch {
-          setChosenLoc({ name: 'Current location', lat: parseFloat(latitude.toFixed(4)), lon: parseFloat(longitude.toFixed(4)), alt: Math.round(altitude ?? 0) });
+          const loc = { name: 'Current location', lat: parseFloat(latitude.toFixed(4)), lon: parseFloat(longitude.toFixed(4)), alt: Math.round(altitude ?? 0) };
+          setChosenLoc(loc);
           setLocConfirmed('Current location');
+          onAutoSave?.(loc);
         }
         setGpsLoading(false);
       },
