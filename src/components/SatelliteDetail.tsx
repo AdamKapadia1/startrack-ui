@@ -6,6 +6,8 @@ import {
 import type { Satellite, SatellitePosition } from '../types';
 import type { LocationSettings } from '../hooks/useLocation';
 import { getConstellation, CONSTELLATION_COLORS } from '../utils/constellation';
+import { horizonQueryParam } from '../utils/horizonProfile';
+import type { HorizonSettings } from '../utils/horizonProfile';
 import { PassShare } from './PassShare';
 
 const API_BASE = import.meta.env.VITE_API_URL ?? '';
@@ -40,9 +42,10 @@ export interface SatPass {
 interface Props {
   satellite:     Satellite | null;
   allSatellites: Satellite[];
-  positions:     SatellitePosition[];
-  location:      LocationSettings;
-  onClose:       () => void;
+  positions:       SatellitePosition[];
+  location:        LocationSettings;
+  horizonSettings: HorizonSettings;
+  onClose:         () => void;
 }
 
 // ── Helpers ────────────────────────────────────────────────────────────────────
@@ -377,7 +380,7 @@ function DopplerChart({ pass }: { pass: SatPass }) {
 }
 
 // ── Main component ─────────────────────────────────────────────────────────────
-export function SatelliteDetail({ satellite, allSatellites, positions, location, onClose }: Props) {
+export function SatelliteDetail({ satellite, allSatellites, positions, location, horizonSettings, onClose }: Props) {
   const [tleData,       setTleData]       = useState<TleData | null>(null);
   const [passes,        setPasses]        = useState<SatPass[]>([]);
   const [tleLoading,    setTleLoading]    = useState(false);
@@ -396,12 +399,12 @@ export function SatelliteDetail({ satellite, allSatellites, positions, location,
       .finally(() => setTleLoading(false));
 
     const { lat, lon } = location;
-    fetch(`${API_BASE}/api/satellites/passes?name=${encodeURIComponent(satname)}&lat=${lat}&lon=${lon}&alt=148`)
+    fetch(`${API_BASE}/api/satellites/passes?name=${encodeURIComponent(satname)}&lat=${lat}&lon=${lon}&alt=148${horizonQueryParam(horizonSettings)}`)
       .then(r => r.ok ? r.json() : [])
       .then(d => setPasses(Array.isArray(d) ? d : []))
       .catch(() => setPasses([]))
       .finally(() => setPassesLoading(false));
-  }, [satname, location.lat, location.lon]);
+  }, [satname, location.lat, location.lon, horizonSettings]);
 
   if (!satellite) return null;
 

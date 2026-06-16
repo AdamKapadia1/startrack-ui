@@ -23,6 +23,8 @@ import { PassLandingPage }      from './components/PassLandingPage';
 import { ChangelogPanel }       from './components/ChangelogPanel';
 import { useTheme }             from './hooks/useTheme';
 import { getConstellation }     from './utils/constellation';
+import { loadHorizonSettings, saveHorizonSettings } from './utils/horizonProfile';
+import type { HorizonSettings } from './utils/horizonProfile';
 import type { Satellite }       from './types';
 import { useSatellites }        from './hooks/useSatellites';
 import { useRecommendation }    from './hooks/useRecommendation';
@@ -67,10 +69,16 @@ function App() {
   const [selectedSatellite,   setSelectedSatellite]   = useState<Satellite | null>(null);
   const [onboarded,           setOnboarded]           = useState(() => !!localStorage.getItem(ONBOARDING_KEY));
   const [activeTab,           setActiveTab]           = useState<Tab>(readStoredTab);
+  const [horizonSettings,     setHorizonSettings]     = useState<HorizonSettings>(loadHorizonSettings);
 
   function switchTab(tab: Tab) {
     setActiveTab(tab);
     localStorage.setItem(TAB_KEY, tab);
+  }
+
+  function updateHorizonSettings(settings: HorizonSettings) {
+    setHorizonSettings(settings);
+    saveHorizonSettings(settings);
   }
 
   function openChatWithQuestion(q: string) {
@@ -196,6 +204,7 @@ function App() {
               activeConstellation={activeConstellation}
               loading={!satData}
               compact={true}
+              horizonSettings={horizonSettings}
             />
             <button
               className="tab-skymap-link"
@@ -219,6 +228,7 @@ function App() {
               activeConstellation={activeConstellation}
               loading={!satData}
               compact={false}
+              horizonSettings={horizonSettings}
             />
             <SatelliteList
               satellites={filteredSatellites}
@@ -284,6 +294,8 @@ function App() {
         onClose={() => setSettingsOpen(false)}
         location={location}
         onSave={saveLocation}
+        horizonSettings={horizonSettings}
+        onSaveHorizon={updateHorizonSettings}
       />
 
       <LocationPermission permState={permState} onAllow={requestGPS} onDecline={declineGPS} />
@@ -312,6 +324,7 @@ function App() {
         allSatellites={satellites}
         positions={positions}
         location={location}
+        horizonSettings={horizonSettings}
         onClose={() => setSelectedSatellite(null)}
       />
 

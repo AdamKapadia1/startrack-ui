@@ -1,13 +1,19 @@
 import { useState, useEffect, useRef } from 'react';
 import type { LocationSettings } from '../hooks/useLocation';
 import { DEFAULT_LOCATION } from '../hooks/useLocation';
+import { HORIZON_PRESET_INFO, COMPASS_DIRECTIONS } from '../utils/horizonProfile';
+import type { HorizonSettings, HorizonPresetKey } from '../utils/horizonProfile';
 
 interface Props {
-  open:     boolean;
-  onClose:  () => void;
-  location: LocationSettings;
-  onSave:   (loc: LocationSettings) => void;
+  open:            boolean;
+  onClose:         () => void;
+  location:        LocationSettings;
+  onSave:          (loc: LocationSettings) => void;
+  horizonSettings: HorizonSettings;
+  onSaveHorizon:   (settings: HorizonSettings) => void;
 }
+
+const HORIZON_PRESET_ORDER: HorizonPresetKey[] = ['flat', 'suburban', 'urban', 'valley', 'custom'];
 
 interface NominatimResult {
   display_name: string;
@@ -50,7 +56,7 @@ function regionText(r: NominatimResult): string {
   return [a.state ?? a.county, a.country].filter(Boolean).join(', ');
 }
 
-export function SettingsPanel({ open, onClose, location, onSave }: Props) {
+export function SettingsPanel({ open, onClose, location, onSave, horizonSettings, onSaveHorizon }: Props) {
   const [form,         setForm]         = useState<LocationSettings>(location);
   const [query,        setQuery]        = useState('');
   const [results,      setResults]      = useState<NominatimResult[]>([]);
@@ -138,6 +144,16 @@ export function SettingsPanel({ open, onClose, location, onSave }: Props) {
       },
       () => setGeoError('Location access denied'),
     );
+  }
+
+  function selectHorizonPreset(preset: HorizonPresetKey) {
+    onSaveHorizon({ ...horizonSettings, preset });
+  }
+
+  function setCustomHorizon(index: number, value: number) {
+    const custom = [...horizonSettings.custom];
+    custom[index] = value;
+    onSaveHorizon({ ...horizonSettings, preset: 'custom', custom });
   }
 
   function handleSave() {
@@ -303,6 +319,53 @@ export function SettingsPanel({ open, onClose, location, onSave }: Props) {
               </div>
             </>
           )}
+
+          {/* ── Horizon Obstruction ── */}
+          <div className="settings-field">
+            <label className="settings-label">
+              Horizon Obstruction
+              <span
+                className="orbital-tip"
+                title="Trees, hills, and buildings can block satellites near the horizon. Setting this correctly gives more accurate pass timing for when a satellite actually becomes visible from your exact spot."
+              >?</span>
+            </label>
+            <div className="horizon-radio-group">
+              {HORIZON_PRESET_ORDER.map(key => {
+                const info = HORIZON_PRESET_INFO[key];
+                return (
+                  <label key={key} className={`horizon-option${horizonSettings.preset === key ? ' horizon-option--active' : ''}`}>
+                    <input
+                      type="radio"
+                      name="horizon-preset"
+                      checked={horizonSettings.preset === key}
+                      onChange={() => selectHorizonPreset(key)}
+                    />
+                    <span className="horizon-option-text">
+                      <span className="horizon-option-label">{info.label}</span>
+                      <span className="horizon-option-desc">{info.description}</span>
+                    </span>
+                  </label>
+                );
+              })}
+            </div>
+
+            {horizonSettings.preset === 'custom' && (
+              <div className="horizon-custom-sliders">
+                {COMPASS_DIRECTIONS.map((dir, i) => (
+                  <div key={dir} className="horizon-slider-row">
+                    <span className="horizon-slider-dir">{dir}</span>
+                    <input
+                      type="range"
+                      min={0} max={30} step={1}
+                      value={horizonSettings.custom[i]}
+                      onChange={e => setCustomHorizon(i, Number(e.target.value))}
+                    />
+                    <span className="horizon-slider-val">{horizonSettings.custom[i]}°</span>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
         </div>
 
         <div className="settings-footer">

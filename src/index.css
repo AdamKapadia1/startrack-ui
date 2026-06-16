@@ -1336,6 +1336,88 @@ button { font-family: inherit; }
   color:        var(--green);
 }
 
+.settings-label .orbital-tip {
+  margin-left:   6px;
+  vertical-align: middle;
+  text-transform: none;
+  letter-spacing: normal;
+}
+
+/* Horizon obstruction settings */
+.horizon-radio-group {
+  display:        flex;
+  flex-direction: column;
+  gap:            6px;
+}
+
+.horizon-option {
+  display:       flex;
+  align-items:   flex-start;
+  gap:           8px;
+  padding:       7px 9px;
+  background:    var(--surface-2);
+  border:        1px solid var(--border);
+  border-radius: 6px;
+  cursor:        pointer;
+  transition:    background 0.12s, border-color 0.12s;
+}
+.horizon-option:hover { border-color: rgba(0,212,255,0.4); }
+.horizon-option--active {
+  background:   rgba(0,212,255,0.12);
+  border-color: rgba(0,212,255,0.4);
+}
+.horizon-option input[type="radio"] {
+  margin-top: 2px;
+  accent-color: var(--green);
+}
+
+.horizon-option-text {
+  display:        flex;
+  flex-direction: column;
+  gap:            1px;
+}
+.horizon-option-label {
+  font-size:   11px;
+  font-weight: 600;
+  color:       var(--text-dim);
+}
+.horizon-option-desc {
+  font-size: 10px;
+  color:     var(--text-muted);
+}
+
+.horizon-custom-sliders {
+  display:        flex;
+  flex-direction: column;
+  gap:            6px;
+  margin-top:     6px;
+  padding:        9px;
+  background:     var(--surface-2);
+  border:         1px solid var(--border);
+  border-radius:  6px;
+}
+
+.horizon-slider-row {
+  display:     grid;
+  grid-template-columns: 28px 1fr 30px;
+  align-items: center;
+  gap:         8px;
+}
+.horizon-slider-dir {
+  font-size:   10px;
+  font-weight: 700;
+  color:       var(--text-muted);
+}
+.horizon-slider-row input[type="range"] {
+  accent-color: var(--green);
+}
+.horizon-slider-val {
+  font-size:   10px;
+  font-family: var(--mono);
+  color:       var(--text-secondary);
+  text-align:  right;
+}
+
 /* Advanced toggle */
 .loc-advanced-toggle {
   display:     flex;

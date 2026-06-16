@@ -3,6 +3,8 @@ import { createPortal } from 'react-dom';
 import type { Satellite, SatellitePosition } from '../types';
 import type { Pass } from '../hooks/useRecommendation';
 import { getConstellation } from '../utils/constellation';
+import { resolveHorizonProfile } from '../utils/horizonProfile';
+import type { HorizonSettings } from '../utils/horizonProfile';
 
 interface Props {
   satellites:          Satellite[];
@@ -13,6 +15,7 @@ interface Props {
   activeConstellation: string;
   loading?:            boolean;
   compact?:            boolean;
+  horizonSettings?:    HorizonSettings;
 }
 
 const CX = 210, CY = 210, R = 175;
@@ -22,6 +25,26 @@ function toXY(az: number, el: number) {
   const r     = R * (1 - el / 90);
   const angle = (az - 90) * Math.PI / 180;
   return { x: CX + r * Math.cos(angle), y: CY + r * Math.sin(angle) };
+}
+
+function polarXY(az: number, r: number) {
+  const angle = (az - 90) * Math.PI / 180;
+  return { x: CX + r * Math.cos(angle), y: CY + r * Math.sin(angle) };
+}
+
+// Annulus sector from az0→az1 (degrees, az0 < az1), between rInner and rOuter.
+function sectorPath(az0: number, az1: number, rInner: number, rOuter: number): string {
+  const p0o = polarXY(az0, rOuter);
+  const p1o = polarXY(az1, rOuter);
+  const p1i = polarXY(az1, rInner);
+  const p0i = polarXY(az0, rInner);
+  return [
+    `M ${p0o.x} ${p0o.y}`,
+    `A ${rOuter} ${rOuter} 0 0 1 ${p1o.x} ${p1o.y}`,
+    `L ${p1i.x} ${p1i.y}`,
+    `A ${rInner} ${rInner} 0 0 0 ${p0i.x} ${p0i.y}`,
+    'Z',
+  ].join(' ');
 }
 
 // Muted radar-style palette — no saturated glow colours
@@ -120,8 +143,12 @@ interface TrailPos { el: number; az: number; constellation?: string | null; }
 export function SkyMap({
   satellites, cloudCover = 0, passes = [], positions = [],
   posLastUpdate, activeConstellation, loading, compact = false,
+  horizonSettings,
 }: Props) {
   const [selected, setSelected] = useState<{ sat: Satellite } | null>(null);
+
+  const horizonProfile  = horizonSettings ? resolveHorizonProfile(horizonSettings) : null;
+  const hasObstruction  = !!horizonProfile && horizonProfile.some(deg => deg > 0);
 
   // Trail: name → last 3 positions (oldest first), not including current
   const trailRef    = useRef<Map<string, TrailPos[]>>(new Map());
@@ -250,6 +277,20 @@ export function SkyMap({
           {/* Cloud cover overlay */}
           {cloudCover > 30 && (
             <circle cx={CX} cy={CY} r={R} fill="#1a2a3a" opacity={cloudCover / 100 * 0.18} clipPath="url(#skyClip)"/>
+          )}
+
+          {/* ── Horizon obstruction shading ── */}
+          {hasObstruction && horizonProfile && (
+            <g clipPath="url(#skyClip)">
+              {horizonProfile.map((deg, i) => {
+                if (deg <= 0) return null;
+                const az0    = i * 10, az1 = az0 + 10;
+                const rInner = R * (1 - deg / 90);
+                return (
+                  <path key={`obs-${i}`} d={sectorPath(az0, az1, rInner, R)} fill="#c4502a" opacity={0.08}/>
+                );
+              })}
+            </g>
           )}
 
           {/* ── Elevation rings (solid, no dash) ── */}
@@ -388,6 +429,14 @@ export function SkyMap({
             <text x={CX - R + 5} y={CY + R - 7} fill={ageColor} fontSize="8"
               fontFamily="JetBrains Mono, monospace" opacity="0.7">
               pos {secsAgo}s ago
+            </text>
+          )}
+
+          {/* ── Obstructed horizon label (top-left) ── */}
+          {hasObstruction && (
+            <text x={CX - R + 6} y={CY - R + 14} fill="#c4502a" fontSize="8"
+              fontFamily="JetBrains Mono, monospace" opacity="0.6" letterSpacing="1">
+              OBSTRUCTED
             </text>
           )}
 
