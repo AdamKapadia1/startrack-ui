@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from 'react';
 import type { LocationSettings } from '../hooks/useLocation';
 import type { WsStatus } from '../hooks/useWebSocket';
 import type { Pass } from '../hooks/useRecommendation';
+import type { User } from '@supabase/supabase-js';
 import { AlertSettings } from './AlertSettings';
 
 interface StatusCfg { label: string; color: string; pulse: boolean }
@@ -35,18 +36,34 @@ interface Props {
   onOpenSettings: () => void;
   onOpenHelp:     () => void;
   onToggleTheme:  () => void;
+  onOpenAuth:     () => void;
+  onSignOut:      () => void;
   theme:          string;
   wsStatus:       WsStatus;
   lastUpdated:    Date | null;
   gpsAccuracy?:   number | null;
   topPasses:      Pass[];
+  user:           User | null;
 }
 
-export function Header({ location, onOpenSettings, onOpenHelp, onToggleTheme, theme, wsStatus, lastUpdated, gpsAccuracy, topPasses }: Props) {
+export function Header({ location, onOpenSettings, onOpenHelp, onToggleTheme, onOpenAuth, onSignOut, theme, wsStatus, lastUpdated, gpsAccuracy, topPasses, user }: Props) {
   const cfg      = STATUS[wsStatus] ?? STATUS.connecting;
   const agoText  = useAgoText(lastUpdated);
-  const [flashing, setFlashing] = useState(false);
+  const [flashing,      setFlashing]      = useState(false);
+  const [userMenuOpen,  setUserMenuOpen]  = useState(false);
   const prevName = useRef(location.name);
+  const userMenuRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (!userMenuOpen) return;
+    function onClickOutside(e: MouseEvent) {
+      if (userMenuRef.current && !userMenuRef.current.contains(e.target as Node)) {
+        setUserMenuOpen(false);
+      }
+    }
+    document.addEventListener('mousedown', onClickOutside);
+    return () => document.removeEventListener('mousedown', onClickOutside);
+  }, [userMenuOpen]);
 
   useEffect(() => {
     if (location.name !== prevName.current) {
@@ -106,6 +123,37 @@ export function Header({ location, onOpenSettings, onOpenHelp, onToggleTheme, th
 
       <div className="header-actions">
         <AlertSettings passes={topPasses} />
+
+        {/* Auth button */}
+        {user ? (
+          <div className="user-menu-wrap" ref={userMenuRef}>
+            <button
+              className="user-avatar-btn"
+              aria-label="Account menu"
+              onClick={() => setUserMenuOpen(o => !o)}
+              title={user.email}
+            >
+              {(user.email?.[0] ?? '?').toUpperCase()}
+            </button>
+            {userMenuOpen && (
+              <div className="user-dropdown">
+                <div className="user-dropdown-email">{user.email}</div>
+                <div className="user-dropdown-divider" />
+                <button
+                  className="user-dropdown-item user-dropdown-item--danger"
+                  onClick={() => { setUserMenuOpen(false); onSignOut(); }}
+                >
+                  Sign out
+                </button>
+              </div>
+            )}
+          </div>
+        ) : (
+          <button className="auth-signin-btn" onClick={onOpenAuth}>
+            Sign in
+          </button>
+        )}
+
         <button className="icon-btn" aria-label="Help" onClick={onOpenHelp}>
           <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
             <circle cx="12" cy="12" r="10"/>

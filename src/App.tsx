@@ -22,6 +22,8 @@ import { HelpPanel }            from './components/HelpPanel';
 import { PassLandingPage }      from './components/PassLandingPage';
 import { ChangelogPanel }       from './components/ChangelogPanel';
 import { useTheme }             from './hooks/useTheme';
+import { useAuth }              from './hooks/useAuth';
+import { AuthModal }            from './components/AuthModal';
 import { getConstellation }     from './utils/constellation';
 import { loadHorizonSettings, saveHorizonSettings } from './utils/horizonProfile';
 import type { HorizonSettings } from './utils/horizonProfile';
@@ -59,7 +61,9 @@ function App() {
   const isPassRoute = window.location.pathname === '/pass';
   const { location, saveLocation, gpsAccuracy, permState, requestGPS, declineGPS } = useLocation();
   const { theme, toggleTheme } = useTheme();
+  const { user, signOut }      = useAuth();
 
+  const [authOpen,            setAuthOpen]            = useState(false);
   const [settingsOpen,        setSettingsOpen]        = useState(false);
   const [chatOpen,            setChatOpen]            = useState(false);
   const [chatInitialInput,    setChatInitialInput]    = useState('');
@@ -146,11 +150,14 @@ function App() {
         onOpenSettings={() => setSettingsOpen(true)}
         onOpenHelp={() => setHelpOpen(true)}
         onToggleTheme={toggleTheme}
+        onOpenAuth={() => setAuthOpen(true)}
+        onSignOut={signOut}
         theme={theme}
         wsStatus={status}
         lastUpdated={lastUpdated}
         gpsAccuracy={gpsAccuracy}
         topPasses={topPasses}
+        user={user}
       />
 
       <CountdownBanner passes={topPasses} />
@@ -327,6 +334,8 @@ function App() {
         horizonSettings={horizonSettings}
         onClose={() => setSelectedSatellite(null)}
       />
+
+      <AuthModal open={authOpen} onClose={() => setAuthOpen(false)} />
 
       <button
         className={`chat-bubble-btn${chatOpen ? ' open' : ''}`}

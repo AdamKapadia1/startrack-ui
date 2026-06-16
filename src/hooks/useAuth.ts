@@ -1,0 +1,36 @@
+import { useState, useEffect } from 'react';
+import { supabase } from '../lib/supabaseClient';
+import type { User } from '@supabase/supabase-js';
+
+export function useAuth() {
+  const [user,    setUser]    = useState<User | null>(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setUser(session?.user ?? null);
+      setLoading(false);
+    });
+
+    const { data: listener } = supabase.auth.onAuthStateChange((_event, session) => {
+      setUser(session?.user ?? null);
+    });
+
+    return () => listener.subscription.unsubscribe();
+  }, []);
+
+  const signUp = (email: string, password: string) =>
+    supabase.auth.signUp({ email, password });
+
+  const signIn = (email: string, password: string) =>
+    supabase.auth.signInWithPassword({ email, password });
+
+  const signOut = () => supabase.auth.signOut();
+
+  const resetPassword = (email: string) =>
+    supabase.auth.resetPasswordForEmail(email, {
+      redirectTo: `${window.location.origin}/reset-password`,
+    });
+
+  return { user, loading, signUp, signIn, signOut, resetPassword };
+}

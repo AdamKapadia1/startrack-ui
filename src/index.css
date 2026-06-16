@@ -4574,3 +4574,258 @@ circle[fill="#7b61ff"] { filter: drop-shadow(0 0 6px #7b61ff); }
   .pass-landing-countdown { font-size: 15px; padding: 10px 14px; }
   .pass-landing-buttons  { flex-direction: column; }
 }
+
+/* ── Auth modal ───────────────────────────────────────────── */
+@keyframes auth-spin {
+  to { transform: rotate(360deg); }
+}
+
+.auth-overlay {
+  position:        fixed;
+  inset:           0;
+  background:      rgba(8, 12, 20, 0.80);
+  backdrop-filter: blur(4px);
+  display:         flex;
+  align-items:     center;
+  justify-content: center;
+  z-index:         1200;
+  padding:         16px;
+}
+
+.auth-modal {
+  background:    var(--bg-secondary);
+  border:        1px solid var(--border-primary);
+  border-radius: 12px;
+  width:         100%;
+  max-width:     380px;
+  padding:       0 0 20px;
+  box-shadow:    0 24px 64px rgba(0, 0, 0, 0.6);
+}
+
+.auth-tabs {
+  display:       flex;
+  border-bottom: 1px solid var(--border-primary);
+}
+
+.auth-tab {
+  flex:            1;
+  background:      none;
+  border:          none;
+  padding:         14px 0;
+  color:           var(--text-secondary);
+  font-size:       13px;
+  font-weight:     500;
+  cursor:          pointer;
+  letter-spacing:  0.3px;
+  transition:      color 0.15s;
+}
+
+.auth-tab:first-child { border-radius: 12px 0 0 0; }
+.auth-tab:last-child  { border-radius: 0 12px 0 0; }
+
+.auth-tab--active {
+  color:        var(--accent-primary);
+  border-bottom: 2px solid var(--accent-primary);
+  margin-bottom: -1px;
+}
+
+.auth-tab:not(.auth-tab--active):hover { color: var(--text-primary); }
+
+.auth-form {
+  display:        flex;
+  flex-direction: column;
+  gap:            14px;
+  padding:        20px 24px 0;
+}
+
+.auth-label {
+  display:        flex;
+  flex-direction: column;
+  gap:            6px;
+  font-size:      11px;
+  font-weight:    600;
+  color:          var(--text-secondary);
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+}
+
+.auth-input {
+  background:    var(--bg-tertiary);
+  border:        1px solid var(--border-primary);
+  border-radius: 6px;
+  color:         var(--text-primary);
+  font-size:     13px;
+  padding:       9px 12px;
+  outline:       none;
+  transition:    border-color 0.15s;
+  font-family:   inherit;
+}
+
+.auth-input:focus { border-color: var(--accent-primary); }
+.auth-input::placeholder { color: var(--text-tertiary); }
+
+.auth-error {
+  font-size:  12px;
+  color:      var(--accent-danger);
+  margin:     0;
+  line-height: 1.4;
+}
+
+.auth-success {
+  font-size:  12px;
+  color:      var(--accent-secondary);
+  margin:     0;
+  line-height: 1.4;
+}
+
+.auth-success-box {
+  display:        flex;
+  flex-direction: column;
+  align-items:    center;
+  gap:            10px;
+  padding:        20px 0 4px;
+  text-align:     center;
+  color:          var(--text-primary);
+  font-size:      13px;
+  line-height:    1.5;
+}
+
+.auth-submit {
+  background:     var(--accent-primary);
+  border:         none;
+  border-radius:  6px;
+  color:          #080c14;
+  font-size:      13px;
+  font-weight:    700;
+  padding:        10px;
+  cursor:         pointer;
+  letter-spacing: 0.4px;
+  display:        flex;
+  align-items:    center;
+  justify-content: center;
+  gap:            8px;
+  transition:     opacity 0.15s;
+  width:          100%;
+}
+
+.auth-submit:disabled { opacity: 0.5; cursor: not-allowed; }
+.auth-submit:not(:disabled):hover { opacity: 0.88; }
+
+.auth-link {
+  background:    none;
+  border:        none;
+  color:         var(--text-secondary);
+  font-size:     12px;
+  cursor:        pointer;
+  padding:       0;
+  text-align:    center;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+.auth-link:hover { color: var(--text-primary); }
+
+.auth-guest {
+  padding:    18px 24px 0;
+  text-align: center;
+}
+
+.auth-guest-btn {
+  background:      none;
+  border:          none;
+  color:           var(--text-tertiary);
+  font-size:       12px;
+  cursor:          pointer;
+  padding:         0;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+.auth-guest-btn:hover { color: var(--text-secondary); }
+
+/* ── Header auth controls ─────────────────────────────────── */
+.auth-signin-btn {
+  background:    transparent;
+  border:        1px solid var(--border-primary);
+  border-radius: 5px;
+  color:         var(--text-secondary);
+  font-size:     11px;
+  font-weight:   600;
+  padding:       4px 10px;
+  cursor:        pointer;
+  letter-spacing: 0.4px;
+  transition:    border-color 0.15s, color 0.15s;
+  white-space:   nowrap;
+}
+
+.auth-signin-btn:hover {
+  border-color: var(--accent-primary);
+  color:        var(--accent-primary);
+}
+
+.user-menu-wrap {
+  position: relative;
+}
+
+.user-avatar-btn {
+  width:         28px;
+  height:        28px;
+  border-radius: 50%;
+  background:    var(--accent-primary);
+  color:         #080c14;
+  font-size:     11px;
+  font-weight:   700;
+  border:        none;
+  cursor:        pointer;
+  display:       flex;
+  align-items:   center;
+  justify-content: center;
+  transition:    opacity 0.15s;
+}
+
+.user-avatar-btn:hover { opacity: 0.82; }
+
+.user-dropdown {
+  position:      absolute;
+  top:           calc(100% + 8px);
+  right:         0;
+  background:    var(--bg-secondary);
+  border:        1px solid var(--border-primary);
+  border-radius: 8px;
+  min-width:     200px;
+  box-shadow:    0 8px 24px rgba(0, 0, 0, 0.5);
+  overflow:      hidden;
+  z-index:       1100;
+}
+
+.user-dropdown-email {
+  padding:     10px 14px;
+  font-size:   11px;
+  color:       var(--text-secondary);
+  white-space: nowrap;
+  overflow:    hidden;
+  text-overflow: ellipsis;
+}
+
+.user-dropdown-divider {
+  height:     1px;
+  background: var(--border-primary);
+}
+
+.user-dropdown-item {
+  display:    block;
+  width:      100%;
+  text-align: left;
+  background: none;
+  border:     none;
+  padding:    10px 14px;
+  font-size:  12px;
+  color:      var(--text-primary);
+  cursor:     pointer;
+  transition: background 0.12s;
+}
+
+.user-dropdown-item:hover { background: var(--bg-tertiary); }
+
+.user-dropdown-item--danger { color: var(--accent-danger); }
+.user-dropdown-item--danger:hover { background: rgba(255, 68, 68, 0.08); }
