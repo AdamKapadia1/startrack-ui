@@ -198,7 +198,7 @@ const TIPS: Record<string, string> = {
   speed:        'True orbital velocity, calculated from this satellite\'s own SGP4 velocity vector — lower orbits move faster',
 };
 
-function OrbitalElements({ data, loading }: { data: TleData | null; loading: boolean }) {
+function OrbitalElements({ data, loading, spaceTrackVerified }: { data: TleData | null; loading: boolean; spaceTrackVerified: boolean }) {
   if (loading) return <div className="sd-loading">Loading orbital data…</div>;
   if (!data)   return <div className="sd-loading">No TLE data available for this satellite</div>;
 
@@ -229,6 +229,14 @@ function OrbitalElements({ data, loading }: { data: TleData | null; loading: boo
           <span className="orbital-value">{r.value}</span>
         </div>
       ))}
+      {spaceTrackVerified && (
+        <div className="spacetrack-badge">
+          <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3">
+            <polyline points="20 6 9 17 4 12"/>
+          </svg>
+          Verified against Space-Track.org
+        </div>
+      )}
     </div>
   );
 }
@@ -381,20 +389,29 @@ function DopplerChart({ pass }: { pass: SatPass }) {
 
 // ── Main component ─────────────────────────────────────────────────────────────
 export function SatelliteDetail({ satellite, allSatellites, positions, location, horizonSettings, onClose }: Props) {
-  const [tleData,       setTleData]       = useState<TleData | null>(null);
-  const [passes,        setPasses]        = useState<SatPass[]>([]);
-  const [tleLoading,    setTleLoading]    = useState(false);
-  const [passesLoading, setPassesLoading] = useState(false);
+  const [tleData,            setTleData]            = useState<TleData | null>(null);
+  const [passes,             setPasses]              = useState<SatPass[]>([]);
+  const [tleLoading,         setTleLoading]          = useState(false);
+  const [passesLoading,      setPassesLoading]       = useState(false);
+  const [spaceTrackVerified, setSpaceTrackVerified]  = useState(false);
 
   const satname = satellite?.satname;
 
   useEffect(() => {
     if (!satname) return;
-    setTleData(null); setPasses([]); setTleLoading(true); setPassesLoading(true);
+    setTleData(null); setPasses([]); setTleLoading(true); setPassesLoading(true); setSpaceTrackVerified(false);
 
     fetch(`${API_BASE}/api/satellites/tle?name=${encodeURIComponent(satname)}`)
       .then(r => r.ok ? r.json() : null)
-      .then(d => setTleData(d))
+      .then(d => {
+        setTleData(d);
+        if (d?.noradId) {
+          fetch(`${API_BASE}/api/validate/spacetrack/${d.noradId}`)
+            .then(r => r.ok ? r.json() : null)
+            .then(v => setSpaceTrackVerified(!!v?.matches))
+            .catch(() => setSpaceTrackVerified(false));
+        }
+      })
       .catch(() => setTleData(null))
       .finally(() => setTleLoading(false));
 
@@ -481,7 +498,7 @@ export function SatelliteDetail({ satellite, allSatellites, positions, location,
           {/* § 3 — Orbital Elements */}
           <div className="sd-section">
             <div className="sd-section-title">Orbital Elements</div>
-            <OrbitalElements data={tleData} loading={tleLoading}/>
+            <OrbitalElements data={tleData} loading={tleLoading} spaceTrackVerified={spaceTrackVerified}/>
           </div>
 
           {/* § 4 — Upcoming Passes */}

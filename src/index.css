@@ -2837,6 +2837,19 @@ button { font-family: inherit; }
   border-bottom: 1px solid rgba(0, 212, 255, 0.06);
 }
 .orbital-row:last-child { border-bottom: none; }
+
+.spacetrack-badge {
+  display:     flex;
+  align-items: center;
+  gap:         5px;
+  margin-top:  8px;
+  padding:     6px 0 2px;
+  font-size:   10px;
+  font-weight: 600;
+  color:       #5a8a6e;
+  font-family: var(--mono);
+}
+.spacetrack-badge svg { flex-shrink: 0; }
 .orbital-label {
   font-size: 10px;
   color: #4a6080;
