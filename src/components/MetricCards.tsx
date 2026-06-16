@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import type { Satellite } from '../types';
 import type { Pass } from '../hooks/useRecommendation';
-import { CONSTELLATION_LABELS } from '../utils/constellation';
+import { CONSTELLATION_LABELS, getConstellation } from '../utils/constellation';
 import { Skeleton } from './Skeleton';
 
 interface Props {
@@ -75,16 +75,20 @@ export function MetricCards({ satellites, topPasses, activeConstellation, loadin
     ? 'All constellations'
     : CONSTELLATION_LABELS[activeConstellation] ?? `${activeConstellation} only`;
 
-  const slCount  = satellites.filter(s => s.satname.includes('STARLINK')).length;
-  const owCount  = satellites.filter(s => s.satname.includes('ONEWEB')).length;
-  const gpsCount = satellites.filter(s => s.satname.includes('GPS') || s.satname.includes('NAVSTAR')).length;
-  const issCount = satellites.filter(s => s.satname.includes('ISS') || s.satname.includes('ZARYA')).length;
+  const slCount  = satellites.filter(s => getConstellation(s.satname, s.constellation) === 'STARLINK').length;
+  const owCount  = satellites.filter(s => getConstellation(s.satname, s.constellation) === 'ONEWEB').length;
+  const gpsCount = satellites.filter(s => getConstellation(s.satname, s.constellation) === 'GPS').length;
+  const issCount = satellites.filter(s => getConstellation(s.satname, s.constellation) === 'ISS').length;
+  const galCount = satellites.filter(s => getConstellation(s.satname, s.constellation) === 'GALILEO').length;
+  const gloCount = satellites.filter(s => getConstellation(s.satname, s.constellation) === 'GLONASS').length;
 
   const contextParts: string[] = [];
   if (slCount  > 0) contextParts.push(`SL ${slCount}`);
   if (owCount  > 0) contextParts.push(`OW ${owCount}`);
   if (gpsCount > 0) contextParts.push(`GPS ${gpsCount}`);
   if (issCount > 0) contextParts.push(`ISS ${issCount}`);
+  if (galCount > 0) contextParts.push(`GAL ${galCount}`);
+  if (gloCount > 0) contextParts.push(`GLO ${gloCount}`);
   const contextText = contextParts.join(' · ') || 'No satellites tracked';
 
   return (

@@ -10,7 +10,7 @@ interface Props {
 export function ConstellationFilter({ satellites, active, onChange }: Props) {
   function countFor(c: string): number {
     if (c === 'ALL') return satellites.length;
-    return satellites.filter(s => getConstellation(s.satname) === c).length;
+    return satellites.filter(s => getConstellation(s.satname, s.constellation) === c).length;
   }
 
   return (

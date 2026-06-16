@@ -102,8 +102,8 @@ function MiniSkyMap({ sat, pos }: { sat: Satellite; pos: SatellitePosition | und
   const el    = pos?.elevation ?? sat.elevation;
   const az    = pos?.azimuth   ?? sat.azimuth;
   const { x, y } = toXY(az, el);
-  const color = CONSTELLATION_COLORS[getConstellation(sat.satname)] ?? '#00d4ff';
-  const isIss = getConstellation(sat.satname) === 'ISS';
+  const color = CONSTELLATION_COLORS[getConstellation(sat.satname, sat.constellation)] ?? '#00d4ff';
+  const isIss = getConstellation(sat.satname, sat.constellation) === 'ISS';
   const dotR  = isIss ? 8 : 5;
 
   return (
@@ -409,7 +409,7 @@ export function SatelliteDetail({ satellite, allSatellites, positions, location,
   const liveSat    = allSatellites.find(s => s.satname === satellite.satname) ?? satellite;
   const pos        = positions.find(p => p.satname === satellite.satname);
   const isOverhead = allSatellites.some(s => s.satname === satellite.satname);
-  const c          = getConstellation(satellite.satname);
+  const c          = getConstellation(satellite.satname, satellite.constellation);
   const cColor     = CONSTELLATION_COLORS[c] ?? '#4a6080';
   const isDtc      = satellite.satname.includes('[DTC]');
   const nextPass   = passes[0];

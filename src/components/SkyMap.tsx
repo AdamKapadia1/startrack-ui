@@ -25,8 +25,8 @@ function toXY(az: number, el: number) {
 }
 
 // Muted radar-style palette — no saturated glow colours
-function dotStyle(name: string, el: number): { color: string; opacity: number; r: number } {
-  const c = getConstellation(name);
+function dotStyle(name: string, el: number, constellation?: string | null): { color: string; opacity: number; r: number } {
+  const c = getConstellation(name, constellation);
   switch (c) {
     case 'STARLINK':
       return el >= 60
@@ -38,6 +38,10 @@ function dotStyle(name: string, el: number): { color: string; opacity: number; r
       return { color: '#ffffff', opacity: 0.90, r: 4 };
     case 'GPS':
       return { color: '#a8915a', opacity: 0.60, r: 2 };
+    case 'GALILEO':
+      return { color: '#b888d4', opacity: 0.60, r: 2 };
+    case 'GLONASS':
+      return { color: '#d4a888', opacity: 0.60, r: 2 };
     default:
       return { color: '#6a7a8a', opacity: 0.50, r: 2 };
   }
@@ -109,7 +113,7 @@ function SatPopup({ sat, passes, onClose }: PopupProps) {
 }
 
 // ── Trail position store ──────────────────────────────────────────────────────
-interface TrailPos { el: number; az: number; }
+interface TrailPos { el: number; az: number; constellation?: string | null; }
 
 // ── Main component ────────────────────────────────────────────────────────────
 
@@ -146,6 +150,7 @@ export function SkyMap({
           range:           s.range,
           dopplerShiftKHz: s.dopplerShiftKHz,
           dopplerShiftHz:  s.dopplerShiftHz,
+          constellation:   s.constellation,
         }));
 
   // Total above horizon (before MIN_EL filter) for the "Showing X of Y" label
@@ -155,7 +160,7 @@ export function SkyMap({
 
   const renderSats = activeConstellation === 'ALL'
     ? allSats
-    : allSats.filter(s => getConstellation(s.satname) === activeConstellation);
+    : allSats.filter(s => getConstellation(s.satname, s.constellation) === activeConstellation);
 
   // Update trails and fading-out ghosts
   useEffect(() => {
@@ -185,7 +190,7 @@ export function SkyMap({
       const existing = trailRef.current.get(sat.satname) ?? [];
       trailRef.current.set(
         sat.satname,
-        [...existing, { el: sat.elevation, az: sat.azimuth }].slice(-4),
+        [...existing, { el: sat.elevation, az: sat.azimuth, constellation: sat.constellation }].slice(-4),
       );
     }
     prevNames.current = currentNames;
@@ -215,6 +220,8 @@ export function SkyMap({
     { color: '#4a7a9e', label: 'OneWeb' },
     { color: '#ffffff', label: 'ISS' },
     { color: '#a8915a', label: 'GPS' },
+    { color: '#b888d4', label: 'Galileo' },
+    { color: '#d4a888', label: 'GLONASS' },
   ];
 
   return (
@@ -291,10 +298,10 @@ export function SkyMap({
           {/* ── Fading-out ghosts ── */}
           <g clipPath="url(#skyClip)">
             {Array.from(fadingOut.entries())
-              .filter(([name]) => activeConstellation === 'ALL' || getConstellation(name) === activeConstellation)
+              .filter(([name, pos]) => activeConstellation === 'ALL' || getConstellation(name, pos.constellation) === activeConstellation)
               .map(([name, pos]) => {
                 const { x, y } = toXY(pos.az, pos.el);
-                const { color } = dotStyle(name, pos.el);
+                const { color } = dotStyle(name, pos.el, pos.constellation);
                 return <circle key={`exit-${name}`} cx={x} cy={y} r={2} fill={color} opacity={0} className="sat-fading-out"/>;
               })}
           </g>
@@ -303,7 +310,7 @@ export function SkyMap({
           <g clipPath="url(#skyClip)">
             {renderSats.map(sat => {
               const { x, y }    = toXY(sat.azimuth, sat.elevation);
-              const ds          = dotStyle(sat.satname, sat.elevation);
+              const ds          = dotStyle(sat.satname, sat.elevation, sat.constellation);
               const isSelected  = selected?.sat.satname === sat.satname;
               const trail       = trailRef.current.get(sat.satname) ?? [];
               const prevPos     = trail.length > 0 ? trail[trail.length - 1] : null;
@@ -388,19 +395,24 @@ export function SkyMap({
           {!compact && (activeConstellation === 'ALL' ? (() => {
             const lx = CX + R - 6;
             const ly = CY + R - 6;
-            const rowH = 13, pad = 6;
+            const rowH = 13, pad = 6, colW = 60;
             const rows = LEGEND;
-            const boxH = rows.length * rowH + pad * 1.5;
-            const boxW = 64;
+            const numRows = Math.ceil(rows.length / 2);
+            const boxH = numRows * rowH + pad * 1.5;
+            const boxW = colW * 2 + pad;
             return (
               <g transform={`translate(${lx - boxW}, ${ly - boxH})`}>
                 <rect width={boxW} height={boxH} rx={3} fill="rgba(6,10,16,0.85)" stroke="#1a3050" strokeWidth="0.5"/>
-                {rows.map((item, i) => (
-                  <g key={item.label} transform={`translate(${pad}, ${pad + i * rowH})`}>
-                    <circle cx={3} cy={0} r={3} fill={item.color} opacity={0.8}/>
-                    <text x={9} y={3.5} fill="#3a5878" fontSize="9" fontFamily="JetBrains Mono, monospace">{item.label}</text>
-                  </g>
-                ))}
+                {rows.map((item, i) => {
+                  const col = Math.floor(i / numRows);
+                  const row = i % numRows;
+                  return (
+                    <g key={item.label} transform={`translate(${pad + col * colW}, ${pad + row * rowH})`}>
+                      <circle cx={3} cy={0} r={3} fill={item.color} opacity={0.8}/>
+                      <text x={9} y={3.5} fill="#3a5878" fontSize="9" fontFamily="JetBrains Mono, monospace">{item.label}</text>
+                    </g>
+                  );
+                })}
               </g>
             );
           })() : (() => {

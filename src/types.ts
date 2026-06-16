@@ -4,6 +4,7 @@ export interface SatellitePosition {
   azimuth:         number;
   range:           number;
   dopplerShiftKHz: number | null;
+  constellation?:  string | null;
 }
 
 export interface Satellite {
@@ -14,6 +15,7 @@ export interface Satellite {
   dopplerShiftHz:  number | null;
   dopplerShiftKHz: number | null;
   orbitalSpeedKmS?: number | null;
+  constellation?:  string | null;
 }
 
 export interface ScoreBreakdown {
