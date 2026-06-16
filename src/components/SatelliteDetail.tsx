@@ -16,14 +16,15 @@ const CX = 100, CY = 100, R = 82;
 
 // ── Types ──────────────────────────────────────────────────────────────────────
 interface TleData {
-  name:         string;
-  noradId:      number;
-  epoch:        string;
-  inclination:  number;
-  raan:         number;
-  eccentricity: number;
-  period:       number;
-  meanAltitude: number;
+  name:            string;
+  noradId:         number;
+  epoch:           string;
+  inclination:     number;
+  raan:            number;
+  eccentricity:    number;
+  period:          number;
+  meanAltitude:    number;
+  orbitalSpeedKmS: number;
 }
 
 export interface SatPass {
@@ -150,12 +151,13 @@ function MiniSkyMap({ sat, pos }: { sat: Satellite; pos: SatellitePosition | und
 }
 
 // ── Section 2: Live telemetry ──────────────────────────────────────────────────
-function TelemetryGrid({ sat, pos }: { sat: Satellite; pos: SatellitePosition | undefined }) {
+function TelemetryGrid({ sat, pos, orbitalSpeedKmS }: { sat: Satellite; pos: SatellitePosition | undefined; orbitalSpeedKmS: number | null }) {
   const el    = pos?.elevation ?? sat.elevation;
   const range = pos?.range     ?? sat.range;
   const dHz   = sat.dopplerShiftHz;
   const dKHz  = sat.dopplerShiftKHz;
   const altKm = Math.round(range * Math.sin(el * D2R));
+  const speed = orbitalSpeedKmS ?? sat.orbitalSpeedKmS ?? null;
 
   const elColor = el >= 60 ? '#00d4ff' : el >= 30 ? '#ffb800' : '#4a6080';
   const dColor  = dHz === null ? '#4a6080' : dHz > 0 ? '#00d4ff' : dHz < 0 ? '#ff4444' : '#4a6080';
@@ -168,7 +170,7 @@ function TelemetryGrid({ sat, pos }: { sat: Satellite; pos: SatellitePosition | 
     { label: 'Range',         value: `${range.toLocaleString()} km`, color: '#9ca3af' },
     { label: 'Ku Doppler',    value: dLabel,                         color: dColor },
     { label: 'Est. Altitude', value: `~${altKm.toLocaleString()} km`, color: '#9ca3af' },
-    { label: 'Orbital Speed', value: '~7.5 km/s',                    color: '#9ca3af', span: true },
+    { label: 'Orbital Speed', value: speed !== null ? `${speed.toFixed(2)} km/s` : '—', color: '#9ca3af', span: true },
   ];
 
   return (
@@ -190,6 +192,7 @@ const TIPS: Record<string, string> = {
   eccentricity: 'How circular the orbit is (0 = perfect circle)',
   period:       'Time for one complete orbit',
   altitude:     "Average height above Earth's surface",
+  speed:        'True orbital velocity, calculated from this satellite\'s own SGP4 velocity vector — lower orbits move faster',
 };
 
 function OrbitalElements({ data, loading }: { data: TleData | null; loading: boolean }) {
@@ -208,6 +211,7 @@ function OrbitalElements({ data, loading }: { data: TleData | null; loading: boo
     { label: 'Eccentricity',  value: data.eccentricity.toFixed(7),              tip: TIPS.eccentricity },
     { label: 'Period',        value: `${data.period.toFixed(1)} min`,           tip: TIPS.period },
     { label: 'Mean Altitude', value: `${data.meanAltitude.toLocaleString()} km`, tip: TIPS.altitude },
+    { label: 'Orbital Speed', value: `${data.orbitalSpeedKmS.toFixed(2)} km/s`,   tip: TIPS.speed },
     { label: 'TLE Epoch',     value: epoch,                                      tip: '' },
   ];
 
@@ -468,7 +472,7 @@ export function SatelliteDetail({ satellite, allSatellites, positions, location,
           {/* § 2 — Live Telemetry */}
           <div className="sd-section">
             <div className="sd-section-title">Live Telemetry</div>
-            <TelemetryGrid sat={liveSat} pos={pos}/>
+            <TelemetryGrid sat={liveSat} pos={pos} orbitalSpeedKmS={tleData?.orbitalSpeedKmS ?? null}/>
           </div>
 
           {/* § 3 — Orbital Elements */}

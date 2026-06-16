@@ -94,7 +94,7 @@ function SatPopup({ sat, passes, onClose }: PopupProps) {
         <div className="sat-popup-row"><span>Azimuth</span><span>{sat.azimuth.toFixed(1)}°</span></div>
         <div className="sat-popup-row"><span>Range</span><span>{sat.range.toLocaleString()} km</span></div>
         <div className="sat-popup-row"><span>Altitude</span><span>~{altKm.toLocaleString()} km</span></div>
-        <div className="sat-popup-row"><span>Speed</span><span>~7.5 km/s</span></div>
+        <div className="sat-popup-row"><span>Speed</span><span>{sat.orbitalSpeedKmS != null ? `${sat.orbitalSpeedKmS.toFixed(2)} km/s` : '—'}</span></div>
         <div className="sat-popup-row"><span>Ku-band</span><span style={{ color: dopplerColor, fontWeight: 600 }}>{dopplerLabel}</span></div>
         {nextPass && (
           <div className="sat-popup-row sat-popup-pass">

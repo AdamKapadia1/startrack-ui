@@ -13,6 +13,7 @@ export interface Satellite {
   range:           number;
   dopplerShiftHz:  number | null;
   dopplerShiftKHz: number | null;
+  orbitalSpeedKmS?: number | null;
 }
 
 export interface ScoreBreakdown {
