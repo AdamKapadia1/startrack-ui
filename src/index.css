@@ -5565,3 +5565,87 @@ circle[fill="#7b61ff"] { filter: drop-shadow(0 0 6px #7b61ff); }
   white-space: nowrap;
   z-index:    10;
 }
+
+/* ── Signal Heatmap ──────────────────────────────────────────────────────── */
+.insights-heatmap-wrap {
+  margin-bottom: 24px;
+}
+
+.signal-heatmap {
+  background:    var(--bg-card);
+  border:        1px solid var(--border);
+  border-radius: 12px;
+  padding:       20px 20px 16px;
+  overflow-x:    auto;
+}
+
+.heatmap-empty {
+  color:       var(--text-muted);
+  font-size:   0.85rem;
+  text-align:  center;
+  padding:     24px 0;
+}
+
+.heatmap-summary {
+  display:       flex;
+  align-items:   center;
+  gap:           8px;
+  font-size:     0.82rem;
+  color:         var(--text-muted);
+  margin-bottom: 14px;
+  flex-wrap:     wrap;
+}
+.heatmap-summary strong { color: var(--text-primary); }
+.heatmap-summary-sep    { opacity: 0.4; }
+
+.heatmap-grid-wrap {
+  position: relative;
+  overflow-x: auto;
+  padding-bottom: 4px;
+}
+
+.heatmap-label-text {
+  font-size:   9px;
+  fill:        var(--text-muted, #8aa0bc);
+  font-family: inherit;
+}
+
+.heatmap-cell { cursor: default; }
+.heatmap-cell--has-data {
+  cursor: pointer;
+  transition: opacity 0.1s;
+}
+.heatmap-cell--has-data:hover { opacity: 0.75; }
+
+.heatmap-tooltip {
+  background:    rgba(10, 18, 30, 0.96);
+  border:        1px solid var(--border);
+  border-radius: 8px;
+  padding:       8px 12px;
+  display:       flex;
+  flex-direction: column;
+  gap:           2px;
+  font-size:     0.78rem;
+  color:         var(--text-primary);
+  pointer-events: none;
+  white-space:   nowrap;
+  z-index:       100;
+  box-shadow:    0 4px 16px rgba(0,0,0,0.5);
+}
+.heatmap-tooltip strong  { font-weight: 600; margin-bottom: 1px; }
+.heatmap-tooltip-count   { color: var(--text-muted); font-size: 0.74rem; }
+
+.heatmap-legend {
+  display:     flex;
+  align-items: center;
+  gap:         4px;
+  margin-top:  12px;
+  font-size:   0.74rem;
+  color:       var(--text-muted);
+}
+.heatmap-legend-cell {
+  width:        12px;
+  height:       12px;
+  border-radius: 2px;
+  display:      inline-block;
+}
