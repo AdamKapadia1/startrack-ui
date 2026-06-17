@@ -6,6 +6,7 @@ import { ConnectivityGauge }    from './components/ConnectivityGauge';
 import { AIRecommendation }     from './components/AIRecommendation';
 import { DtcCard }              from './components/DtcCard';
 import { SkyMap }               from './components/SkyMap';
+import { Globe3D }              from './components/Globe3D';
 import { ConstellationFilter }  from './components/ConstellationFilter';
 import { PassList }             from './components/PassList';
 import { SatelliteList }        from './components/SatelliteList';
@@ -20,6 +21,8 @@ import { SatelliteDetail }      from './components/SatelliteDetail';
 import { Onboarding, ONBOARDING_KEY } from './components/Onboarding';
 import { HelpPanel }            from './components/HelpPanel';
 import { PassLandingPage }      from './components/PassLandingPage';
+import { EmbedWidget }          from './components/EmbedWidget';
+import { EmbedCodePanel }       from './components/EmbedCodePanel';
 import { ChangelogPanel }       from './components/ChangelogPanel';
 import { useTheme }             from './hooks/useTheme';
 import { useAuth }              from './hooks/useAuth';
@@ -61,7 +64,9 @@ const CHAT_INSIGHTS = [
 ];
 
 function App() {
-  const isPassRoute = window.location.pathname === '/pass';
+  const isPassRoute  = window.location.pathname === '/pass';
+  const isEmbedRoute = window.location.pathname === '/embed';
+  if (isEmbedRoute) return <EmbedWidget />;
   const { location, saveLocation, gpsAccuracy, permState, requestGPS, declineGPS } = useLocation();
   const { theme, toggleTheme }                  = useTheme();
   const { user, signOut }                       = useAuth();
@@ -70,8 +75,11 @@ function App() {
     accountSettings, updateAccountSettings,
   } = useProfile(user?.id);
 
+  const isMobile = window.innerWidth < 768;
+  const [skyView,             setSkyView]             = useState<'2d' | '3d'>('2d');
   const [authOpen,            setAuthOpen]            = useState(false);
   const [historyOpen,         setHistoryOpen]         = useState(false);
+  const [embedOpen,           setEmbedOpen]           = useState(false);
   const [settingsOpen,        setSettingsOpen]        = useState(false);
   const [chatOpen,            setChatOpen]            = useState(false);
   const [chatInitialInput,    setChatInitialInput]    = useState('');
@@ -169,6 +177,7 @@ function App() {
         onOpenAuth={() => setAuthOpen(true)}
         onSignOut={signOut}
         onOpenHistory={() => setHistoryOpen(true)}
+        onOpenEmbed={() => setEmbedOpen(true)}
         theme={theme}
         wsStatus={status}
         lastUpdated={lastUpdated}
@@ -246,26 +255,58 @@ function App() {
         {/* ── SKY MAP ── */}
         {activeTab === 'skymap' && (
           <div className="tab-pane tab-skymap">
-            {skyMapHeader}
-            <SkyMap
-              satellites={satellites}
-              cloudCover={weather?.cloudCover}
-              passes={topPasses}
-              positions={positions}
-              posLastUpdate={posLastUpdate}
-              activeConstellation={activeConstellation}
-              loading={!satData}
-              compact={false}
-              horizonSettings={horizonSettings}
-              minElevation={accountSettings.default_elevation_threshold}
-            />
-            <SatelliteList
-              satellites={filteredSatellites}
-              onSelectSatellite={setSelectedSatellite}
-              loading={!satData}
-              fullHeight={true}
-              units={accountSettings.units}
-            />
+            <div className="section-label sky-header">
+              <span>
+                {skyView === '2d'
+                  ? `Sky Map${weather?.cloudCover != null ? ` · ☁ ${weather.cloudCover}%` : ': Azimuth / Elevation'}`
+                  : 'Globe · Live Constellation'}
+              </span>
+              <div className="sky-view-controls">
+                <div className="sky-view-toggle">
+                  <button
+                    className={`sky-view-btn${skyView === '2d' ? ' active' : ''}`}
+                    onClick={() => setSkyView('2d')}
+                  >2D</button>
+                  <button
+                    className={`sky-view-btn${skyView === '3d' ? ' active' : ''}`}
+                    onClick={() => setSkyView('3d')}
+                  >3D</button>
+                </div>
+                {skyView === '2d' && (
+                  <ConstellationFilter
+                    satellites={satellites}
+                    active={activeConstellation}
+                    onChange={setActiveConstellation}
+                  />
+                )}
+              </div>
+            </div>
+
+            {skyView === '2d' ? (
+              <>
+                <SkyMap
+                  satellites={satellites}
+                  cloudCover={weather?.cloudCover}
+                  passes={topPasses}
+                  positions={positions}
+                  posLastUpdate={posLastUpdate}
+                  activeConstellation={activeConstellation}
+                  loading={!satData}
+                  compact={false}
+                  horizonSettings={horizonSettings}
+                  minElevation={accountSettings.default_elevation_threshold}
+                />
+                <SatelliteList
+                  satellites={filteredSatellites}
+                  onSelectSatellite={setSelectedSatellite}
+                  loading={!satData}
+                  fullHeight={true}
+                  units={accountSettings.units}
+                />
+              </>
+            ) : (
+              <Globe3D location={location} isMobile={isMobile} />
+            )}
           </div>
         )}
 
@@ -365,6 +406,7 @@ function App() {
       />
 
       <AuthModal open={authOpen} onClose={() => setAuthOpen(false)} />
+      <EmbedCodePanel open={embedOpen} onClose={() => setEmbedOpen(false)} location={location} />
       <ProfilePage
         open={historyOpen}
         onClose={() => setHistoryOpen(false)}

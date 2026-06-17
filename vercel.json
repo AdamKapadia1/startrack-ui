@@ -1,3 +1,6 @@
 {
-  "rewrites": [{ "source": "/pass", "destination": "/index.html" }]
+  "rewrites": [
+    { "source": "/pass",  "destination": "/index.html" },
+    { "source": "/embed", "destination": "/index.html" }
+  ]
 }

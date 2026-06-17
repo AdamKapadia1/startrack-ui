@@ -41,6 +41,7 @@ interface Props {
   onOpenAuth:         () => void;
   onSignOut:          () => void;
   onOpenHistory:      () => void;
+  onOpenEmbed:        () => void;
   theme:              string;
   wsStatus:           WsStatus;
   lastUpdated:        Date | null;
@@ -52,7 +53,7 @@ interface Props {
   onManageLocations:  () => void;
 }
 
-export function Header({ location, onOpenSettings, onOpenHelp, onToggleTheme, onOpenAuth, onSignOut, onOpenHistory, theme, wsStatus, lastUpdated, gpsAccuracy, topPasses, user, savedLocations, onSwitchLocation, onManageLocations }: Props) {
+export function Header({ location, onOpenSettings, onOpenHelp, onToggleTheme, onOpenAuth, onSignOut, onOpenHistory, onOpenEmbed, theme, wsStatus, lastUpdated, gpsAccuracy, topPasses, user, savedLocations, onSwitchLocation, onManageLocations }: Props) {
   const cfg      = STATUS[wsStatus] ?? STATUS.connecting;
   const agoText  = useAgoText(lastUpdated);
   const [flashing,      setFlashing]      = useState(false);
@@ -163,6 +164,12 @@ export function Header({ location, onOpenSettings, onOpenHelp, onToggleTheme, on
                 >
                   Pass history
                 </button>
+                <button
+                  className="user-dropdown-item"
+                  onClick={() => { setUserMenuOpen(false); onOpenEmbed(); }}
+                >
+                  Get embed code
+                </button>
                 <div className="user-dropdown-divider" />
                 <button
                   className="user-dropdown-item user-dropdown-item--danger"
@@ -179,6 +186,11 @@ export function Header({ location, onOpenSettings, onOpenHelp, onToggleTheme, on
           </button>
         )}
 
+        <button className="icon-btn" aria-label="Get embed code" title="Get embed code" onClick={onOpenEmbed}>
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+            <polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/>
+          </svg>
+        </button>
         <button className="icon-btn" aria-label="Help" onClick={onOpenHelp}>
           <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
             <circle cx="12" cy="12" r="10"/>

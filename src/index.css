@@ -308,8 +308,42 @@ button { font-family: inherit; }
   row-gap: 4px;
 }
 
-.sky-header .constellation-filter {
+.sky-view-controls {
+  display:     flex;
+  align-items: center;
+  gap:         8px;
   margin-left: auto;
+  flex-wrap:   nowrap;
+}
+.sky-view-toggle {
+  display:       flex;
+  border:        1px solid var(--border-primary);
+  border-radius: 5px;
+  overflow:      hidden;
+  flex-shrink:   0;
+}
+.sky-view-btn {
+  background:    transparent;
+  border:        none;
+  color:         var(--text-muted);
+  cursor:        pointer;
+  font-size:     10px;
+  font-weight:   600;
+  letter-spacing: 0.6px;
+  padding:       3px 9px;
+  transition:    background 0.15s, color 0.15s;
+}
+.sky-view-btn.active {
+  background: rgba(0,212,255,0.12);
+  color:      var(--accent-primary);
+}
+.sky-view-btn:hover:not(.active) {
+  background: rgba(255,255,255,0.04);
+  color:      var(--text-secondary);
+}
+
+.sky-header .constellation-filter {
+  margin-left: 0;
   padding: 0;
   margin-bottom: 0;
   gap: 4px;
@@ -5478,4 +5512,34 @@ circle[fill="#7b61ff"] { filter: drop-shadow(0 0 6px #7b61ff); }
   background:    rgba(0,212,255,0.75);
   border-radius: 1px;
   flex-shrink:   0;
+}
+
+/* ── 3D Globe ─────────────────────────────────────────────── */
+.globe3d-container {
+  position:      relative;
+  width:         100%;
+  height:        clamp(320px, 60vh, 640px);
+  border-radius: 8px;
+  overflow:      hidden;
+  background:    #080c14;
+}
+.globe3d-container canvas {
+  display: block;
+  width:   100% !important;
+  height:  100% !important;
+}
+.globe3d-mobile-note {
+  position:   absolute;
+  top:        8px;
+  left:       50%;
+  transform:  translateX(-50%);
+  background: rgba(8,12,20,0.85);
+  border:     1px solid var(--border-primary);
+  border-radius: 4px;
+  color:      var(--text-muted);
+  font-size:  10px;
+  padding:    4px 10px;
+  pointer-events: none;
+  white-space: nowrap;
+  z-index:    10;
 }
