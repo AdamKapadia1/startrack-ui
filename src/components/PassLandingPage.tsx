@@ -1,7 +1,8 @@
 import { useState, useEffect } from 'react';
 import { ElevationArcChart } from './ElevationArcChart';
 
-const SITE = 'https://startrackv1-ui.vercel.app';
+const SITE    = 'https://startrackv1-ui.vercel.app';
+const API_BASE = 'https://web-production-98c0d.up.railway.app';
 
 function estimateDuration(peakEl: number): number {
   return Math.round(200 + (peakEl / 90) * 400);
@@ -53,27 +54,56 @@ export function PassLandingPage() {
 
   // Update document meta tags for this specific pass (for social sharing)
   useEffect(() => {
-    const formattedTime = timeStr
-      ? new Date(timeStr).toLocaleString('en-GB', {
-          timeZone: 'Europe/London', dateStyle: 'medium', timeStyle: 'short',
-        })
+    const d = timeStr ? new Date(timeStr) : null;
+    const dateStr = d
+      ? d.toLocaleDateString('en-GB', { weekday: 'short', day: 'numeric', month: 'short', timeZone: 'Europe/London' })
+      : '';
+    const timeOnly = d
+      ? d.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit', timeZone: 'Europe/London' })
+      : '';
+    const formattedTime = d
+      ? d.toLocaleString('en-GB', { timeZone: 'Europe/London', dateStyle: 'medium', timeStyle: 'short' })
       : '';
 
     document.title = `${satname} Pass Alert | StarTrack AI`;
 
     function setMeta(selector: string, content: string) {
-      const el = document.querySelector(selector);
-      if (el) el.setAttribute('content', content);
+      let el = document.querySelector(selector);
+      if (!el) {
+        // Create the tag if it doesn't exist
+        el = document.createElement('meta');
+        const [attr, val] = selector.replace(/^meta\[/, '').replace(/\]$/, '').split('="');
+        el.setAttribute(attr, val.replace(/"$/, ''));
+        document.head.appendChild(el);
+      }
+      el.setAttribute('content', content);
     }
 
-    const ogTitle   = `${satname} passes at ${Math.round(el)}° | StarTrack AI`;
-    const ogDesc    = `${satname} will pass overhead at ${Math.round(el)}° elevation over ${loc}${formattedTime ? ` at ${formattedTime}` : ''}. Track it live on StarTrack AI.`;
-    const twDesc    = `${satname} overhead at ${Math.round(el)}° over ${loc}${formattedTime ? ` at ${formattedTime}` : ''}. Track it live.`;
+    const ogTitle = `${satname} passes at ${Math.round(el)}° | StarTrack AI`;
+    const ogDesc  = `${satname} will pass overhead at ${Math.round(el)}° elevation over ${loc}${formattedTime ? ` at ${formattedTime}` : ''}. Track it live on StarTrack AI.`;
+    const twDesc  = `${satname} overhead at ${Math.round(el)}° over ${loc}${formattedTime ? ` at ${formattedTime}` : ''}. Track it live.`;
+
+    const qualityLabel = el >= 60 ? 'Excellent' : el >= 30 ? 'Good' : 'Fair';
+    const cardUrl = `${API_BASE}/api/pass-card?` + new URLSearchParams({
+      sat:     satname,
+      date:    dateStr,
+      time:    timeOnly,
+      el:      String(Math.round(el * 10) / 10),
+      quality: qualityLabel,
+      loc:     loc,
+      ...(score !== null ? { score: String(score) } : {}),
+    }).toString();
 
     setMeta('meta[property="og:title"]',          ogTitle);
     setMeta('meta[property="og:description"]',    ogDesc);
+    setMeta('meta[property="og:image"]',          cardUrl);
+    setMeta('meta[property="og:image:width"]',    '1200');
+    setMeta('meta[property="og:image:height"]',   '630');
+    setMeta('meta[property="og:image:type"]',     'image/png');
+    setMeta('meta[name="twitter:card"]',          'summary_large_image');
     setMeta('meta[name="twitter:title"]',         ogTitle);
     setMeta('meta[name="twitter:description"]',   twDesc);
+    setMeta('meta[name="twitter:image"]',         cardUrl);
     setMeta('meta[name="description"]',           ogDesc);
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
