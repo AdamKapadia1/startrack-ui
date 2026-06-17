@@ -10,6 +10,8 @@ import { horizonQueryParam } from '../utils/horizonProfile';
 import type { HorizonSettings } from '../utils/horizonProfile';
 import { usePassHistory } from '../hooks/usePassHistory';
 import { PassShare } from './PassShare';
+import { GroundTrackMap } from './GroundTrackMap';
+import type { GroundTrackPoint } from './GroundTrackMap';
 import { formatDistance, formatAltitude, formatSpeed } from '../utils/units';
 import { formatTime, formatDate, tzLabel } from '../utils/timezone';
 
@@ -396,10 +398,23 @@ export function SatelliteDetail({ satellite, allSatellites, positions, location,
   const [tleLoading,         setTleLoading]          = useState(false);
   const [passesLoading,      setPassesLoading]       = useState(false);
   const [spaceTrackVerified, setSpaceTrackVerified]  = useState(false);
+  const [groundTrack,        setGroundTrack]         = useState<GroundTrackPoint[] | null>(null);
+  const [groundTrackLoading, setGroundTrackLoading]  = useState(false);
   const { logEvent }  = usePassHistory();
   const loggedForRef  = useRef<string | null>(null);
 
   const satname = satellite?.satname;
+
+  useEffect(() => {
+    if (!satname) { setGroundTrack(null); return; }
+    setGroundTrack(null);
+    setGroundTrackLoading(true);
+    fetch(`${API_BASE}/api/satellites/groundtrack?name=${encodeURIComponent(satname)}`)
+      .then(r => r.ok ? r.json() : null)
+      .then(d => setGroundTrack(d?.points ?? null))
+      .catch(() => setGroundTrack(null))
+      .finally(() => setGroundTrackLoading(false));
+  }, [satname]);
 
   useEffect(() => {
     if (!satname) return;
@@ -571,6 +586,19 @@ export function SatelliteDetail({ satellite, allSatellites, positions, location,
                 <span className="sd-section-sub">Ku-band · estimated</span>
               </div>
               <DopplerChart pass={nextPass} timezone={timezone}/>
+            </div>
+          )}
+
+          {/* § 7 — Ground track */}
+          {(groundTrack || groundTrackLoading) && (
+            <div className="sd-section">
+              <div className="sd-section-title">Ground Track</div>
+              <GroundTrackMap
+                points={groundTrack ?? []}
+                observerLat={location.lat}
+                observerLon={location.lon}
+                loading={groundTrackLoading}
+              />
             </div>
           )}
 
