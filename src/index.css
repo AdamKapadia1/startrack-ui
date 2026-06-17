@@ -4567,6 +4567,7 @@ circle[fill="#7b61ff"] { filter: drop-shadow(0 0 6px #7b61ff); }
   text-decoration: none;
 }
 .pass-landing-link:hover { text-decoration: underline; }
+.pass-landing-views { color: var(--text-tertiary); font-size: 11px; }
 
 @media (max-width: 520px) {
   .pass-landing-card     { padding: 28px 16px; }

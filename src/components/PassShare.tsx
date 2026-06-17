@@ -1,7 +1,8 @@
 import { useState, useRef, useEffect } from 'react';
 import { usePassHistory } from '../hooks/usePassHistory';
 
-const SITE = 'https://startrackv1-ui.vercel.app';
+const SITE     = 'https://startrack-delta.vercel.app';
+const API_BASE = import.meta.env.VITE_API_URL ?? '';
 
 interface Props {
   startUTC:     number;
@@ -9,27 +10,36 @@ interface Props {
   satname:      string;
   locationName: string;
   className?:   string;
+  // Optional extra pass data for richer share records
+  durationSeconds?: number;
+  signalScore?:     number;
+  noradId?:         string;
 }
 
-function buildShare(startUTC: number, maxEl: number, satname: string, locationName: string) {
-  const d   = new Date(startUTC * 1000);
-  const iso = d.toISOString();
-  const el  = Math.round(maxEl);
-  const url = `${SITE}/pass?sat=${encodeURIComponent(satname)}&time=${encodeURIComponent(iso)}&el=${el}&loc=${encodeURIComponent(locationName)}`;
-  const date = d.toLocaleDateString('en-GB', { weekday: 'short', day: 'numeric', month: 'short', timeZone: 'Europe/London' });
-  const time = d.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit', timeZone: 'Europe/London' });
-  const quality = el >= 60 ? 'nearly directly overhead' : el >= 30 ? 'at a good angle' : 'at low elevation';
-  const text = `🛰 ${satname} passes overhead at ${el}° on ${date} at ${time} BST, ${quality}! Track it live: ${url} #StarTrack #Starlink`;
-  return { url, text };
+function qualityLabel(el: number) {
+  if (el >= 60) return 'Excellent';
+  if (el >= 30) return 'Good';
+  return 'Fair';
 }
 
-export function PassShare({ startUTC, maxEl, satname, locationName, className = '' }: Props) {
-  const [open,   setOpen]   = useState(false);
-  const [copied, setCopied] = useState(false);
-  const wrapRef = useRef<HTMLDivElement>(null);
+function estimatedScore(el: number) {
+  return Math.round(40 + (el / 90) * 60);
+}
+
+function shareText(satname: string, el: number, shareUrl: string) {
+  const q = el >= 60 ? 'nearly directly overhead' : el >= 30 ? 'at a good angle' : 'at low elevation';
+  return `🛰 ${satname} passes overhead at ${Math.round(el)}°, ${q}! Track it live: ${shareUrl} #StarTrack`;
+}
+
+export function PassShare({ startUTC, maxEl, satname, locationName, className = '', durationSeconds, signalScore, noradId }: Props) {
+  const [open,     setOpen]     = useState(false);
+  const [copied,   setCopied]   = useState(false);
+  const [creating, setCreating] = useState(false);
+  const wrapRef   = useRef<HTMLDivElement>(null);
+  const cachedUrl = useRef<string | null>(null);
   const { logEvent } = usePassHistory();
 
-  function logShared() {
+  function logShared(url: string) {
     logEvent({
       satelliteName: satname,
       locationLabel: locationName,
@@ -37,7 +47,13 @@ export function PassShare({ startUTC, maxEl, satname, locationName, className = 
       maxElevation:  maxEl,
       eventType:     'shared',
     });
+    return url;
   }
+
+  useEffect(() => {
+    // Reset cached URL when the pass changes
+    cachedUrl.current = null;
+  }, [startUTC, satname]);
 
   useEffect(() => {
     if (!open) return;
@@ -48,45 +64,74 @@ export function PassShare({ startUTC, maxEl, satname, locationName, className = 
     return () => document.removeEventListener('mousedown', onOutside);
   }, [open]);
 
-  const { url, text } = buildShare(startUTC, maxEl, satname, locationName);
+  async function getShareUrl(): Promise<string> {
+    if (cachedUrl.current) return cachedUrl.current;
+    setCreating(true);
+    try {
+      const r = await fetch(`${API_BASE}/api/share/create`, {
+        method:  'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body:    JSON.stringify({
+          satelliteName:   satname,
+          noradId:         noradId         ?? null,
+          passTime:        new Date(startUTC * 1000).toISOString(),
+          maxElevation:    maxEl,
+          durationSeconds: durationSeconds ?? null,
+          quality:         qualityLabel(maxEl),
+          locationLabel:   locationName,
+          signalScore:     signalScore     ?? estimatedScore(maxEl),
+        }),
+      });
+      if (!r.ok) throw new Error('share create failed');
+      const { url } = await r.json();
+      cachedUrl.current = url;
+      return url;
+    } catch {
+      // Fallback to parameter-based URL if backend is unavailable
+      const iso = new Date(startUTC * 1000).toISOString();
+      const url = `${SITE}/pass?sat=${encodeURIComponent(satname)}&time=${encodeURIComponent(iso)}&el=${Math.round(maxEl)}&loc=${encodeURIComponent(locationName)}`;
+      cachedUrl.current = url;
+      return url;
+    } finally {
+      setCreating(false);
+    }
+  }
 
   function stop(e: React.MouseEvent) { e.stopPropagation(); }
-
-  function toggle(e: React.MouseEvent) {
-    e.stopPropagation();
-    setOpen(o => !o);
-  }
+  function toggle(e: React.MouseEvent) { e.stopPropagation(); setOpen(o => !o); }
 
   async function copyLink(e: React.MouseEvent) {
     e.stopPropagation();
+    const url = await getShareUrl();
     try {
       await navigator.clipboard.writeText(url);
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);
-      logShared();
-    } catch {
-      // clipboard unavailable
-    }
+      logShared(url);
+    } catch { /* clipboard unavailable */ }
   }
 
-  function nativeShare(e: React.MouseEvent) {
+  async function nativeShare(e: React.MouseEvent) {
     e.stopPropagation();
-    navigator.share?.({ title: `${satname} Pass`, text, url }).catch(() => {});
-    logShared();
+    const url = await getShareUrl();
+    navigator.share?.({ title: `${satname} Pass`, text: shareText(satname, maxEl, url), url }).catch(() => {});
+    logShared(url);
     setOpen(false);
   }
 
-  function tweet(e: React.MouseEvent) {
+  async function tweet(e: React.MouseEvent) {
     e.stopPropagation();
-    window.open(`https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}`, '_blank', 'noopener,noreferrer');
-    logShared();
+    const url = await getShareUrl();
+    window.open(`https://twitter.com/intent/tweet?text=${encodeURIComponent(shareText(satname, maxEl, url))}`, '_blank', 'noopener,noreferrer');
+    logShared(url);
     setOpen(false);
   }
 
-  function whatsapp(e: React.MouseEvent) {
+  async function whatsapp(e: React.MouseEvent) {
     e.stopPropagation();
-    window.open(`https://wa.me/?text=${encodeURIComponent(text)}`, '_blank', 'noopener,noreferrer');
-    logShared();
+    const url = await getShareUrl();
+    window.open(`https://wa.me/?text=${encodeURIComponent(shareText(satname, maxEl, url))}`, '_blank', 'noopener,noreferrer');
+    logShared(url);
     setOpen(false);
   }
 
@@ -104,14 +149,14 @@ export function PassShare({ startUTC, maxEl, satname, locationName, className = 
 
       {open && (
         <div className="pass-share-dropdown" onClick={stop}>
-          <button className="share-opt" onClick={copyLink}>
-            {copied ? '✓ Copied!' : 'Copy link'}
+          <button className="share-opt" onClick={copyLink} disabled={creating}>
+            {creating ? 'Creating link…' : copied ? '✓ Copied!' : 'Copy link'}
           </button>
           {'share' in navigator && (
-            <button className="share-opt" onClick={nativeShare}>Share…</button>
+            <button className="share-opt" onClick={nativeShare} disabled={creating}>Share…</button>
           )}
-          <button className="share-opt" onClick={tweet}>Post to X</button>
-          <button className="share-opt" onClick={whatsapp}>WhatsApp</button>
+          <button className="share-opt" onClick={tweet}     disabled={creating}>Post to X</button>
+          <button className="share-opt" onClick={whatsapp}  disabled={creating}>WhatsApp</button>
         </div>
       )}
     </div>
