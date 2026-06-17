@@ -65,7 +65,10 @@ function App() {
   const { location, saveLocation, gpsAccuracy, permState, requestGPS, declineGPS } = useLocation();
   const { theme, toggleTheme }                  = useTheme();
   const { user, signOut }                       = useAuth();
-  const { locations: savedLocations, addLocation } = useProfile(user?.id);
+  const {
+    locations: savedLocations, addLocation,
+    accountSettings, updateAccountSettings,
+  } = useProfile(user?.id);
 
   const [authOpen,            setAuthOpen]            = useState(false);
   const [historyOpen,         setHistoryOpen]         = useState(false);
@@ -229,6 +232,7 @@ function App() {
               loading={!satData}
               compact={true}
               horizonSettings={horizonSettings}
+              minElevation={accountSettings.default_elevation_threshold}
             />
             <button
               className="tab-skymap-link"
@@ -253,12 +257,14 @@ function App() {
               loading={!satData}
               compact={false}
               horizonSettings={horizonSettings}
+              minElevation={accountSettings.default_elevation_threshold}
             />
             <SatelliteList
               satellites={filteredSatellites}
               onSelectSatellite={setSelectedSatellite}
               loading={!satData}
               fullHeight={true}
+              units={accountSettings.units}
             />
           </div>
         )}
@@ -272,6 +278,7 @@ function App() {
               satname={satname}
               locationName={location.name}
               loading={recLoading}
+              timezone={accountSettings.timezone}
             />
           </div>
         )}
@@ -353,10 +360,17 @@ function App() {
         location={location}
         horizonSettings={horizonSettings}
         onClose={() => setSelectedSatellite(null)}
+        units={accountSettings.units}
+        timezone={accountSettings.timezone}
       />
 
       <AuthModal open={authOpen} onClose={() => setAuthOpen(false)} />
-      <ProfilePage open={historyOpen} onClose={() => setHistoryOpen(false)} />
+      <ProfilePage
+        open={historyOpen}
+        onClose={() => setHistoryOpen(false)}
+        accountSettings={accountSettings}
+        onUpdateSettings={updateAccountSettings}
+      />
 
       <button
         className={`chat-bubble-btn${chatOpen ? ' open' : ''}`}

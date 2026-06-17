@@ -4,12 +4,14 @@ import { CalendarButton, BulkExportButton } from './CalendarExport';
 import { ElevationArcChart } from './ElevationArcChart';
 import { PassShare } from './PassShare';
 import { Skeleton } from './Skeleton';
+import { formatTime as fmtTz, tzLabel } from '../utils/timezone';
 
 interface Props {
   passes:       Pass[];
   satname:      string;
   locationName: string;
   loading?:     boolean;
+  timezone?:    string;
 }
 
 function elevColor(el: number) {
@@ -29,11 +31,7 @@ function qualityInfo(score: number): { label: string; color: string } {
   return              { label: 'Poor',      color: '#ff4444' };
 }
 
-function formatTime(utc: number) {
-  return new Date(utc * 1000).toLocaleTimeString('en-GB', {
-    hour: '2-digit', minute: '2-digit', timeZone: 'Europe/London',
-  });
-}
+// formatTime is resolved at render time using the timezone prop (see usage below)
 
 function formatDuration(secs: number): string {
   const m = Math.floor(secs / 60);
@@ -45,7 +43,8 @@ function shortName(name: string) {
   return name.replace('STARLINK-', 'SL-').replace('SPACE STATION', 'ISS').slice(0, 14);
 }
 
-export function PassList({ passes, satname, locationName, loading }: Props) {
+export function PassList({ passes, satname, locationName, loading, timezone = 'Europe/London' }: Props) {
+  const formatTime = (utc: number) => fmtTz(utc, timezone);
   const [selectedIdx, setSelectedIdx] = useState<number | null>(null);
   const chartRefs = useRef<Map<number, HTMLDivElement | null>>(new Map());
 
@@ -81,7 +80,7 @@ export function PassList({ passes, satname, locationName, loading }: Props) {
         <span>Satellite</span>
         <span>Elevation</span>
         <span>Quality</span>
-        <span>Time (BST)</span>
+        <span>Time ({tzLabel(timezone)})</span>
         <span></span>
         <span></span>
         <span></span>

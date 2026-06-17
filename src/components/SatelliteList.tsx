@@ -1,11 +1,13 @@
 import type { Satellite } from '../types';
 import { Skeleton } from './Skeleton';
+import { formatDistance } from '../utils/units';
 
 interface Props {
   satellites:        Satellite[];
   onSelectSatellite: (sat: Satellite) => void;
   loading?:          boolean;
   fullHeight?:       boolean;
+  units?:            'metric' | 'imperial';
 }
 
 function elevColor(elevation: number) {
@@ -28,7 +30,7 @@ function dopplerVal(hz: number | null, kHz: number | null): string {
   return hz > 0 ? `+${val}` : `${val}`;
 }
 
-export function SatelliteList({ satellites, onSelectSatellite, loading, fullHeight }: Props) {
+export function SatelliteList({ satellites, onSelectSatellite, loading, fullHeight, units = 'metric' }: Props) {
   const sorted = [...satellites].sort((a, b) => b.elevation - a.elevation);
   const hasAnyDoppler = sorted.some(s => s.dopplerShiftKHz !== null);
 
@@ -91,7 +93,7 @@ export function SatelliteList({ satellites, onSelectSatellite, loading, fullHeig
                     {sat.elevation.toFixed(1)}
                   </td>
                   <td className="col-az sat-dim">{sat.azimuth.toFixed(1)}</td>
-                  <td className="sat-dim">{sat.range.toLocaleString()}</td>
+                  <td className="sat-dim">{formatDistance(sat.range, units)}</td>
                   {hasAnyDoppler && (
                     <td style={{
                       color:      dopplerColor(sat.dopplerShiftHz, sat.dopplerShiftKHz),

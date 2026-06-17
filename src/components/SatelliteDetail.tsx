@@ -10,6 +10,8 @@ import { horizonQueryParam } from '../utils/horizonProfile';
 import type { HorizonSettings } from '../utils/horizonProfile';
 import { usePassHistory } from '../hooks/usePassHistory';
 import { PassShare } from './PassShare';
+import { formatDistance, formatAltitude, formatSpeed } from '../utils/units';
+import { formatTime, formatDate, tzLabel } from '../utils/timezone';
 
 const API_BASE = import.meta.env.VITE_API_URL ?? '';
 const D2R      = Math.PI / 180;
@@ -47,6 +49,8 @@ interface Props {
   location:        LocationSettings;
   horizonSettings: HorizonSettings;
   onClose:         () => void;
+  units?:          'metric' | 'imperial';
+  timezone?:       string;
 }
 
 // ── Helpers ────────────────────────────────────────────────────────────────────
@@ -56,17 +60,10 @@ function toXY(az: number, el: number) {
   return { x: CX + r * Math.sin(rad), y: CY - r * Math.cos(rad) };
 }
 
-function formatBST(utc: number): string {
-  return new Date(utc * 1000).toLocaleTimeString('en-GB', {
-    hour: '2-digit', minute: '2-digit', timeZone: 'Europe/London',
-  });
-}
-
-function formatDateBST(utc: number): string {
-  return new Date(utc * 1000).toLocaleDateString('en-GB', {
-    weekday: 'short', day: 'numeric', month: 'short', timeZone: 'Europe/London',
-  });
-}
+// These are replaced by formatTime/formatDate from utils/timezone at the component level.
+// Kept as fallbacks for sub-components that receive tz as a prop.
+function fmtTime(utc: number, tz: string)  { return formatTime(utc, tz); }
+function fmtDate(utc: number, tz: string)  { return formatDate(utc, tz); }
 
 function formatDuration(secs: number): string {
   const m = Math.floor(secs / 60);
@@ -156,12 +153,12 @@ function MiniSkyMap({ sat, pos }: { sat: Satellite; pos: SatellitePosition | und
 }
 
 // ── Section 2: Live telemetry ──────────────────────────────────────────────────
-function TelemetryGrid({ sat, pos, orbitalSpeedKmS }: { sat: Satellite; pos: SatellitePosition | undefined; orbitalSpeedKmS: number | null }) {
+function TelemetryGrid({ sat, pos, orbitalSpeedKmS, units = 'metric' }: { sat: Satellite; pos: SatellitePosition | undefined; orbitalSpeedKmS: number | null; units?: 'metric' | 'imperial' }) {
   const el    = pos?.elevation ?? sat.elevation;
   const range = pos?.range     ?? sat.range;
   const dHz   = sat.dopplerShiftHz;
   const dKHz  = sat.dopplerShiftKHz;
-  const altKm = Math.round(range * Math.sin(el * D2R));
+  const altKm = range * Math.sin(el * D2R);
   const speed = orbitalSpeedKmS ?? sat.orbitalSpeedKmS ?? null;
 
   const elColor = el >= 60 ? '#00d4ff' : el >= 30 ? '#ffb800' : '#4a6080';
@@ -171,11 +168,11 @@ function TelemetryGrid({ sat, pos, orbitalSpeedKmS }: { sat: Satellite; pos: Sat
     : `${dHz > 0 ? '+' : ''}${(dHz / 1000).toFixed(1)} kHz`;
 
   const cards: { label: string; value: string; color: string; span?: boolean }[] = [
-    { label: 'Elevation',     value: `${el.toFixed(1)}°`,            color: elColor },
-    { label: 'Range',         value: `${range.toLocaleString()} km`, color: '#9ca3af' },
-    { label: 'Ku Doppler',    value: dLabel,                         color: dColor },
-    { label: 'Est. Altitude', value: `~${altKm.toLocaleString()} km`, color: '#9ca3af' },
-    { label: 'Orbital Speed', value: speed !== null ? `${speed.toFixed(2)} km/s` : '—', color: '#9ca3af', span: true },
+    { label: 'Elevation',     value: `${el.toFixed(1)}°`,                            color: elColor },
+    { label: 'Range',         value: formatDistance(range, units),                    color: '#9ca3af' },
+    { label: 'Ku Doppler',    value: dLabel,                                          color: dColor },
+    { label: 'Est. Altitude', value: `~${formatAltitude(altKm, units)}`,              color: '#9ca3af' },
+    { label: 'Orbital Speed', value: speed !== null ? formatSpeed(speed, units) : '—', color: '#9ca3af', span: true },
   ];
 
   return (
@@ -200,7 +197,7 @@ const TIPS: Record<string, string> = {
   speed:        'True orbital velocity, calculated from this satellite\'s own SGP4 velocity vector — lower orbits move faster',
 };
 
-function OrbitalElements({ data, loading, spaceTrackVerified }: { data: TleData | null; loading: boolean; spaceTrackVerified: boolean }) {
+function OrbitalElements({ data, loading, spaceTrackVerified, units = 'metric' }: { data: TleData | null; loading: boolean; spaceTrackVerified: boolean; units?: 'metric' | 'imperial' }) {
   if (loading) return <div className="sd-loading">Loading orbital data…</div>;
   if (!data)   return <div className="sd-loading">No TLE data available for this satellite</div>;
 
@@ -210,14 +207,14 @@ function OrbitalElements({ data, loading, spaceTrackVerified }: { data: TleData 
   });
 
   const rows = [
-    { label: 'NORAD ID',      value: data.noradId.toString(),                  tip: '' },
-    { label: 'Inclination',   value: `${data.inclination.toFixed(3)}°`,         tip: TIPS.inclination },
-    { label: 'RAAN',          value: `${data.raan.toFixed(3)}°`,                tip: TIPS.raan },
-    { label: 'Eccentricity',  value: data.eccentricity.toFixed(7),              tip: TIPS.eccentricity },
-    { label: 'Period',        value: `${data.period.toFixed(1)} min`,           tip: TIPS.period },
-    { label: 'Mean Altitude', value: `${data.meanAltitude.toLocaleString()} km`, tip: TIPS.altitude },
-    { label: 'Orbital Speed', value: `${data.orbitalSpeedKmS.toFixed(2)} km/s`,   tip: TIPS.speed },
-    { label: 'TLE Epoch',     value: epoch,                                      tip: '' },
+    { label: 'NORAD ID',      value: data.noradId.toString(),                           tip: '' },
+    { label: 'Inclination',   value: `${data.inclination.toFixed(3)}°`,                  tip: TIPS.inclination },
+    { label: 'RAAN',          value: `${data.raan.toFixed(3)}°`,                         tip: TIPS.raan },
+    { label: 'Eccentricity',  value: data.eccentricity.toFixed(7),                       tip: TIPS.eccentricity },
+    { label: 'Period',        value: `${data.period.toFixed(1)} min`,                    tip: TIPS.period },
+    { label: 'Mean Altitude', value: formatAltitude(data.meanAltitude, units),            tip: TIPS.altitude },
+    { label: 'Orbital Speed', value: formatSpeed(data.orbitalSpeedKmS, units),            tip: TIPS.speed },
+    { label: 'TLE Epoch',     value: epoch,                                               tip: '' },
   ];
 
   return (
@@ -244,10 +241,11 @@ function OrbitalElements({ data, loading, spaceTrackVerified }: { data: TleData 
 }
 
 // ── Section 4: Pass timeline ───────────────────────────────────────────────────
-function PassTimeline({ passes, loading, satname, locationName, onIcsDownload }: { passes: SatPass[]; loading: boolean; satname: string; locationName: string; onIcsDownload?: (p: SatPass) => void }) {
+function PassTimeline({ passes, loading, satname, locationName, onIcsDownload, timezone = 'Europe/London' }: { passes: SatPass[]; loading: boolean; satname: string; locationName: string; onIcsDownload?: (p: SatPass) => void; timezone?: string }) {
   if (loading) return <div className="sd-loading">Calculating passes…</div>;
   if (!passes.length) return <div className="sd-loading">No passes found in the next 7 days</div>;
 
+  const tz = timezone;
   return (
     <div className="pass-timeline">
       {passes.map(p => {
@@ -256,8 +254,8 @@ function PassTimeline({ passes, loading, satname, locationName, onIcsDownload }:
         return (
           <div key={p.startUTC} className="pass-item">
             <div className="pass-item-time">
-              <span className="pass-item-date">{formatDateBST(p.startUTC)}</span>
-              <span className="pass-item-times">{formatBST(p.startUTC)} → {formatBST(p.endUTC)}</span>
+              <span className="pass-item-date">{fmtDate(p.startUTC, tz)}</span>
+              <span className="pass-item-times">{fmtTime(p.startUTC, tz)} → {fmtTime(p.endUTC, tz)}</span>
             </div>
             <div className="pass-item-stats">
               <span className="pass-item-el" style={{ color: elColor }}>{Math.round(p.maxEl)}°</span>
@@ -285,16 +283,17 @@ function PassTimeline({ passes, loading, satname, locationName, onIcsDownload }:
 // ── Section 5: Elevation profile chart ────────────────────────────────────────
 interface ArcPt { label: string; el: number }
 
-function ElevationChart({ pass }: { pass: SatPass }) {
+function ElevationChart({ pass, timezone = 'Europe/London' }: { pass: SatPass; timezone?: string }) {
   const points = 28;
   const data: ArcPt[] = Array.from({ length: points }, (_, i) => {
     const frac = i / (points - 1);
     return {
-      label: formatBST(pass.startUTC + frac * pass.duration),
+      label: fmtTime(pass.startUTC + frac * pass.duration, timezone),
       el:    parseFloat(Math.max(0, pass.maxEl * Math.sin(Math.PI * frac)).toFixed(1)),
     };
   });
   const yMax = Math.min(90, Math.ceil(pass.maxEl / 10) * 10 + 10);
+  const xLabel = `Time (${tzLabel(timezone)})`;
 
   return (
     <ResponsiveContainer width="100%" height={180}>
@@ -311,7 +310,7 @@ function ElevationChart({ pass }: { pass: SatPass }) {
           tick={{ fill: '#3a4f47', fontSize: 8, fontFamily: 'monospace' }}
           axisLine={{ stroke: '#0d1520' }} tickLine={false}
           interval={Math.floor(points / 4) - 1}
-          label={{ value: 'Time (BST)', position: 'insideBottom', fill: '#3a4f47', fontSize: 8, dy: 18 }}
+          label={{ value: xLabel, position: 'insideBottom', fill: '#3a4f47', fontSize: 8, dy: 18 }}
         />
         <YAxis domain={[0, yMax]} tickFormatter={v => `${v}°`}
           tick={{ fill: '#3a4f47', fontSize: 8, fontFamily: 'monospace' }}
@@ -335,15 +334,16 @@ function ElevationChart({ pass }: { pass: SatPass }) {
 // ── Section 6: Doppler profile chart ──────────────────────────────────────────
 interface DopplerPt { label: string; d: number }
 
-function DopplerChart({ pass }: { pass: SatPass }) {
+function DopplerChart({ pass, timezone = 'Europe/London' }: { pass: SatPass; timezone?: string }) {
   const maxD   = Math.round(15 + (pass.maxEl / 90) * 55); // kHz estimate based on elevation
   const points = 28;
-  const peakLabel = formatBST(pass.maxUTC);
+  const peakLabel = fmtTime(pass.maxUTC, timezone);
+  const xLabel    = `Time (${tzLabel(timezone)})`;
 
   const data: DopplerPt[] = Array.from({ length: points }, (_, i) => {
     const frac = i / (points - 1);
     return {
-      label: formatBST(pass.startUTC + frac * pass.duration),
+      label: fmtTime(pass.startUTC + frac * pass.duration, timezone),
       d:     parseFloat((maxD * Math.cos(Math.PI * frac)).toFixed(1)),
     };
   });
@@ -367,7 +367,7 @@ function DopplerChart({ pass }: { pass: SatPass }) {
           tick={{ fill: '#3a4f47', fontSize: 8, fontFamily: 'monospace' }}
           axisLine={{ stroke: '#0d1520' }} tickLine={false}
           interval={Math.floor(points / 4) - 1}
-          label={{ value: 'Time (BST)', position: 'insideBottom', fill: '#3a4f47', fontSize: 8, dy: 18 }}
+          label={{ value: xLabel, position: 'insideBottom', fill: '#3a4f47', fontSize: 8, dy: 18 }}
         />
         <YAxis tickFormatter={v => `${v > 0 ? '+' : ''}${v}`}
           tick={{ fill: '#3a4f47', fontSize: 8, fontFamily: 'monospace' }}
@@ -390,7 +390,7 @@ function DopplerChart({ pass }: { pass: SatPass }) {
 }
 
 // ── Main component ─────────────────────────────────────────────────────────────
-export function SatelliteDetail({ satellite, allSatellites, positions, location, horizonSettings, onClose }: Props) {
+export function SatelliteDetail({ satellite, allSatellites, positions, location, horizonSettings, onClose, units = 'metric', timezone = 'Europe/London' }: Props) {
   const [tleData,            setTleData]            = useState<TleData | null>(null);
   const [passes,             setPasses]              = useState<SatPass[]>([]);
   const [tleLoading,         setTleLoading]          = useState(false);
@@ -522,13 +522,13 @@ export function SatelliteDetail({ satellite, allSatellites, positions, location,
           {/* § 2 — Live Telemetry */}
           <div className="sd-section">
             <div className="sd-section-title">Live Telemetry</div>
-            <TelemetryGrid sat={liveSat} pos={pos} orbitalSpeedKmS={tleData?.orbitalSpeedKmS ?? null}/>
+            <TelemetryGrid sat={liveSat} pos={pos} orbitalSpeedKmS={tleData?.orbitalSpeedKmS ?? null} units={units}/>
           </div>
 
           {/* § 3 — Orbital Elements */}
           <div className="sd-section">
             <div className="sd-section-title">Orbital Elements</div>
-            <OrbitalElements data={tleData} loading={tleLoading} spaceTrackVerified={spaceTrackVerified}/>
+            <OrbitalElements data={tleData} loading={tleLoading} spaceTrackVerified={spaceTrackVerified} units={units}/>
           </div>
 
           {/* § 4 — Upcoming Passes */}
@@ -539,6 +539,7 @@ export function SatelliteDetail({ satellite, allSatellites, positions, location,
               loading={passesLoading}
               satname={satellite.satname}
               locationName={location.name}
+              timezone={timezone}
               onIcsDownload={p => logEvent({
                 satelliteName:   satellite.satname,
                 locationLabel:   location.name,
@@ -556,9 +557,9 @@ export function SatelliteDetail({ satellite, allSatellites, positions, location,
             <div className="sd-section">
               <div className="sd-section-title">
                 Next Pass: Elevation Profile
-                <span className="sd-section-sub">{formatBST(nextPass.startUTC)} BST</span>
+                <span className="sd-section-sub">{fmtTime(nextPass.startUTC, timezone)} {tzLabel(timezone)}</span>
               </div>
-              <ElevationChart pass={nextPass}/>
+              <ElevationChart pass={nextPass} timezone={timezone}/>
             </div>
           )}
 
@@ -569,7 +570,7 @@ export function SatelliteDetail({ satellite, allSatellites, positions, location,
                 Doppler Shift Profile
                 <span className="sd-section-sub">Ku-band · estimated</span>
               </div>
-              <DopplerChart pass={nextPass}/>
+              <DopplerChart pass={nextPass} timezone={timezone}/>
             </div>
           )}
 

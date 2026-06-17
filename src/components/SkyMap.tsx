@@ -16,10 +16,10 @@ interface Props {
   loading?:            boolean;
   compact?:            boolean;
   horizonSettings?:    HorizonSettings;
+  minElevation?:       number;
 }
 
 const CX = 210, CY = 210, R = 175;
-const MIN_EL = 10; // Only render satellites above this elevation
 
 function toXY(az: number, el: number) {
   const r     = R * (1 - el / 90);
@@ -143,8 +143,9 @@ interface TrailPos { el: number; az: number; constellation?: string | null; }
 export function SkyMap({
   satellites, cloudCover = 0, passes = [], positions = [],
   posLastUpdate, activeConstellation, loading, compact = false,
-  horizonSettings,
+  horizonSettings, minElevation = 10,
 }: Props) {
+  const MIN_EL = minElevation;
   const [selected, setSelected] = useState<{ sat: Satellite } | null>(null);
 
   const horizonProfile  = horizonSettings ? resolveHorizonProfile(horizonSettings) : null;

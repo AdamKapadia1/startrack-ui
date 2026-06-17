@@ -1,10 +1,14 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { usePassHistory } from '../hooks/usePassHistory';
 import type { PassHistoryEntry } from '../hooks/usePassHistory';
+import type { AccountSettings } from '../hooks/useProfile';
+import { COMMON_TIMEZONES } from '../utils/timezone';
 
 interface Props {
-  open:    boolean;
-  onClose: () => void;
+  open:                   boolean;
+  onClose:                () => void;
+  accountSettings:        AccountSettings;
+  onUpdateSettings:       (s: Partial<AccountSettings>) => Promise<{ data: unknown; error: unknown }>;
 }
 
 const PAGE_SIZE = 50;
@@ -97,8 +101,102 @@ function formatPassDate(iso: string): string {
   });
 }
 
-export function ProfilePage({ open, onClose }: Props) {
+// ── Settings tab ───────────────────────────────────────────────────────────────
+function SettingsTab({
+  accountSettings,
+  onUpdateSettings,
+}: {
+  accountSettings:  AccountSettings;
+  onUpdateSettings: (s: Partial<AccountSettings>) => Promise<{ data: unknown; error: unknown }>;
+}) {
+  const [tz,       setTz]       = useState(accountSettings.timezone);
+  const [units,    setUnits]    = useState<'metric' | 'imperial'>(accountSettings.units);
+  const [elThresh, setElThresh] = useState(accountSettings.default_elevation_threshold);
+  const [saving,   setSaving]   = useState(false);
+  const [saved,    setSaved]    = useState(false);
+
+  // Sync if parent settings change (e.g. initial load)
+  useEffect(() => {
+    setTz(accountSettings.timezone);
+    setUnits(accountSettings.units);
+    setElThresh(accountSettings.default_elevation_threshold);
+  }, [accountSettings.timezone, accountSettings.units, accountSettings.default_elevation_threshold]);
+
+  async function save() {
+    setSaving(true);
+    await onUpdateSettings({ timezone: tz, units, default_elevation_threshold: elThresh });
+    setSaving(false);
+    setSaved(true);
+    setTimeout(() => setSaved(false), 2500);
+  }
+
+  return (
+    <div className="profile-settings">
+      {/* Timezone */}
+      <div className="profile-settings-row">
+        <label className="profile-settings-label">Timezone</label>
+        <select
+          className="profile-tz-select"
+          value={tz}
+          onChange={e => setTz(e.target.value)}
+        >
+          {COMMON_TIMEZONES.map(t => (
+            <option key={t.value} value={t.value}>{t.label}</option>
+          ))}
+        </select>
+      </div>
+
+      {/* Units */}
+      <div className="profile-settings-row">
+        <label className="profile-settings-label">Units</label>
+        <div className="profile-units-toggle">
+          <button
+            className={`profile-units-btn${units === 'metric' ? ' active' : ''}`}
+            onClick={() => setUnits('metric')}
+          >Metric</button>
+          <button
+            className={`profile-units-btn${units === 'imperial' ? ' active' : ''}`}
+            onClick={() => setUnits('imperial')}
+          >Imperial</button>
+        </div>
+      </div>
+
+      {/* Elevation threshold */}
+      <div className="profile-settings-row">
+        <label className="profile-settings-label">
+          Min. elevation threshold&nbsp;
+          <strong style={{ color: 'var(--text)' }}>{Math.round(elThresh)}°</strong>
+        </label>
+        <input
+          type="range"
+          className="alert-slider"
+          min="0" max="45" step="1"
+          value={elThresh}
+          onChange={e => setElThresh(Number(e.target.value))}
+        />
+        <div className="profile-settings-ticks">
+          <span>0°</span><span>15°</span><span>30°</span><span>45°</span>
+        </div>
+        <p className="profile-settings-hint">
+          Hides satellites and passes below this elevation on the sky map and pass list.
+        </p>
+      </div>
+
+      <button
+        className={`profile-save-btn${saved ? ' saved' : ''}`}
+        onClick={save}
+        disabled={saving}
+      >
+        {saved ? '✓ Settings saved' : saving ? 'Saving…' : 'Save settings'}
+      </button>
+    </div>
+  );
+}
+
+// ── Main panel ─────────────────────────────────────────────────────────────────
+export function ProfilePage({ open, onClose, accountSettings, onUpdateSettings }: Props) {
   const { history, loading, hasMore, fetchHistory } = usePassHistory();
+  const [tab,        setTab]        = useState<'history' | 'settings'>('history');
   const [search,     setSearch]     = useState('');
   const [offset,     setOffset]     = useState(0);
   const debounceRef  = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -135,7 +233,7 @@ export function ProfilePage({ open, onClose }: Props) {
       {open && <div className="settings-overlay" onClick={onClose} />}
       <div className={`profile-panel${open ? ' open' : ''}`}>
         <div className="settings-hdr">
-          <span className="settings-title">Pass History</span>
+          <span className="settings-title">Account</span>
           <button className="settings-close icon-btn" onClick={onClose} aria-label="Close">
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
               <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
@@ -143,86 +241,117 @@ export function ProfilePage({ open, onClose }: Props) {
           </button>
         </div>
 
-        <div className="profile-search-wrap">
-          <svg className="profile-search-icon" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-            <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
-          </svg>
-          <input
-            className="profile-search-input"
-            type="text"
-            value={search}
-            onChange={onSearchChange}
-            placeholder="Search pass history…"
-          />
-          {search && (
-            <button className="loc-clear-btn icon-btn" onClick={() => { setSearch(''); setOffset(0); load('', 0); }}>
-              <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
-                <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
-              </svg>
-            </button>
-          )}
+        {/* Tab bar */}
+        <div className="profile-tabs">
+          <button
+            className={`profile-tab${tab === 'history' ? ' profile-tab--active' : ''}`}
+            onClick={() => setTab('history')}
+          >
+            Pass History
+          </button>
+          <button
+            className={`profile-tab${tab === 'settings' ? ' profile-tab--active' : ''}`}
+            onClick={() => setTab('settings')}
+          >
+            Settings
+          </button>
         </div>
 
-        <div className="profile-body">
-          {loading && history.length === 0 ? (
-            <div className="profile-empty">Loading…</div>
-          ) : history.length === 0 ? (
-            <div className="profile-empty">
-              <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="var(--text-tertiary)" strokeWidth="1.2">
-                <circle cx="12" cy="12" r="10"/>
-                <path d="M12 8v4l3 3"/>
+        {/* History tab */}
+        {tab === 'history' && (
+          <>
+            <div className="profile-search-wrap">
+              <svg className="profile-search-icon" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
               </svg>
-              <p>Your pass history will appear here as you use StarTrack</p>
-            </div>
-          ) : (
-            <>
-              {groups.map(({ bucket, rows }) => (
-                <div key={bucket} className="profile-group">
-                  <div className="profile-date-header">{bucket}</div>
-                  {rows.map(entry => {
-                    const color = EVENT_COLORS[entry.event_type] ?? '#4a6080';
-                    return (
-                      <div key={entry.id} className="profile-entry">
-                        <div className="profile-entry-event" style={{ color }}>
-                          {EVENT_ICONS[entry.event_type]}
-                          <span className="profile-entry-event-label">{EVENT_LABELS[entry.event_type]}</span>
-                        </div>
-                        <div className="profile-entry-main">
-                          <span className="profile-entry-name">{entry.satellite_name}</span>
-                          <div className="profile-entry-meta">
-                            <span className="profile-entry-time">
-                              {formatPassDate(entry.pass_time)} · {formatPassTime(entry.pass_time)}
-                            </span>
-                            <span
-                              className="profile-entry-el"
-                              style={{ color: entry.max_elevation >= 60 ? '#00d4ff' : entry.max_elevation >= 30 ? '#ffb800' : '#4a6080' }}
-                            >
-                              {Math.round(entry.max_elevation)}°
-                            </span>
-                            {entry.quality && (
-                              <span className="profile-entry-quality" style={{ color: qualityColor(entry.quality) }}>
-                                {entry.quality}
-                              </span>
-                            )}
-                            {entry.location_label && (
-                              <span className="profile-entry-loc">{entry.location_label}</span>
-                            )}
-                          </div>
-                        </div>
-                      </div>
-                    );
-                  })}
-                </div>
-              ))}
-
-              {hasMore && (
-                <button className="profile-load-more" onClick={loadMore} disabled={loading}>
-                  {loading ? 'Loading…' : 'Load more'}
+              <input
+                className="profile-search-input"
+                type="text"
+                value={search}
+                onChange={onSearchChange}
+                placeholder="Search pass history…"
+              />
+              {search && (
+                <button className="loc-clear-btn icon-btn" onClick={() => { setSearch(''); setOffset(0); load('', 0); }}>
+                  <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+                    <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+                  </svg>
                 </button>
               )}
-            </>
-          )}
-        </div>
+            </div>
+
+            <div className="profile-body">
+              {loading && history.length === 0 ? (
+                <div className="profile-empty">Loading…</div>
+              ) : history.length === 0 ? (
+                <div className="profile-empty">
+                  <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="var(--text-tertiary)" strokeWidth="1.2">
+                    <circle cx="12" cy="12" r="10"/>
+                    <path d="M12 8v4l3 3"/>
+                  </svg>
+                  <p>Your pass history will appear here as you use StarTrack</p>
+                </div>
+              ) : (
+                <>
+                  {groups.map(({ bucket, rows }) => (
+                    <div key={bucket} className="profile-group">
+                      <div className="profile-date-header">{bucket}</div>
+                      {rows.map(entry => {
+                        const color = EVENT_COLORS[entry.event_type] ?? '#4a6080';
+                        return (
+                          <div key={entry.id} className="profile-entry">
+                            <div className="profile-entry-event" style={{ color }}>
+                              {EVENT_ICONS[entry.event_type]}
+                              <span className="profile-entry-event-label">{EVENT_LABELS[entry.event_type]}</span>
+                            </div>
+                            <div className="profile-entry-main">
+                              <span className="profile-entry-name">{entry.satellite_name}</span>
+                              <div className="profile-entry-meta">
+                                <span className="profile-entry-time">
+                                  {formatPassDate(entry.pass_time)} · {formatPassTime(entry.pass_time)}
+                                </span>
+                                <span
+                                  className="profile-entry-el"
+                                  style={{ color: entry.max_elevation >= 60 ? '#00d4ff' : entry.max_elevation >= 30 ? '#ffb800' : '#4a6080' }}
+                                >
+                                  {Math.round(entry.max_elevation)}°
+                                </span>
+                                {entry.quality && (
+                                  <span className="profile-entry-quality" style={{ color: qualityColor(entry.quality) }}>
+                                    {entry.quality}
+                                  </span>
+                                )}
+                                {entry.location_label && (
+                                  <span className="profile-entry-loc">{entry.location_label}</span>
+                                )}
+                              </div>
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  ))}
+
+                  {hasMore && (
+                    <button className="profile-load-more" onClick={loadMore} disabled={loading}>
+                      {loading ? 'Loading…' : 'Load more'}
+                    </button>
+                  )}
+                </>
+              )}
+            </div>
+          </>
+        )}
+
+        {/* Settings tab */}
+        {tab === 'settings' && (
+          <div className="profile-body">
+            <SettingsTab
+              accountSettings={accountSettings}
+              onUpdateSettings={onUpdateSettings}
+            />
+          </div>
+        )}
       </div>
     </>
   );
