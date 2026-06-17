@@ -40,6 +40,7 @@ interface Props {
   onToggleTheme:      () => void;
   onOpenAuth:         () => void;
   onSignOut:          () => void;
+  onOpenHistory:      () => void;
   theme:              string;
   wsStatus:           WsStatus;
   lastUpdated:        Date | null;
@@ -51,7 +52,7 @@ interface Props {
   onManageLocations:  () => void;
 }
 
-export function Header({ location, onOpenSettings, onOpenHelp, onToggleTheme, onOpenAuth, onSignOut, theme, wsStatus, lastUpdated, gpsAccuracy, topPasses, user, savedLocations, onSwitchLocation, onManageLocations }: Props) {
+export function Header({ location, onOpenSettings, onOpenHelp, onToggleTheme, onOpenAuth, onSignOut, onOpenHistory, theme, wsStatus, lastUpdated, gpsAccuracy, topPasses, user, savedLocations, onSwitchLocation, onManageLocations }: Props) {
   const cfg      = STATUS[wsStatus] ?? STATUS.connecting;
   const agoText  = useAgoText(lastUpdated);
   const [flashing,      setFlashing]      = useState(false);
@@ -155,6 +156,13 @@ export function Header({ location, onOpenSettings, onOpenHelp, onToggleTheme, on
             {userMenuOpen && (
               <div className="user-dropdown">
                 <div className="user-dropdown-email">{user.email}</div>
+                <div className="user-dropdown-divider" />
+                <button
+                  className="user-dropdown-item"
+                  onClick={() => { setUserMenuOpen(false); onOpenHistory(); }}
+                >
+                  Pass history
+                </button>
                 <div className="user-dropdown-divider" />
                 <button
                   className="user-dropdown-item user-dropdown-item--danger"

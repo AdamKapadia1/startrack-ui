@@ -1,4 +1,5 @@
 import type { Pass } from '../hooks/useRecommendation';
+import { usePassHistory } from '../hooks/usePassHistory';
 
 function toGCalTime(utc: number): string {
   return new Date(utc * 1000).toISOString().replace(/[-:]/g, '').split('.')[0] + 'Z';
@@ -37,9 +38,18 @@ interface CalBtnProps {
 }
 
 export function CalendarButton({ pass, locationName }: CalBtnProps) {
+  const { logEvent } = usePassHistory();
+
   function handleClick(e: React.MouseEvent) {
     e.stopPropagation();
     window.open(makeCalendarUrl(pass, locationName), '_blank', 'noopener');
+    logEvent({
+      satelliteName: pass.satname ?? 'Unknown',
+      locationLabel: locationName,
+      passTime:      new Date(pass.startUTC * 1000).toISOString(),
+      maxElevation:  pass.maxEl,
+      eventType:     'calendar_export',
+    });
   }
 
   return (
@@ -67,11 +77,19 @@ interface BulkProps {
 }
 
 export function BulkExportButton({ passes, locationName }: BulkProps) {
+  const { logEvent } = usePassHistory();
   if (!passes.length) return null;
 
   function handleClick() {
     passes.slice(0, 3).forEach(pass => {
       window.open(makeCalendarUrl(pass, locationName), '_blank', 'noopener');
+      logEvent({
+        satelliteName: pass.satname ?? 'Unknown',
+        locationLabel: locationName,
+        passTime:      new Date(pass.startUTC * 1000).toISOString(),
+        maxElevation:  pass.maxEl,
+        eventType:     'calendar_export',
+      });
     });
   }
 

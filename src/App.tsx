@@ -26,6 +26,7 @@ import { useAuth }              from './hooks/useAuth';
 import { useProfile }           from './hooks/useProfile';
 import type { SavedLocation }   from './hooks/useProfile';
 import { AuthModal }            from './components/AuthModal';
+import { ProfilePage }          from './components/ProfilePage';
 import { getConstellation }     from './utils/constellation';
 import { loadHorizonSettings, saveHorizonSettings } from './utils/horizonProfile';
 import type { HorizonSettings } from './utils/horizonProfile';
@@ -67,6 +68,7 @@ function App() {
   const { locations: savedLocations, addLocation } = useProfile(user?.id);
 
   const [authOpen,            setAuthOpen]            = useState(false);
+  const [historyOpen,         setHistoryOpen]         = useState(false);
   const [settingsOpen,        setSettingsOpen]        = useState(false);
   const [chatOpen,            setChatOpen]            = useState(false);
   const [chatInitialInput,    setChatInitialInput]    = useState('');
@@ -163,6 +165,7 @@ function App() {
         onToggleTheme={toggleTheme}
         onOpenAuth={() => setAuthOpen(true)}
         onSignOut={signOut}
+        onOpenHistory={() => setHistoryOpen(true)}
         theme={theme}
         wsStatus={status}
         lastUpdated={lastUpdated}
@@ -353,6 +356,7 @@ function App() {
       />
 
       <AuthModal open={authOpen} onClose={() => setAuthOpen(false)} />
+      <ProfilePage open={historyOpen} onClose={() => setHistoryOpen(false)} />
 
       <button
         className={`chat-bubble-btn${chatOpen ? ' open' : ''}`}

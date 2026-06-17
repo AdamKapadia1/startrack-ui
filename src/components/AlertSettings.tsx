@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import QRCode from 'qrcode';
 import type { Pass } from '../hooks/useRecommendation';
+import { usePassHistory } from '../hooks/usePassHistory';
 
 const API_BASE   = import.meta.env.VITE_API_URL ?? '';
 const NTFY_TOPIC = 'startrack-tring-alerts';
@@ -43,7 +44,9 @@ export function AlertSettings({ passes }: Props) {
   const [browserPerm, setBrowserPerm] = useState<NotificationPermission>('default');
   const [qrDataUrl, setQrDataUrl] = useState('');
   const [now,       setNow]       = useState(Math.floor(Date.now() / 1000));
-  const dropdownRef = useRef<HTMLDivElement>(null);
+  const dropdownRef    = useRef<HTMLDivElement>(null);
+  const alertedPassRef = useRef<number | null>(null);
+  const { logEvent }   = usePassHistory();
 
   // Fetch settings from API
   useEffect(() => {
@@ -93,6 +96,19 @@ export function AlertSettings({ passes }: Props) {
     (p.startUTC - now) <= config.alertMinutesBefore * 60
   );
   const bellShaking = config.enabled && !!imminentPass;
+
+  // Log 'alerted' once per unique pass when the alert window opens
+  useEffect(() => {
+    if (!bellShaking || !imminentPass) return;
+    if (alertedPassRef.current === imminentPass.startUTC) return;
+    alertedPassRef.current = imminentPass.startUTC;
+    logEvent({
+      satelliteName: imminentPass.satname ?? 'Starlink',
+      passTime:      new Date(imminentPass.startUTC * 1000).toISOString(),
+      maxElevation:  imminentPass.maxEl,
+      eventType:     'alerted',
+    });
+  }, [bellShaking, imminentPass?.startUTC]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // Upcoming passes that meet threshold
   const upcomingAlerts = passes

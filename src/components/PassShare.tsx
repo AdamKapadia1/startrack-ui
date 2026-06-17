@@ -1,4 +1,5 @@
 import { useState, useRef, useEffect } from 'react';
+import { usePassHistory } from '../hooks/usePassHistory';
 
 const SITE = 'https://startrackv1-ui.vercel.app';
 
@@ -26,6 +27,17 @@ export function PassShare({ startUTC, maxEl, satname, locationName, className = 
   const [open,   setOpen]   = useState(false);
   const [copied, setCopied] = useState(false);
   const wrapRef = useRef<HTMLDivElement>(null);
+  const { logEvent } = usePassHistory();
+
+  function logShared() {
+    logEvent({
+      satelliteName: satname,
+      locationLabel: locationName,
+      passTime:      new Date(startUTC * 1000).toISOString(),
+      maxElevation:  maxEl,
+      eventType:     'shared',
+    });
+  }
 
   useEffect(() => {
     if (!open) return;
@@ -51,6 +63,7 @@ export function PassShare({ startUTC, maxEl, satname, locationName, className = 
       await navigator.clipboard.writeText(url);
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);
+      logShared();
     } catch {
       // clipboard unavailable
     }
@@ -59,18 +72,21 @@ export function PassShare({ startUTC, maxEl, satname, locationName, className = 
   function nativeShare(e: React.MouseEvent) {
     e.stopPropagation();
     navigator.share?.({ title: `${satname} Pass`, text, url }).catch(() => {});
+    logShared();
     setOpen(false);
   }
 
   function tweet(e: React.MouseEvent) {
     e.stopPropagation();
     window.open(`https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}`, '_blank', 'noopener,noreferrer');
+    logShared();
     setOpen(false);
   }
 
   function whatsapp(e: React.MouseEvent) {
     e.stopPropagation();
     window.open(`https://wa.me/?text=${encodeURIComponent(text)}`, '_blank', 'noopener,noreferrer');
+    logShared();
     setOpen(false);
   }
 

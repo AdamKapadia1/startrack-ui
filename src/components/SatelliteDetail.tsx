@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import {
   AreaChart, Area, LineChart, Line,
   XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid, ReferenceLine,
@@ -8,6 +8,7 @@ import type { LocationSettings } from '../hooks/useLocation';
 import { getConstellation, CONSTELLATION_COLORS } from '../utils/constellation';
 import { horizonQueryParam } from '../utils/horizonProfile';
 import type { HorizonSettings } from '../utils/horizonProfile';
+import { usePassHistory } from '../hooks/usePassHistory';
 import { PassShare } from './PassShare';
 
 const API_BASE = import.meta.env.VITE_API_URL ?? '';
@@ -80,7 +81,7 @@ function qualityInfo(score: number): { label: string; color: string } {
   return              { label: 'Poor',       color: '#4a6080' };
 }
 
-function downloadICS(pass: SatPass, satname: string) {
+function downloadICS(pass: SatPass, satname: string, onLogged?: () => void) {
   const start = new Date(pass.startUTC * 1000);
   const end   = new Date(pass.endUTC   * 1000);
   const pad   = (n: number) => n.toString().padStart(2, '0');
@@ -98,6 +99,7 @@ function downloadICS(pass: SatPass, satname: string) {
   const a    = document.createElement('a');
   a.href = url; a.download = `${satname.replace(/\s+/g, '-')}.ics`; a.click();
   URL.revokeObjectURL(url);
+  onLogged?.();
 }
 
 // ── Section 1: Mini sky map ────────────────────────────────────────────────────
@@ -242,7 +244,7 @@ function OrbitalElements({ data, loading, spaceTrackVerified }: { data: TleData 
 }
 
 // ── Section 4: Pass timeline ───────────────────────────────────────────────────
-function PassTimeline({ passes, loading, satname, locationName }: { passes: SatPass[]; loading: boolean; satname: string; locationName: string }) {
+function PassTimeline({ passes, loading, satname, locationName, onIcsDownload }: { passes: SatPass[]; loading: boolean; satname: string; locationName: string; onIcsDownload?: (p: SatPass) => void }) {
   if (loading) return <div className="sd-loading">Calculating passes…</div>;
   if (!passes.length) return <div className="sd-loading">No passes found in the next 7 days</div>;
 
@@ -263,7 +265,7 @@ function PassTimeline({ passes, loading, satname, locationName }: { passes: SatP
               <span className="pass-quality-badge" style={{ color: q.color, borderColor: `${q.color}55` }}>
                 {q.label}
               </span>
-              <button className="pass-cal-btn" onClick={() => downloadICS(p, satname)} title="Export to calendar">
+              <button className="pass-cal-btn" onClick={() => downloadICS(p, satname, () => onIcsDownload?.(p))} title="Export to calendar">
                 Cal
               </button>
               <PassShare
@@ -394,6 +396,8 @@ export function SatelliteDetail({ satellite, allSatellites, positions, location,
   const [tleLoading,         setTleLoading]          = useState(false);
   const [passesLoading,      setPassesLoading]       = useState(false);
   const [spaceTrackVerified, setSpaceTrackVerified]  = useState(false);
+  const { logEvent }  = usePassHistory();
+  const loggedForRef  = useRef<string | null>(null);
 
   const satname = satellite?.satname;
 
@@ -422,6 +426,32 @@ export function SatelliteDetail({ satellite, allSatellites, positions, location,
       .catch(() => setPasses([]))
       .finally(() => setPassesLoading(false));
   }, [satname, location.lat, location.lon, horizonSettings]);
+
+  // Log 'viewed' once per satellite open, after the first pass loads
+  useEffect(() => {
+    if (!satellite || passes.length === 0) return;
+    if (loggedForRef.current === satellite.satname) return;
+    loggedForRef.current = satellite.satname;
+    const p = passes[0];
+    logEvent({
+      satelliteName:   satellite.satname,
+      noradId:         tleData?.noradId?.toString(),
+      locationLabel:   location.name,
+      lat:             location.lat,
+      lon:             location.lon,
+      passTime:        new Date(p.startUTC * 1000).toISOString(),
+      maxElevation:    p.maxEl,
+      durationSeconds: p.duration,
+      signalScore:     p.score,
+      quality:         qualityInfo(p.score).label,
+      eventType:       'viewed',
+    });
+  }, [satellite?.satname, passes]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  // Reset log guard when satellite closes or changes
+  useEffect(() => {
+    loggedForRef.current = null;
+  }, [satellite?.satname]);
 
   if (!satellite) return null;
 
@@ -504,7 +534,21 @@ export function SatelliteDetail({ satellite, allSatellites, positions, location,
           {/* § 4 — Upcoming Passes */}
           <div className="sd-section">
             <div className="sd-section-title">Upcoming Passes: Next 7 Days</div>
-            <PassTimeline passes={passes} loading={passesLoading} satname={satellite.satname} locationName={location.name}/>
+            <PassTimeline
+              passes={passes}
+              loading={passesLoading}
+              satname={satellite.satname}
+              locationName={location.name}
+              onIcsDownload={p => logEvent({
+                satelliteName:   satellite.satname,
+                locationLabel:   location.name,
+                passTime:        new Date(p.startUTC * 1000).toISOString(),
+                maxElevation:    p.maxEl,
+                durationSeconds: p.duration,
+                signalScore:     p.score,
+                eventType:       'calendar_export',
+              })}
+            />
           </div>
 
           {/* § 5 — Elevation profile */}
