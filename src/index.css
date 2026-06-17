@@ -5505,6 +5505,18 @@ circle[fill="#7b61ff"] { filter: drop-shadow(0 0 6px #7b61ff); }
   color:       var(--text-muted);
   letter-spacing: 0.4px;
 }
+.groundtrack-footprint-toggle {
+  cursor:  pointer;
+  user-select: none;
+  gap:     5px;
+}
+.groundtrack-footprint-toggle input[type="checkbox"] {
+  accent-color: var(--accent-primary);
+  cursor:       pointer;
+  width:        11px;
+  height:       11px;
+  margin:       0;
+}
 .groundtrack-legend-line {
   display:       inline-block;
   width:         18px;
@@ -5515,6 +5527,16 @@ circle[fill="#7b61ff"] { filter: drop-shadow(0 0 6px #7b61ff); }
 }
 
 /* ── 3D Globe ─────────────────────────────────────────────── */
+.globe3d-outer {
+  display:        flex;
+  flex-direction: column;
+  gap:            8px;
+}
+.globe3d-controls {
+  display:     flex;
+  align-items: center;
+  padding:     0 2px;
+}
 .globe3d-container {
   position:      relative;
   width:         100%;

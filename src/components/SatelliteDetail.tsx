@@ -400,19 +400,24 @@ export function SatelliteDetail({ satellite, allSatellites, positions, location,
   const [spaceTrackVerified, setSpaceTrackVerified]  = useState(false);
   const [groundTrack,        setGroundTrack]         = useState<GroundTrackPoint[] | null>(null);
   const [groundTrackLoading, setGroundTrackLoading]  = useState(false);
+  const [footprintRadiusKm,  setFootprintRadiusKm]   = useState<number | null>(null);
   const { logEvent }  = usePassHistory();
   const loggedForRef  = useRef<string | null>(null);
 
   const satname = satellite?.satname;
 
   useEffect(() => {
-    if (!satname) { setGroundTrack(null); return; }
+    if (!satname) { setGroundTrack(null); setFootprintRadiusKm(null); return; }
     setGroundTrack(null);
+    setFootprintRadiusKm(null);
     setGroundTrackLoading(true);
     fetch(`${API_BASE}/api/satellites/groundtrack?name=${encodeURIComponent(satname)}`)
       .then(r => r.ok ? r.json() : null)
-      .then(d => setGroundTrack(d?.points ?? null))
-      .catch(() => setGroundTrack(null))
+      .then(d => {
+        setGroundTrack(d?.points ?? null);
+        setFootprintRadiusKm(d?.footprintRadiusKm ?? null);
+      })
+      .catch(() => { setGroundTrack(null); setFootprintRadiusKm(null); })
       .finally(() => setGroundTrackLoading(false));
   }, [satname]);
 
@@ -597,6 +602,7 @@ export function SatelliteDetail({ satellite, allSatellites, positions, location,
                 points={groundTrack ?? []}
                 observerLat={location.lat}
                 observerLon={location.lon}
+                footprintRadiusKm={footprintRadiusKm ?? undefined}
                 loading={groundTrackLoading}
               />
             </div>

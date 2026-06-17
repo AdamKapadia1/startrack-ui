@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import * as THREE from 'three';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
 import type { LocationSettings } from '../hooks/useLocation';
@@ -9,11 +9,12 @@ const EARTH_R    = 5;      // scene units
 const EARTH_KM   = 6371;   // km
 
 interface SatPos {
-  satname:       string;
-  lat:           number;
-  lon:           number;
-  altKm:         number;
-  constellation: string | null;
+  satname:           string;
+  lat:               number;
+  lon:               number;
+  altKm:             number;
+  constellation:     string | null;
+  footprintRadiusKm: number;
 }
 
 // Pre-compute Three.js colors from shared CSS palette
@@ -44,7 +45,10 @@ interface Props {
 }
 
 export function Globe3D({ location, isMobile }: Props) {
-  const containerRef = useRef<HTMLDivElement>(null);
+  const containerRef      = useRef<HTMLDivElement>(null);
+  const [showFootprint,   setShowFootprint]   = useState(false);
+  const showFootprintRef  = useRef(false);
+  showFootprintRef.current = showFootprint;
 
   useEffect(() => {
     const el = containerRef.current;
@@ -139,51 +143,66 @@ export function Globe3D({ location, isMobile }: Props) {
     ring.lookAt(0, 0, 0);
     scene.add(ring);
 
-    // ── Satellite points ────────────────────────────────────
-    let satPoints: THREE.Points | null = null;
+    // ── Satellite points + footprints ───────────────────────
+    let satPoints:    THREE.Points        | null = null;
+    let footprintMesh: THREE.InstancedMesh | null = null;
+
+    const fpGeo = new THREE.CircleGeometry(1, 16);
+    const fpMat = new THREE.MeshBasicMaterial({
+      color: 0x00d4ff, transparent: true, opacity: 0.15, side: THREE.DoubleSide,
+    });
 
     function updateSatellites(sats: SatPos[]) {
+      // ── satellite dots ──────────────────────────────────
       if (satPoints) {
         scene.remove(satPoints);
         satPoints.geometry.dispose();
         (satPoints.material as THREE.Material).dispose();
         satPoints = null;
       }
+      if (footprintMesh) {
+        scene.remove(footprintMesh);
+        footprintMesh.dispose();
+        footprintMesh = null;
+      }
       if (!sats.length) return;
 
-      const posArr = new Float32Array(sats.length * 3);
-      const colArr = new Float32Array(sats.length * 3);
-      const sizeArr = new Float32Array(sats.length);
+      const posArr  = new Float32Array(sats.length * 3);
+      const colArr  = new Float32Array(sats.length * 3);
 
       sats.forEach((sat, i) => {
         const v   = latLonAltToVec3(sat.lat, sat.lon, sat.altKm);
         const col = satColor(sat.satname, sat.constellation);
-        posArr[i * 3]     = v.x;
-        posArr[i * 3 + 1] = v.y;
-        posArr[i * 3 + 2] = v.z;
-        colArr[i * 3]     = col.r;
-        colArr[i * 3 + 1] = col.g;
-        colArr[i * 3 + 2] = col.b;
-        const isIss = getConstellation(sat.satname, sat.constellation) === 'ISS';
-        sizeArr[i] = isIss ? 0.35 : 0.12;
+        posArr[i * 3]     = v.x; posArr[i * 3 + 1] = v.y; posArr[i * 3 + 2] = v.z;
+        colArr[i * 3]     = col.r; colArr[i * 3 + 1] = col.g; colArr[i * 3 + 2] = col.b;
       });
 
       const geo = new THREE.BufferGeometry();
       geo.setAttribute('position', new THREE.BufferAttribute(posArr, 3));
       geo.setAttribute('color',    new THREE.BufferAttribute(colArr, 3));
-      geo.setAttribute('size',     new THREE.BufferAttribute(sizeArr, 1));
-
-      satPoints = new THREE.Points(
-        geo,
-        new THREE.PointsMaterial({
-          vertexColors:    true,
-          size:            0.14,
-          sizeAttenuation: true,
-          transparent:     true,
-          opacity:         0.92,
-        }),
-      );
+      satPoints = new THREE.Points(geo, new THREE.PointsMaterial({
+        vertexColors: true, size: 0.14, sizeAttenuation: true, transparent: true, opacity: 0.92,
+      }));
       scene.add(satPoints);
+
+      // ── footprint circles (InstancedMesh) ───────────────
+      const up = new THREE.Vector3(0, 1, 0);
+      footprintMesh = new THREE.InstancedMesh(fpGeo, fpMat, sats.length);
+      footprintMesh.visible = showFootprintRef.current;
+
+      const mat4 = new THREE.Matrix4();
+      const q    = new THREE.Quaternion();
+      sats.forEach((sat, i) => {
+        const groundPos = latLonAltToVec3(sat.lat, sat.lon, 0);
+        const normal    = groundPos.clone().normalize();
+        const pos       = normal.clone().multiplyScalar(EARTH_R + 0.015);
+        const scaleU    = sat.footprintRadiusKm * (EARTH_R / EARTH_KM);
+        q.setFromUnitVectors(up, normal);
+        mat4.compose(pos, q, new THREE.Vector3(scaleU, scaleU, 1));
+        footprintMesh!.setMatrixAt(i, mat4);
+      });
+      footprintMesh.instanceMatrix.needsUpdate = true;
+      scene.add(footprintMesh);
     }
 
     // ── Fetch satellite positions ───────────────────────────
@@ -213,6 +232,7 @@ export function Globe3D({ location, isMobile }: Props) {
     let animId: number;
     function animate() {
       animId = requestAnimationFrame(animate);
+      if (footprintMesh) footprintMesh.visible = showFootprintRef.current;
       controls.update();
       renderer.render(scene, camera);
     }
@@ -224,16 +244,31 @@ export function Globe3D({ location, isMobile }: Props) {
       if (pollId) clearInterval(pollId);
       ro.disconnect();
       controls.dispose();
+      fpGeo.dispose();
+      fpMat.dispose();
       renderer.dispose();
       if (el.contains(renderer.domElement)) el.removeChild(renderer.domElement);
     };
   }, [location.lat, location.lon]); // eslint-disable-line react-hooks/exhaustive-deps
 
+
   return (
-    <div ref={containerRef} className="globe3d-container">
-      {isMobile && (
-        <div className="globe3d-mobile-note">3D view works best on desktop — touch to orbit</div>
-      )}
+    <div className="globe3d-outer">
+      <div ref={containerRef} className="globe3d-container">
+        {isMobile && (
+          <div className="globe3d-mobile-note">3D view works best on desktop — touch to orbit</div>
+        )}
+      </div>
+      <div className="globe3d-controls">
+        <label className="groundtrack-legend-item groundtrack-footprint-toggle">
+          <input
+            type="checkbox"
+            checked={showFootprint}
+            onChange={e => setShowFootprint(e.target.checked)}
+          />
+          Show coverage footprints
+        </label>
+      </div>
     </div>
   );
 }

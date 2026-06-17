@@ -1,14 +1,18 @@
+import { useState } from 'react';
+
 export interface GroundTrackPoint {
-  lat:  number;
-  lon:  number;
-  time: string;
+  lat:   number;
+  lon:   number;
+  altKm?: number;
+  time:  string;
 }
 
 interface Props {
-  points:      GroundTrackPoint[];
-  observerLat: number;
-  observerLon: number;
-  loading?:    boolean;
+  points:             GroundTrackPoint[];
+  observerLat:        number;
+  observerLon:        number;
+  footprintRadiusKm?: number;
+  loading?:           boolean;
 }
 
 // Simplified continent outlines as [lon, lat] pairs
@@ -75,10 +79,24 @@ function segPath(seg: GroundTrackPoint[]): string {
   }).join(' ');
 }
 
-export function GroundTrackMap({ points, observerLat, observerLon, loading }: Props) {
+export function GroundTrackMap({ points, observerLat, observerLon, footprintRadiusKm, loading }: Props) {
+  const [showFootprint, setShowFootprint] = useState(false);
+
   const segments   = splitTrack(points);
   const currentPos = points[0] ?? null;
   const [obX, obY] = toSvg(observerLon, observerLat);
+
+  // Footprint ellipse in SVG units (equirectangular: 1 unit = 1 degree)
+  // ry is constant (latitude); rx expands at higher latitudes (lon compression)
+  const footprintEllipse = (showFootprint && footprintRadiusKm && currentPos)
+    ? (() => {
+        const KM_PER_DEG = 111.32;
+        const ry = footprintRadiusKm / KM_PER_DEG;
+        const rx = footprintRadiusKm / (KM_PER_DEG * Math.max(0.1, Math.cos(currentPos.lat * Math.PI / 180)));
+        const [cx, cy] = toSvg(currentPos.lon, currentPos.lat);
+        return { cx, cy, rx, ry };
+      })()
+    : null;
 
   return (
     <div className="groundtrack-wrap">
@@ -142,6 +160,20 @@ export function GroundTrackMap({ points, observerLat, observerLon, loading }: Pr
             fill="rgba(8,12,20,0.6)" />
         )}
 
+        {/* Coverage footprint */}
+        {footprintEllipse && (
+          <ellipse
+            cx={footprintEllipse.cx}
+            cy={footprintEllipse.cy}
+            rx={footprintEllipse.rx}
+            ry={footprintEllipse.ry}
+            fill="rgba(0,212,255,0.08)"
+            stroke="rgba(0,212,255,0.3)"
+            strokeWidth="0.5"
+            strokeDasharray="1.5 1.5"
+          />
+        )}
+
         {/* Observer location */}
         <circle cx={obX} cy={obY} r="1.8"
           fill="#a78bfa" stroke="rgba(167,139,250,0.45)" strokeWidth="0.8" />
@@ -172,6 +204,16 @@ export function GroundTrackMap({ points, observerLat, observerLon, loading }: Pr
           <svg width="9" height="9"><circle cx="4.5" cy="4.5" r="3.5" fill="#a78bfa"/></svg>
           Observer
         </span>
+        {footprintRadiusKm != null && (
+          <label className="groundtrack-legend-item groundtrack-footprint-toggle">
+            <input
+              type="checkbox"
+              checked={showFootprint}
+              onChange={e => setShowFootprint(e.target.checked)}
+            />
+            Coverage footprint{showFootprint ? ` · ~${footprintRadiusKm.toLocaleString()} km` : ''}
+          </label>
+        )}
         {loading && <span className="groundtrack-legend-item" style={{ color: 'var(--text-muted)' }}>Calculating…</span>}
       </div>
     </div>
