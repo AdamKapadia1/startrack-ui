@@ -5746,3 +5746,179 @@ circle[fill="#7b61ff"] { filter: drop-shadow(0 0 6px #7b61ff); }
 .alert-fav-star {
   color: #fbbf24;
 }
+
+/* ── ISS Card ────────────────────────────────────────────────────────────────── */
+.iss-card {
+  background:    var(--bg-card);
+  border:        1px solid var(--border);
+  border-radius: 12px;
+  overflow:      hidden;
+  margin-bottom: 16px;
+}
+
+.iss-banner {
+  position: relative;
+  height:   160px;
+  overflow: hidden;
+}
+.iss-banner-img {
+  width:      100%;
+  height:     100%;
+  object-fit: cover;
+  display:    block;
+}
+.iss-banner-overlay {
+  position:   absolute;
+  inset:      0;
+  background: linear-gradient(to top, rgba(6,10,16,0.92) 0%, rgba(6,10,16,0.15) 60%, transparent 100%);
+  display:    flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  padding:    12px 14px;
+}
+.iss-banner-top {
+  display:     flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+.iss-label {
+  font-size:      10px;
+  font-weight:    700;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  color:          #00d4ff;
+  font-family:    var(--mono);
+}
+.iss-live-badge {
+  display:       flex;
+  align-items:   center;
+  gap:           5px;
+  font-size:     9px;
+  font-weight:   700;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  color:         var(--text-muted);
+  background:    rgba(10, 18, 30, 0.7);
+  border:        1px solid var(--border);
+  border-radius: 4px;
+  padding:       3px 7px;
+  white-space:   nowrap;
+}
+.iss-live-badge--live {
+  color:        #00ff88;
+  border-color: rgba(0, 255, 136, 0.3);
+  background:   rgba(0, 255, 136, 0.08);
+}
+.iss-live-dot {
+  width:      6px;
+  height:     6px;
+  border-radius: 50%;
+  background: #00ff88;
+  animation:  pulse 1.5s infinite;
+  flex-shrink: 0;
+}
+
+.iss-body {
+  padding: 14px 16px 16px;
+}
+
+.iss-telemetry-row {
+  display:       flex;
+  align-items:   center;
+  gap:           0;
+  margin-bottom: 12px;
+}
+.iss-telemetry-cell {
+  flex:           1;
+  display:        flex;
+  flex-direction: column;
+  gap:            2px;
+  text-align:     center;
+}
+.iss-telemetry-divider {
+  width:      1px;
+  height:     32px;
+  background: var(--border);
+  flex-shrink: 0;
+}
+.iss-tel-label {
+  font-size:      9px;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  color:          var(--text-muted);
+  font-family:    var(--mono);
+}
+.iss-tel-value {
+  font-size:   15px;
+  font-weight: 600;
+  color:       var(--text-primary);
+  font-family: var(--mono);
+}
+
+.iss-crew-section {
+  margin-bottom: 12px;
+}
+.iss-crew-avatars {
+  display:   flex;
+  gap:       6px;
+  flex-wrap: wrap;
+  margin-bottom: 6px;
+}
+.iss-crew-avatar {
+  width:           32px;
+  height:          32px;
+  border-radius:   50%;
+  background:      rgba(0, 212, 255, 0.12);
+  border:          1px solid rgba(0, 212, 255, 0.3);
+  display:         flex;
+  align-items:     center;
+  justify-content: center;
+  font-size:       11px;
+  font-weight:     700;
+  color:           #00d4ff;
+  font-family:     var(--mono);
+  flex-shrink:     0;
+  cursor:          default;
+}
+.iss-crew-names {
+  font-size:   11px;
+  color:       var(--text-muted);
+  line-height: 1.5;
+}
+
+.iss-next-pass {
+  display:       flex;
+  align-items:   center;
+  gap:           6px;
+  font-size:     12px;
+  color:         var(--text-muted);
+  margin-bottom: 12px;
+}
+.iss-next-pass svg { color: var(--text-muted); flex-shrink: 0; }
+.iss-next-pass strong { color: var(--text-primary); }
+
+.iss-track-btn {
+  display:         flex;
+  align-items:     center;
+  gap:             6px;
+  width:           100%;
+  padding:         8px 14px;
+  background:      rgba(0, 212, 255, 0.06);
+  border:          1px solid rgba(0, 212, 255, 0.2);
+  border-radius:   8px;
+  color:           #00d4ff;
+  font-size:       12px;
+  font-weight:     600;
+  cursor:          pointer;
+  justify-content: center;
+  transition:      background 0.15s, border-color 0.15s;
+}
+.iss-track-btn:hover:not(:disabled) {
+  background:    rgba(0, 212, 255, 0.12);
+  border-color:  rgba(0, 212, 255, 0.4);
+}
+.iss-track-btn:disabled {
+  opacity: 0.4;
+  cursor:  default;
+}

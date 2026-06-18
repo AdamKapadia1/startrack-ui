@@ -14,6 +14,7 @@ import { SignalHistory }        from './components/SignalHistory';
 import { HistoricalInsight }    from './components/HistoricalInsight';
 import { SignalHeatmap }        from './components/SignalHeatmap';
 import { useFavourites }        from './hooks/useFavourites';
+import { ISSCard }              from './components/ISSCard';
 import { Footer }               from './components/Footer';
 import { SettingsPanel }        from './components/SettingsPanel';
 import { ChatPanel }            from './components/ChatPanel';
@@ -235,6 +236,12 @@ function App() {
               loading={recLoading}
             />
             {starlinkSat && <DtcCard satellite={starlinkSat} />}
+
+            <ISSCard
+              satellites={satellites}
+              location={location}
+              onSelectSatellite={setSelectedSatellite}
+            />
 
             {/* Compact sky map in overview */}
             {skyMapHeader}
