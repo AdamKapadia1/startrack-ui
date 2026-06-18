@@ -75,6 +75,7 @@ export function ISSCard({ satellites, location, onSelectSatellite }: Props) {
   const [info,        setInfo]        = useState<ISSInfo | null>(null);
   const [loading,     setLoading]     = useState(true);
   const [imgError,    setImgError]    = useState(false);
+  const [imgSrc,      setImgSrc]      = useState(`${API_BASE}/api/iss/photo`);
 
   const issTle = satellites.find(s =>
     s.satname.toUpperCase().includes('ISS') ||
@@ -101,17 +102,21 @@ export function ISSCard({ satellites, location, onSelectSatellite }: Props) {
     return () => { cancelled = true; clearInterval(id); };
   }, [location.lat, location.lon, location.alt]);
 
-  const FALLBACK_IMG = 'https://images-assets.nasa.gov/image/iss054e004111/iss054e004111~medium.jpg';
-
   return (
     <div className="iss-card">
-      {/* Banner image */}
+      {/* Banner image — served via Railway proxy to avoid NASA CDN blocking */}
       <div className="iss-banner">
         <img
-          src={imgError || !info?.nasaImageUrl ? FALLBACK_IMG : info.nasaImageUrl}
+          src={imgSrc}
           alt="International Space Station"
           className="iss-banner-img"
-          onError={() => setImgError(true)}
+          onError={() => {
+            if (!imgError) {
+              setImgError(true);
+              // Cycle to a different image ID on error
+              setImgSrc(`${API_BASE}/api/iss/photo?t=${Date.now()}`);
+            }
+          }}
         />
         <div className="iss-banner-overlay">
           <div className="iss-banner-top">
