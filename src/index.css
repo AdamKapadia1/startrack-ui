@@ -5922,3 +5922,258 @@ circle[fill="#7b61ff"] { filter: drop-shadow(0 0 6px #7b61ff); }
   opacity: 0.4;
   cursor:  default;
 }
+
+/* ── AR Sky View ─────────────────────────────────────────────────────────────── */
+
+.ar-overlay {
+  position:        fixed;
+  inset:           0;
+  z-index:         9000;
+  background:      #000;
+  overflow:        hidden;
+  touch-action:    none;
+}
+
+.ar-overlay--center {
+  display:         flex;
+  align-items:     center;
+  justify-content: center;
+  background:      rgba(0, 0, 0, 0.92);
+}
+
+.ar-video {
+  position:    absolute;
+  inset:       0;
+  width:       100%;
+  height:      100%;
+  object-fit:  cover;
+}
+
+.ar-svg {
+  position: absolute;
+  inset:    0;
+}
+
+/* Controls bar */
+.ar-controls {
+  position:       absolute;
+  bottom:         env(safe-area-inset-bottom, 0);
+  left:           0;
+  right:          0;
+  padding:        14px 16px;
+  display:        flex;
+  align-items:    center;
+  gap:            10px;
+  background:     linear-gradient(to top, rgba(0,0,0,0.65), transparent);
+}
+
+.ar-close-btn {
+  display:         flex;
+  align-items:     center;
+  justify-content: center;
+  width:           40px;
+  height:          40px;
+  border-radius:   50%;
+  background:      rgba(0,0,0,0.55);
+  border:          1px solid rgba(255,255,255,0.18);
+  color:           #fff;
+  cursor:          pointer;
+  flex-shrink:     0;
+  transition:      background 0.15s;
+}
+.ar-close-btn:hover { background: rgba(0,0,0,0.75); }
+
+.ar-heading-badge {
+  background:    rgba(0,0,0,0.55);
+  border:        1px solid rgba(0,212,255,0.25);
+  border-radius: 20px;
+  padding:       5px 12px;
+  font-size:     11px;
+  font-family:   var(--mono);
+  color:         rgba(0,212,255,0.85);
+  white-space:   nowrap;
+}
+
+.ar-toggle-btn {
+  margin-left:   auto;
+  background:    rgba(0,0,0,0.55);
+  border:        1px solid rgba(255,255,255,0.18);
+  border-radius: 20px;
+  padding:       6px 14px;
+  color:         #fff;
+  font-size:     12px;
+  cursor:        pointer;
+  white-space:   nowrap;
+  transition:    background 0.15s;
+}
+.ar-toggle-btn:hover { background: rgba(0,0,0,0.75); }
+
+/* Permission / desktop / loading cards */
+.ar-message-card {
+  background:    var(--bg-secondary);
+  border:        1px solid var(--border-accent);
+  border-radius: 16px;
+  padding:       32px 28px;
+  max-width:     340px;
+  text-align:    center;
+}
+.ar-message-icon {
+  font-size:     48px;
+  margin-bottom: 12px;
+}
+.ar-message-title {
+  font-size:     18px;
+  font-weight:   700;
+  color:         var(--text-primary);
+  margin-bottom: 10px;
+}
+.ar-message-text {
+  font-size:     13px;
+  color:         var(--text-secondary);
+  line-height:   1.6;
+  margin-bottom: 20px;
+}
+.ar-message-close {
+  display:         inline-flex;
+  align-items:     center;
+  justify-content: center;
+  padding:         10px 28px;
+  background:      rgba(0,212,255,0.08);
+  border:          1px solid rgba(0,212,255,0.25);
+  border-radius:   8px;
+  color:           #00d4ff;
+  font-size:       13px;
+  font-weight:     600;
+  cursor:          pointer;
+  transition:      background 0.15s;
+}
+.ar-message-close:hover { background: rgba(0,212,255,0.15); }
+
+.ar-permission-btn {
+  display:         block;
+  width:           100%;
+  padding:         11px 0;
+  background:      rgba(0,212,255,0.1);
+  border:          1px solid rgba(0,212,255,0.3);
+  border-radius:   10px;
+  color:           #00d4ff;
+  font-size:       14px;
+  font-weight:     700;
+  cursor:          pointer;
+  margin-bottom:   10px;
+  transition:      background 0.15s;
+}
+.ar-permission-btn:hover { background: rgba(0,212,255,0.18); }
+
+.ar-permission-skip {
+  background:    transparent;
+  border:        none;
+  color:         var(--text-muted);
+  font-size:     12px;
+  cursor:        pointer;
+  text-decoration: underline;
+}
+
+/* Compass view */
+.ar-compass-view {
+  display:        flex;
+  flex-direction: column;
+  align-items:    center;
+  justify-content: flex-start;
+  padding:        60px 16px 100px;
+  height:         100%;
+  overflow-y:     auto;
+}
+
+.ar-compass-label {
+  font-size:     11px;
+  font-family:   var(--mono);
+  color:         var(--text-muted);
+  letter-spacing: 0.8px;
+  text-transform: uppercase;
+  margin-bottom: 20px;
+}
+
+.ar-compass-svg {
+  flex-shrink: 0;
+  margin-bottom: 24px;
+}
+
+.ar-compass-list {
+  width:      100%;
+  max-width:  340px;
+}
+
+.ar-list-row {
+  display:       flex;
+  align-items:   center;
+  gap:           10px;
+  padding:       8px 12px;
+  border-radius: 8px;
+  margin-bottom: 4px;
+  background:    rgba(255,255,255,0.04);
+}
+.ar-list-row--target {
+  background: rgba(251,191,36,0.1);
+  border:     1px solid rgba(251,191,36,0.25);
+}
+
+.ar-list-dot {
+  width:        8px;
+  height:       8px;
+  border-radius: 50%;
+  flex-shrink:  0;
+}
+.ar-list-name {
+  flex:        1;
+  font-size:   12px;
+  font-family: var(--mono);
+  color:       var(--text-primary);
+  white-space: nowrap;
+  overflow:    hidden;
+  text-overflow: ellipsis;
+}
+.ar-list-meta {
+  font-size:   11px;
+  font-family: var(--mono);
+  color:       var(--text-muted);
+  white-space: nowrap;
+}
+
+/* "Find in sky" badge in SatelliteDetail */
+.find-in-sky-btn {
+  display:       inline-flex;
+  align-items:   center;
+  gap:           4px;
+  padding:       3px 10px;
+  background:    rgba(0,212,255,0.08);
+  border:        1px solid rgba(0,212,255,0.22);
+  border-radius: 20px;
+  color:         #00d4ff;
+  font-size:     10px;
+  font-weight:   600;
+  cursor:        pointer;
+  transition:    background 0.15s;
+  letter-spacing: 0.4px;
+  white-space:   nowrap;
+}
+.find-in-sky-btn:hover { background: rgba(0,212,255,0.15); }
+
+/* "AR Sky" launch button in Sky Map tab header */
+.ar-launch-btn {
+  display:       inline-flex;
+  align-items:   center;
+  gap:           4px;
+  padding:       4px 10px;
+  background:    rgba(0,212,255,0.07);
+  border:        1px solid rgba(0,212,255,0.2);
+  border-radius: 8px;
+  color:         #00d4ff;
+  font-size:     11px;
+  font-weight:   600;
+  cursor:        pointer;
+  white-space:   nowrap;
+  transition:    background 0.15s;
+  flex-shrink:   0;
+}
+.ar-launch-btn:hover { background: rgba(0,212,255,0.14); }

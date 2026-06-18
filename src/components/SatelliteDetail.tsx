@@ -55,6 +55,7 @@ interface Props {
   timezone?:          string;
   isFavourite?:       boolean;
   onToggleFavourite?: () => void;
+  onFindInSky?:       () => void;
 }
 
 // ── Helpers ────────────────────────────────────────────────────────────────────
@@ -394,7 +395,7 @@ function DopplerChart({ pass, timezone = 'Europe/London' }: { pass: SatPass; tim
 }
 
 // ── Main component ─────────────────────────────────────────────────────────────
-export function SatelliteDetail({ satellite, allSatellites, positions, location, horizonSettings, onClose, units = 'metric', timezone = 'Europe/London', isFavourite = false, onToggleFavourite }: Props) {
+export function SatelliteDetail({ satellite, allSatellites, positions, location, horizonSettings, onClose, units = 'metric', timezone = 'Europe/London', isFavourite = false, onToggleFavourite, onFindInSky }: Props) {
   const [tleData,            setTleData]            = useState<TleData | null>(null);
   const [passes,             setPasses]              = useState<SatPass[]>([]);
   const [tleLoading,         setTleLoading]          = useState(false);
@@ -528,6 +529,15 @@ export function SatelliteDetail({ satellite, allSatellites, positions, location,
               <span className={`sat-status-badge${isOverhead ? ' sat-status-badge--live' : ''}`}>
                 {isOverhead ? 'OVERHEAD NOW' : 'NOT VISIBLE'}
               </span>
+              {onFindInSky && isOverhead && (
+                <button
+                  className="find-in-sky-btn"
+                  onClick={onFindInSky}
+                  title="Open AR Sky View to find this satellite"
+                >
+                  🔭 Find in sky
+                </button>
+              )}
             </div>
           </div>
           <div className="sat-detail-hdr-right">

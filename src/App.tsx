@@ -15,6 +15,7 @@ import { HistoricalInsight }    from './components/HistoricalInsight';
 import { SignalHeatmap }        from './components/SignalHeatmap';
 import { useFavourites }        from './hooks/useFavourites';
 import { ISSCard }              from './components/ISSCard';
+import { ARSkyView }            from './components/ARSkyView';
 import { Footer }               from './components/Footer';
 import { SettingsPanel }        from './components/SettingsPanel';
 import { ChatPanel }            from './components/ChatPanel';
@@ -90,6 +91,7 @@ function App() {
   const [changelogOpen,       setChangelogOpen]       = useState(false);
   const [activeConstellation, setActiveConstellation] = useState('ALL');
   const [selectedSatellite,   setSelectedSatellite]   = useState<Satellite | null>(null);
+  const [arSatellite,         setArSatellite]         = useState<Satellite | null>(null);
   const [onboarded,           setOnboarded]           = useState(() => !!localStorage.getItem(ONBOARDING_KEY));
   const [activeTab,           setActiveTab]           = useState<Tab>(readStoredTab);
   const [horizonSettings,     setHorizonSettings]     = useState<HorizonSettings>(loadHorizonSettings);
@@ -287,6 +289,13 @@ function App() {
                     onClick={() => setSkyView('3d')}
                   >3D</button>
                 </div>
+                <button
+                  className="ar-launch-btn"
+                  onClick={() => setArSatellite(topSat)}
+                  title="Open AR Sky View — point your phone at the sky"
+                >
+                  🔭 AR Sky
+                </button>
                 {skyView === '2d' && (
                   <ConstellationFilter
                     satellites={satellites}
@@ -430,7 +439,16 @@ function App() {
         timezone={accountSettings.timezone}
         isFavourite={selectedSatellite ? isFavourite(selectedSatellite.satname) : false}
         onToggleFavourite={selectedSatellite ? () => toggleFavourite(selectedSatellite.satname) : undefined}
+        onFindInSky={selectedSatellite ? () => setArSatellite(selectedSatellite) : undefined}
       />
+
+      {arSatellite !== null && (
+        <ARSkyView
+          satellites={satellites}
+          initialSatellite={arSatellite}
+          onClose={() => setArSatellite(null)}
+        />
+      )}
 
       <AuthModal open={authOpen} onClose={() => setAuthOpen(false)} />
       <EmbedCodePanel open={embedOpen} onClose={() => setEmbedOpen(false)} location={location} />
