@@ -17,6 +17,7 @@ interface Props {
   compact?:            boolean;
   horizonSettings?:    HorizonSettings;
   minElevation?:       number;
+  favourites?:         string[];
 }
 
 const CX = 210, CY = 210, R = 175;
@@ -143,7 +144,7 @@ interface TrailPos { el: number; az: number; constellation?: string | null; }
 export function SkyMap({
   satellites, cloudCover = 0, passes = [], positions = [],
   posLastUpdate, activeConstellation, loading, compact = false,
-  horizonSettings, minElevation = 10,
+  horizonSettings, minElevation = 10, favourites = [],
 }: Props) {
   const MIN_EL = minElevation;
   const [selected, setSelected] = useState<{ sat: Satellite } | null>(null);
@@ -186,9 +187,13 @@ export function SkyMap({
     ? positions.filter(p => p.elevation >= 0).length
     : satellites.filter(s => s.elevation >= 0).length;
 
+  const favSet = new Set(favourites);
+
   const renderSats = activeConstellation === 'ALL'
     ? allSats
-    : allSats.filter(s => getConstellation(s.satname, s.constellation) === activeConstellation);
+    : activeConstellation === 'FAVOURITES'
+      ? allSats.filter(s => favSet.has(s.satname))
+      : allSats.filter(s => getConstellation(s.satname, s.constellation) === activeConstellation);
 
   // Update trails and fading-out ghosts
   useEffect(() => {
@@ -354,6 +359,8 @@ export function SkyMap({
               const { x, y }    = toXY(sat.azimuth, sat.elevation);
               const ds          = dotStyle(sat.satname, sat.elevation, sat.constellation);
               const isSelected  = selected?.sat.satname === sat.satname;
+              const isFav       = favSet.has(sat.satname);
+              const dotR        = isFav ? ds.r + 1.5 : ds.r;
               const trail       = trailRef.current.get(sat.satname) ?? [];
               const prevPos     = trail.length > 0 ? trail[trail.length - 1] : null;
               const lxOff       = x < CX ? 7 : -7;
@@ -381,7 +388,6 @@ export function SkyMap({
                 <g
                   key={sat.satname}
                   style={{
-                    // CSS transform for smooth animated movement — 5s matches position broadcast interval
                     transform: `translate(${x}px, ${y}px)`,
                     transition: 'transform 5s linear',
                     cursor: 'pointer',
@@ -393,21 +399,26 @@ export function SkyMap({
                   {/* Large invisible hit area */}
                   <circle cx={0} cy={0} r={12} fill="transparent"/>
 
-                  {/* Selection ring */}
-                  {isSelected && (
-                    <circle cx={0} cy={0} r={ds.r + 4} fill="none" stroke="#8a9ab8" strokeWidth={0.8} opacity={0.6}/>
+                  {/* Gold favourite ring */}
+                  {isFav && (
+                    <circle cx={0} cy={0} r={dotR + 3} fill="none" stroke="#fbbf24" strokeWidth={1.5} opacity={0.9}/>
                   )}
 
-                  {/* Main dot — no glow filter */}
-                  <circle cx={0} cy={0} r={ds.r} fill={ds.color} opacity={ds.opacity}/>
+                  {/* Selection ring */}
+                  {isSelected && (
+                    <circle cx={0} cy={0} r={dotR + 4} fill="none" stroke="#8a9ab8" strokeWidth={0.8} opacity={0.6}/>
+                  )}
 
-                  {/* Label only above 70° and not in compact mode */}
-                  {!compact && sat.elevation >= 70 && (
+                  {/* Main dot */}
+                  <circle cx={0} cy={0} r={dotR} fill={ds.color} opacity={ds.opacity}/>
+
+                  {/* Label: always for favourites, else only above 70° */}
+                  {!compact && (isFav || sat.elevation >= 70) && (
                     <text
-                      x={lxOff} y={-ds.r - 3}
-                      fill="#4a6080" fontSize="8"
+                      x={lxOff} y={-(dotR + 3)}
+                      fill={isFav ? '#fbbf24' : '#4a6080'} fontSize="8"
                       fontFamily="JetBrains Mono, monospace"
-                      textAnchor={anchor} opacity="0.85"
+                      textAnchor={anchor} opacity={isFav ? '1' : '0.85'}
                     >
                       {shortName(sat.satname)}
                     </text>

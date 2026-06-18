@@ -45,14 +45,16 @@ export interface SatPass {
 }
 
 interface Props {
-  satellite:     Satellite | null;
-  allSatellites: Satellite[];
-  positions:       SatellitePosition[];
-  location:        LocationSettings;
-  horizonSettings: HorizonSettings;
-  onClose:         () => void;
-  units?:          'metric' | 'imperial';
-  timezone?:       string;
+  satellite:          Satellite | null;
+  allSatellites:      Satellite[];
+  positions:          SatellitePosition[];
+  location:           LocationSettings;
+  horizonSettings:    HorizonSettings;
+  onClose:            () => void;
+  units?:             'metric' | 'imperial';
+  timezone?:          string;
+  isFavourite?:       boolean;
+  onToggleFavourite?: () => void;
 }
 
 // ── Helpers ────────────────────────────────────────────────────────────────────
@@ -392,7 +394,7 @@ function DopplerChart({ pass, timezone = 'Europe/London' }: { pass: SatPass; tim
 }
 
 // ── Main component ─────────────────────────────────────────────────────────────
-export function SatelliteDetail({ satellite, allSatellites, positions, location, horizonSettings, onClose, units = 'metric', timezone = 'Europe/London' }: Props) {
+export function SatelliteDetail({ satellite, allSatellites, positions, location, horizonSettings, onClose, units = 'metric', timezone = 'Europe/London', isFavourite = false, onToggleFavourite }: Props) {
   const [tleData,            setTleData]            = useState<TleData | null>(null);
   const [passes,             setPasses]              = useState<SatPass[]>([]);
   const [tleLoading,         setTleLoading]          = useState(false);
@@ -495,7 +497,25 @@ export function SatelliteDetail({ satellite, allSatellites, positions, location,
         {/* Header */}
         <div className="sat-detail-header">
           <div className="sat-detail-hdr-left">
-            <div className="sat-detail-name">{satellite.satname}</div>
+            <div className="sat-detail-name">
+              {satellite.satname}
+              {onToggleFavourite && (
+                <button
+                  className={`star-btn star-btn--detail${isFavourite ? ' star-btn--active' : ''}`}
+                  onClick={onToggleFavourite}
+                  aria-label={isFavourite ? 'Remove from favourites' : 'Add to favourites'}
+                  title={isFavourite ? 'Remove from favourites' : 'Add to favourites'}
+                >
+                  <svg width="15" height="15" viewBox="0 0 24 24"
+                    fill={isFavourite ? '#fbbf24' : 'none'}
+                    stroke={isFavourite ? '#fbbf24' : 'currentColor'}
+                    strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"
+                  >
+                    <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
+                  </svg>
+                </button>
+              )}
+            </div>
             <div className="sat-detail-badges">
               {c !== 'OTHER' && (
                 <span className="sat-const-badge"

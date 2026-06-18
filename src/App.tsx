@@ -13,6 +13,7 @@ import { SatelliteList }        from './components/SatelliteList';
 import { SignalHistory }        from './components/SignalHistory';
 import { HistoricalInsight }    from './components/HistoricalInsight';
 import { SignalHeatmap }        from './components/SignalHeatmap';
+import { useFavourites }        from './hooks/useFavourites';
 import { Footer }               from './components/Footer';
 import { SettingsPanel }        from './components/SettingsPanel';
 import { ChatPanel }            from './components/ChatPanel';
@@ -128,6 +129,7 @@ function App() {
   }, []);
 
   const { data: satData, lastUpdated, status, positions, posLastUpdate } = useSatellites(location);
+  const { favourites, isFavourite, toggleFavourite } = useFavourites();
   const { data: recData, loading: recLoading }  = useRecommendation(location);
   const { data: weather }                       = useWeather(location);
 
@@ -141,7 +143,9 @@ function App() {
 
   const filteredSatellites = activeConstellation === 'ALL'
     ? satellites
-    : satellites.filter(s => getConstellation(s.satname) === activeConstellation);
+    : activeConstellation === 'FAVOURITES'
+      ? satellites.filter(s => favourites.includes(s.satname))
+      : satellites.filter(s => getConstellation(s.satname) === activeConstellation);
 
   if (isPassRoute) return <PassLandingPage />;
 
@@ -164,6 +168,7 @@ function App() {
         satellites={satellites}
         active={activeConstellation}
         onChange={setActiveConstellation}
+        favourites={favourites}
       />
     </div>
   );
@@ -243,6 +248,7 @@ function App() {
               compact={true}
               horizonSettings={horizonSettings}
               minElevation={accountSettings.default_elevation_threshold}
+              favourites={favourites}
             />
             <button
               className="tab-skymap-link"
@@ -278,6 +284,7 @@ function App() {
                     satellites={satellites}
                     active={activeConstellation}
                     onChange={setActiveConstellation}
+                    favourites={favourites}
                   />
                 )}
               </div>
@@ -296,10 +303,13 @@ function App() {
                   compact={false}
                   horizonSettings={horizonSettings}
                   minElevation={accountSettings.default_elevation_threshold}
+                  favourites={favourites}
                 />
                 <SatelliteList
                   satellites={filteredSatellites}
                   onSelectSatellite={setSelectedSatellite}
+                  favourites={favourites}
+                  onToggleFavourite={name => toggleFavourite(name)}
                   loading={!satData}
                   fullHeight={true}
                   units={accountSettings.units}
@@ -410,6 +420,8 @@ function App() {
         onClose={() => setSelectedSatellite(null)}
         units={accountSettings.units}
         timezone={accountSettings.timezone}
+        isFavourite={selectedSatellite ? isFavourite(selectedSatellite.satname) : false}
+        onToggleFavourite={selectedSatellite ? () => toggleFavourite(selectedSatellite.satname) : undefined}
       />
 
       <AuthModal open={authOpen} onClose={() => setAuthOpen(false)} />
