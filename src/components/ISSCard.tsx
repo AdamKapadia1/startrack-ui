@@ -13,15 +13,21 @@ interface NextPass {
 }
 
 interface ISSInfo {
-  crew:          string[];
-  crewCount:     number;
-  altitudeKm:    number | null;
-  speedKmS:      number | null;
-  currentLat:    number | null;
-  currentLon:    number | null;
-  nextPass:      NextPass | null;
-  nasaImageUrl:  string;
+  crew:       string[];
+  crewCount:  number;
+  altitudeKm: number | null;
+  speedKmS:   number | null;
+  currentLat: number | null;
+  currentLon: number | null;
+  nextPass:   NextPass | null;
 }
+
+const ISS_PHOTOS = [
+  'https://www.nasa.gov/wp-content/uploads/2023/03/iss068e027836.jpg',
+  'https://www.nasa.gov/wp-content/uploads/2023/02/iss068e006713.jpg',
+  'https://www.nasa.gov/wp-content/uploads/2023/09/iss069e079025.jpg',
+];
+const WIKI_FALLBACK = 'https://upload.wikimedia.org/wikipedia/commons/thumb/0/04/International_Space_Station_after_undocking_of_STS-132.jpg/1280px-International_Space_Station_after_undocking_of_STS-132.jpg';
 
 interface Props {
   satellites:        Satellite[];
@@ -72,10 +78,10 @@ function CrewAvatar({ name }: { name: string }) {
 }
 
 export function ISSCard({ satellites, location, onSelectSatellite }: Props) {
-  const [info,        setInfo]        = useState<ISSInfo | null>(null);
-  const [loading,     setLoading]     = useState(true);
-  const [imgError,    setImgError]    = useState(false);
-  const [imgSrc,      setImgSrc]      = useState(`${API_BASE}/api/iss/photo`);
+  const [info,    setInfo]    = useState<ISSInfo | null>(null);
+  const [loading, setLoading] = useState(true);
+
+  const photo = ISS_PHOTOS[new Date().getDay() % ISS_PHOTOS.length];
 
   const issTle = satellites.find(s =>
     s.satname.toUpperCase().includes('ISS') ||
@@ -104,19 +110,13 @@ export function ISSCard({ satellites, location, onSelectSatellite }: Props) {
 
   return (
     <div className="iss-card">
-      {/* Banner image — served via Railway proxy to avoid NASA CDN blocking */}
       <div className="iss-banner">
         <img
-          src={imgSrc}
-          alt="International Space Station"
+          src={photo}
+          alt=""
           className="iss-banner-img"
-          onError={() => {
-            if (!imgError) {
-              setImgError(true);
-              // Cycle to a different image ID on error
-              setImgSrc(`${API_BASE}/api/iss/photo?t=${Date.now()}`);
-            }
-          }}
+          style={{ width: '100%', height: '180px', objectFit: 'cover', borderRadius: '6px 6px 0 0' }}
+          onError={(e) => { e.currentTarget.src = WIKI_FALLBACK; }}
         />
         <div className="iss-banner-overlay">
           <div className="iss-banner-top">
