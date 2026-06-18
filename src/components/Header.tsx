@@ -51,9 +51,10 @@ interface Props {
   savedLocations:     SavedLocation[];
   onSwitchLocation:   (loc: SavedLocation) => void;
   onManageLocations:  () => void;
+  favourites?:        string[];
 }
 
-export function Header({ location, onOpenSettings, onOpenHelp, onToggleTheme, onOpenAuth, onSignOut, onOpenHistory, onOpenEmbed, theme, wsStatus, lastUpdated, gpsAccuracy, topPasses, user, savedLocations, onSwitchLocation, onManageLocations }: Props) {
+export function Header({ location, onOpenSettings, onOpenHelp, onToggleTheme, onOpenAuth, onSignOut, onOpenHistory, onOpenEmbed, theme, wsStatus, lastUpdated, gpsAccuracy, topPasses, user, savedLocations, onSwitchLocation, onManageLocations, favourites = [] }: Props) {
   const cfg      = STATUS[wsStatus] ?? STATUS.connecting;
   const agoText  = useAgoText(lastUpdated);
   const [flashing,      setFlashing]      = useState(false);
@@ -141,7 +142,7 @@ export function Header({ location, onOpenSettings, onOpenHelp, onToggleTheme, on
       )}
 
       <div className="header-actions">
-        <AlertSettings passes={topPasses} />
+        <AlertSettings passes={topPasses} favourites={favourites} />
 
         {/* Auth button */}
         {user ? (

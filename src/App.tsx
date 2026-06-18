@@ -193,6 +193,7 @@ function App() {
         savedLocations={savedLocations}
         onSwitchLocation={switchToLocation}
         onManageLocations={() => setSettingsOpen(true)}
+        favourites={favourites}
       />
 
       <CountdownBanner passes={topPasses} />

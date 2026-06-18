@@ -11,6 +11,7 @@ interface Props { passes: Pass[] }
 export function CountdownBanner({ passes }: Props) {
   const [settings, setSettings] = useState<AlertConfig>({
     minElevation: 60, alertMinutesBefore: 10, enabled: true,
+    favouriteSatellitesOnly: false, favouriteSatelliteNames: [],
   });
   const [now,          setNow]          = useState(Math.floor(Date.now() / 1000));
   const [dismissedKey, setDismissedKey] = useState<number | null>(null);

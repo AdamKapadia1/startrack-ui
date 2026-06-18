@@ -1,9 +1,10 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { supabase } from '../lib/supabaseClient';
 import { useAuth } from './useAuth';
 
 const LS_KEY      = 'startrack-favourites';
 const GUEST_KEY   = 'startrack-guest-key';
+const API_BASE    = import.meta.env.VITE_API_URL ?? '';
 
 function getGuestKey(): string {
   let key = localStorage.getItem(GUEST_KEY);
@@ -27,6 +28,7 @@ export function useFavourites() {
   const { user } = useAuth();
   const [favourites, setFavourites] = useState<string[]>([]);
   const [loading,    setLoading]    = useState(true);
+  const initialLoad = useRef(true);
 
   const ownerFilter = useCallback(() => {
     return user
@@ -59,6 +61,17 @@ export function useFavourites() {
   useEffect(() => {
     loadFavourites();
   }, [loadFavourites]);
+
+  // Sync favourites list to backend alert checker whenever it changes (skip first empty load)
+  useEffect(() => {
+    if (loading) return;
+    if (initialLoad.current) { initialLoad.current = false; return; }
+    fetch(`${API_BASE}/api/notifications/favourites`, {
+      method:  'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body:    JSON.stringify({ satelliteNames: favourites }),
+    }).catch(() => {});
+  }, [favourites, loading]);
 
   const toggleFavourite = async (satelliteName: string, noradId?: string) => {
     const isFav = favourites.includes(satelliteName);
