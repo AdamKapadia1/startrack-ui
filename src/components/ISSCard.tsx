@@ -24,8 +24,8 @@ interface ISSInfo {
 
 const ISS_PHOTOS = [
   'https://www.nasa.gov/wp-content/uploads/2023/03/iss068e027836.jpg',
-  'https://www.nasa.gov/wp-content/uploads/2023/02/iss068e006713.jpg',
-  'https://www.nasa.gov/wp-content/uploads/2023/09/iss069e079025.jpg',
+  'https://www.nasa.gov/wp-content/uploads/2026/06/iss074e0590568orig.jpg',
+  'https://images-assets.nasa.gov/image/iss074e0521507/iss074e0521507~large.jpg',
 ];
 const WIKI_FALLBACK = 'https://upload.wikimedia.org/wikipedia/commons/thumb/0/04/International_Space_Station_after_undocking_of_STS-132.jpg/1280px-International_Space_Station_after_undocking_of_STS-132.jpg';
 
