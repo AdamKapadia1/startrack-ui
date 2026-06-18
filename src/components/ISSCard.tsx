@@ -101,7 +101,7 @@ export function ISSCard({ satellites, location, onSelectSatellite }: Props) {
     return () => { cancelled = true; clearInterval(id); };
   }, [location.lat, location.lon, location.alt]);
 
-  const FALLBACK_IMG = 'https://images-assets.nasa.gov/image/iss056e000236/iss056e000236~large.jpg';
+  const FALLBACK_IMG = 'https://images-assets.nasa.gov/image/iss054e004111/iss054e004111~medium.jpg';
 
   return (
     <div className="iss-card">
@@ -147,7 +147,7 @@ export function ISSCard({ satellites, location, onSelectSatellite }: Props) {
           <div className="iss-telemetry-cell">
             <span className="iss-tel-label">Crew</span>
             <span className="iss-tel-value">
-              {loading ? '—' : `${info?.crewCount ?? '—'} aboard`}
+              {loading ? '—' : info?.crewCount ? `${info.crewCount} aboard` : '—'}
             </span>
           </div>
         </div>
