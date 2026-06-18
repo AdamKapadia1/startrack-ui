@@ -45,12 +45,13 @@ import { useLocation }          from './hooks/useLocation';
 
 // ── Tab definition ────────────────────────────────────────────────────────────
 
-type Tab = 'overview' | 'skymap' | 'passes' | 'insights';
+type Tab = 'overview' | 'skymap' | 'passes' | 'insights' | 'iss';
 const TABS: { id: Tab; label: string }[] = [
   { id: 'overview',  label: 'Overview' },
   { id: 'skymap',    label: 'Sky Map'  },
   { id: 'passes',    label: 'Passes'   },
   { id: 'insights',  label: 'Insights' },
+  { id: 'iss',       label: 'ISS'      },
 ];
 const TAB_KEY = 'startrack-active-tab';
 
@@ -239,12 +240,6 @@ function App() {
             />
             {starlinkSat && <DtcCard satellite={starlinkSat} />}
 
-            <ISSCard
-              satellites={satellites}
-              location={location}
-              onSelectSatellite={setSelectedSatellite}
-            />
-
             {/* Compact sky map in overview */}
             {skyMapHeader}
             <SkyMap
@@ -387,6 +382,18 @@ function App() {
 
             {/* Pattern insight — full width */}
             <HistoricalInsight />
+          </div>
+        )}
+
+        {/* ── ISS ── */}
+        {activeTab === 'iss' && (
+          <div className="tab-pane tab-iss">
+            <div className="section-label">International Space Station</div>
+            <ISSCard
+              satellites={satellites}
+              location={location}
+              onSelectSatellite={setSelectedSatellite}
+            />
           </div>
         )}
       </div>
