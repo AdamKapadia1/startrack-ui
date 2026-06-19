@@ -393,6 +393,8 @@ function App() {
               satellites={satellites}
               location={location}
               onSelectSatellite={setSelectedSatellite}
+              onOpenSkyMap={() => switchTab('skymap')}
+              onOpenSettings={() => setSettingsOpen(true)}
             />
           </div>
         )}
