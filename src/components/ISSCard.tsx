@@ -66,10 +66,10 @@ interface ISSInfo {
   bstar:            number;
   elementSet:       number;
   revNumber:        number;
-  smaKm:            number;
-  apogeeKm:         number;
-  perigeeKm:        number;
-  periodMin:        number;
+  smaKm:            number | null;
+  apogeeKm:         number | null;
+  perigeeKm:        number | null;
+  periodMin:        number | null;
   // ECI state vector
   eciPosX: number; eciPosY: number; eciPosZ: number;
   eciVelX: number; eciVelY: number; eciVelZ: number;
@@ -380,10 +380,10 @@ function ISSKeplerianSection({ info }: { info: ISSInfo }) {
         </div>
         <div className="iss-orbital-col">
           <OrbEl label="EPOCH"          value={epochStr} />
-          <OrbEl label="SEMI-MAJOR AXIS" value={`${info.smaKm.toFixed(3)} km`} />
-          <OrbEl label="APOLUNE"        value={`${info.apogeeKm.toFixed(1)} km`} />
-          <OrbEl label="PERILUNE"       value={`${info.perigeeKm.toFixed(1)} km`} />
-          <OrbEl label="PERIOD"         value={`${info.periodMin.toFixed(4)} min`} />
+          <OrbEl label="SEMI-MAJOR AXIS" value={info.smaKm    != null ? `${info.smaKm!.toFixed(3)} km`    : '—'} />
+          <OrbEl label="APOLUNE"        value={info.apogeeKm  != null ? `${info.apogeeKm!.toFixed(1)} km`  : '—'} />
+          <OrbEl label="PERILUNE"       value={info.perigeeKm != null ? `${info.perigeeKm!.toFixed(1)} km` : '—'} />
+          <OrbEl label="PERIOD"         value={info.periodMin  != null ? `${info.periodMin!.toFixed(4)} min` : '—'} />
           <OrbEl label="SPEED"          value={info.speedKmS != null ? `${info.speedKmS.toFixed(3)} km/s` : '—'} />
           <OrbEl label="B* DRAG"        value={info.bstar !== 0 ? info.bstar.toExponential(4) : '—'} />
         </div>
