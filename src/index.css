@@ -6595,3 +6595,357 @@ circle[fill="#7b61ff"] { filter: drop-shadow(0 0 6px #7b61ff); }
   flex-shrink:   0;
 }
 .ar-launch-btn:hover { background: rgba(0,212,255,0.14); }
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   ISS Specialist Orbital Operations Panel — 6 new sections
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+/* ── Section 1: Keplerian Elements ───────────────────────────────────────── */
+.iss-orbital-section {
+  padding: 8px 14px 12px;
+}
+.iss-orbital-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0 20px;
+}
+.iss-orbital-col { display: flex; flex-direction: column; }
+.iss-orbital-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  padding: 3px 0;
+  border-bottom: 1px solid rgba(255,255,255,0.03);
+  gap: 6px;
+}
+.iss-el-label {
+  font-size: 9px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+  color: var(--text-tertiary);
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+.iss-el-value {
+  font-family: 'JetBrains Mono', 'Courier New', monospace;
+  font-size: 10px;
+  color: var(--text-primary);
+  text-align: right;
+}
+.iss-orbital-source {
+  margin-top: 8px;
+  font-size: 8px;
+  color: var(--text-tertiary);
+  opacity: 0.55;
+}
+
+/* ── Section 2: State Vector ─────────────────────────────────────────────── */
+.iss-sv-section { padding: 8px 14px 12px; }
+.iss-sv-groups {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 8px;
+}
+.iss-sv-group {
+  border: 1px solid var(--border);
+  padding: 6px 8px;
+}
+.iss-sv-group-label {
+  font-size: 8px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.09em;
+  color: var(--text-tertiary);
+  margin-bottom: 5px;
+  padding-bottom: 4px;
+  border-bottom: 1px solid var(--border);
+}
+.iss-sv-row {
+  display: flex;
+  justify-content: space-between;
+  padding: 2px 0;
+}
+.iss-sv-key {
+  font-family: 'JetBrains Mono', 'Courier New', monospace;
+  font-size: 10px;
+  font-weight: 700;
+  color: var(--accent);
+}
+.iss-sv-val {
+  font-family: 'JetBrains Mono', 'Courier New', monospace;
+  font-size: 10px;
+  color: var(--text-primary);
+}
+.iss-sv-epoch {
+  margin-top: 6px;
+  font-size: 8px;
+  color: var(--text-tertiary);
+  opacity: 0.5;
+  text-align: right;
+}
+
+/* ── Section 3: Pass Geometry Table ─────────────────────────────────────── */
+.iss-pass-geo-wrap { padding: 4px 0 12px; }
+.iss-pass-geo-scroll { overflow-x: auto; }
+.iss-pass-geo-table {
+  width: 100%;
+  min-width: 520px;
+  border-collapse: collapse;
+  font-family: 'JetBrains Mono', 'Courier New', monospace;
+  font-size: 10px;
+}
+.iss-pass-geo-table th {
+  font-size: 8px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+  color: var(--text-tertiary);
+  padding: 4px 10px;
+  text-align: left;
+  border-bottom: 1px solid var(--border);
+  white-space: nowrap;
+}
+.iss-pass-geo-table td {
+  padding: 6px 10px;
+  color: var(--text-secondary);
+  border-bottom: 1px solid rgba(255,255,255,0.03);
+  white-space: nowrap;
+}
+.iss-pass-geo-table tr.iss-pass-best-row td {
+  background: rgba(34,197,94,0.07);
+  color: #4ade80;
+}
+.iss-pass-geo-table .iss-pass-time { color: var(--text-secondary); }
+.iss-pass-geo-table .iss-pass-el   { font-weight: 700; color: var(--accent); }
+.iss-pass-geo-note {
+  padding: 4px 14px 0;
+  font-size: 8px;
+  color: var(--text-tertiary);
+  opacity: 0.55;
+}
+
+/* ── Section 4: Solar Status + Beta Angle ────────────────────────────────── */
+.iss-solar-section {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0;
+  padding: 10px 14px 14px;
+  align-items: start;
+}
+.iss-beta-panel {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding-right: 16px;
+  border-right: 1px solid var(--border);
+}
+.iss-beta-label {
+  font-size: 8px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  color: var(--text-tertiary);
+  margin-bottom: 4px;
+  align-self: flex-start;
+}
+.iss-beta-svg  { width: 144px; height: 74px; }
+.iss-beta-value {
+  font-family: 'JetBrains Mono', 'Courier New', monospace;
+  font-size: 22px;
+  font-weight: 700;
+  margin-top: 2px;
+  line-height: 1;
+}
+.iss-beta-low  { color: #22c55e; }
+.iss-beta-mid  { color: #f59e0b; }
+.iss-beta-high { color: #ef4444; }
+.iss-beta-sub  {
+  font-size: 8px;
+  color: var(--text-tertiary);
+  text-align: center;
+  margin-top: 4px;
+  line-height: 1.4;
+}
+
+.iss-illumination-panel { padding-left: 16px; }
+.iss-illumination-label {
+  font-size: 8px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  color: var(--text-tertiary);
+  margin-bottom: 10px;
+}
+.iss-solar-badge {
+  display: inline-block;
+  padding: 4px 14px;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  margin-bottom: 10px;
+}
+.iss-solar-sunlit  { background: rgba(251,191,36,0.12); color: #fbbf24; border: 1px solid rgba(251,191,36,0.3); }
+.iss-solar-eclipse { background: rgba(129,140,248,0.12); color: #818cf8; border: 1px solid rgba(129,140,248,0.3); }
+.iss-solar-transition {
+  font-family: 'JetBrains Mono', 'Courier New', monospace;
+  font-size: 11px;
+  color: var(--text-secondary);
+  margin-bottom: 8px;
+}
+.iss-solar-desc {
+  font-size: 9px;
+  color: var(--text-tertiary);
+  line-height: 1.5;
+}
+
+/* ── Section 5: Amateur Radio ────────────────────────────────────────────── */
+.iss-radio-section { padding: 8px 14px 14px; }
+.iss-radio-ref-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 2px 20px;
+  margin-bottom: 12px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid var(--border);
+}
+.iss-radio-ref-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  padding: 2px 0;
+}
+.iss-radio-key {
+  font-size: 8px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+  color: var(--text-tertiary);
+}
+.iss-radio-val {
+  font-family: 'JetBrains Mono', 'Courier New', monospace;
+  font-size: 11px;
+  color: var(--text-primary);
+}
+.iss-radio-doppler-header {
+  font-size: 8px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--text-tertiary);
+  margin-bottom: 8px;
+}
+.iss-radio-doppler-cells {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 6px;
+}
+.iss-radio-doppler-cell {
+  border: 1px solid var(--border);
+  padding: 7px 8px;
+  text-align: center;
+}
+.iss-radio-doppler-phase {
+  font-size: 8px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  color: var(--text-tertiary);
+  margin-bottom: 5px;
+}
+.iss-radio-doppler-shift {
+  font-family: 'JetBrains Mono', 'Courier New', monospace;
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--accent);
+  margin-bottom: 3px;
+}
+.iss-radio-doppler-recv {
+  font-family: 'JetBrains Mono', 'Courier New', monospace;
+  font-size: 9px;
+  color: var(--text-secondary);
+}
+.iss-radio-note {
+  margin-top: 8px;
+  font-size: 8px;
+  color: var(--text-tertiary);
+  opacity: 0.65;
+  line-height: 1.5;
+}
+.iss-radio-no-pass { font-size: 10px; color: var(--text-tertiary); }
+
+/* ── Section 6: TLE Quality ──────────────────────────────────────────────── */
+.iss-tle-quality-section { padding: 8px 14px 14px; }
+.iss-tle-meta-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 2px 20px;
+  margin-bottom: 10px;
+}
+.iss-tle-meta-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  padding: 3px 0;
+  border-bottom: 1px solid rgba(255,255,255,0.03);
+  gap: 6px;
+}
+.iss-tle-meta-label {
+  font-size: 8px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+  color: var(--text-tertiary);
+  white-space: nowrap;
+}
+.iss-tle-meta-value {
+  font-family: 'JetBrains Mono', 'Courier New', monospace;
+  font-size: 10px;
+  color: var(--text-secondary);
+  text-align: right;
+}
+.iss-confidence-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 6px;
+}
+.iss-confidence-label {
+  font-size: 8px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+  color: var(--text-tertiary);
+  flex-shrink: 0;
+}
+.iss-confidence-track {
+  flex: 1;
+  height: 6px;
+  background: var(--bg-tertiary);
+  border: 1px solid var(--border);
+}
+.iss-confidence-fill {
+  height: 100%;
+  transition: width 0.8s ease;
+}
+.iss-confidence-fill.qual-ex { background: #22c55e; }
+.iss-confidence-fill.qual-gd { background: #84cc16; }
+.iss-confidence-fill.qual-fa { background: #f59e0b; }
+.iss-confidence-fill.qual-ca { background: #ef4444; }
+.iss-confidence-badge {
+  font-size: 8px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  padding: 2px 7px;
+  border: 1px solid;
+  flex-shrink: 0;
+}
+.iss-confidence-badge.qual-ex { color: #22c55e; border-color: rgba(34,197,94,0.4); }
+.iss-confidence-badge.qual-gd { color: #84cc16; border-color: rgba(132,204,22,0.4); }
+.iss-confidence-badge.qual-fa { color: #f59e0b; border-color: rgba(245,158,11,0.4); }
+.iss-confidence-badge.qual-ca { color: #ef4444; border-color: rgba(239,68,68,0.4); }
+.iss-tle-source {
+  font-size: 8px;
+  color: var(--text-tertiary);
+  opacity: 0.45;
+}
