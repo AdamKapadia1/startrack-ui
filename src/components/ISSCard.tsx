@@ -20,7 +20,7 @@ interface ISSInfo {
   currentLat:     number | null;
   currentLon:     number | null;
   nextPass:       NextPass | null;
-  nasaImage:      string | null;
+  nasaImageUrl:   string | null;
   nasaImageTitle: string | null;
 }
 
@@ -104,28 +104,45 @@ export function ISSCard({ satellites, location, onSelectSatellite }: Props) {
   return (
     <div className="iss-card">
       <div className="iss-banner">
-        {info?.nasaImage ? (
+        {info?.nasaImageUrl && (
           <img
-            src={info.nasaImage}
-            alt={info.nasaImageTitle ?? 'NASA Astronomy Picture of the Day'}
-            className="iss-banner-img"
-            style={{ width: '100%', height: '180px', objectFit: 'cover', borderRadius: '6px 6px 0 0' }}
+            src={info.nasaImageUrl}
+            alt={info.nasaImageTitle || 'International Space Station'}
+            onError={(e) => {
+              (e.target as HTMLImageElement).parentElement!.style.display = 'none';
+            }}
+            style={{
+              width: '100%',
+              height: '200px',
+              objectFit: 'cover',
+              borderRadius: '6px 6px 0 0',
+              display: 'block',
+            }}
           />
-        ) : (
+        )}
+        {!info?.nasaImageUrl && (
           <div style={{
-            width: '100%', height: '180px', borderRadius: '6px 6px 0 0',
-            background: '#0a0a1a', display: 'flex', flexDirection: 'column',
-            alignItems: 'center', justifyContent: 'center', gap: '8px',
+            width: '100%',
+            height: '100px',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            background: 'var(--bg-tertiary)',
+            borderRadius: '6px 6px 0 0',
+            color: 'var(--text-tertiary)',
+            fontSize: '13px',
           }}>
-            <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#4a5568" strokeWidth="1.5">
-              <circle cx="12" cy="12" r="10"/>
-              <circle cx="12" cy="12" r="3"/>
-              <line x1="12" y1="2" x2="12" y2="5"/>
-              <line x1="12" y1="19" x2="12" y2="22"/>
-              <line x1="2" y1="12" x2="5" y2="12"/>
-              <line x1="19" y1="12" x2="22" y2="12"/>
-            </svg>
-            <span style={{ color: '#4a5568', fontSize: '13px' }}>Photo unavailable</span>
+            No photo available
+          </div>
+        )}
+        {info?.nasaImageTitle && (
+          <div style={{
+            fontSize: '10px',
+            color: 'var(--text-tertiary)',
+            padding: '4px 8px',
+            fontStyle: 'italic',
+          }}>
+            📷 {info.nasaImageTitle} — NASA
           </div>
         )}
         <div className="iss-banner-overlay">
