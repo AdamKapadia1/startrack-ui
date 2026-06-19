@@ -6069,6 +6069,65 @@ circle[fill="#7b61ff"] { filter: drop-shadow(0 0 6px #7b61ff); }
 .iss-crew-toggle:hover { color: var(--text-secondary); }
 .iss-crew-toggle svg   { margin-left: auto; }
 
+/* ISS crew list (expanded) */
+.iss-crew-list { display: flex; flex-direction: column; gap: 6px; margin: 8px 0 4px; }
+.iss-crew-member { display: flex; align-items: center; gap: 10px; }
+.iss-crew-name { font-size: 13px; color: var(--text-primary); }
+.iss-crew-attribution { font-size: 10px; color: var(--text-tertiary); margin-top: 6px; font-style: italic; }
+
+/* ISS World Map */
+.iss-world-map { border-top: 1px solid var(--border); background: #0c1a33; }
+
+.iss-video-wrap {
+  padding: 10px 14px;
+  background: var(--bg-secondary);
+  border-top: 1px solid var(--border);
+}
+.iss-video-btn {
+  display: flex; align-items: center; justify-content: center; gap: 8px;
+  width: 100%; background: rgba(239,68,68,0.1); border: 1px solid rgba(239,68,68,0.3);
+  border-radius: 6px; color: var(--text-primary); text-decoration: none;
+  font-size: 13px; font-weight: 500; padding: 8px 12px; cursor: pointer;
+  transition: background 0.15s, border-color 0.15s; box-sizing: border-box;
+}
+.iss-video-btn:hover { background: rgba(239,68,68,0.22); border-color: rgba(239,68,68,0.55); }
+.iss-video-note { font-size: 11px; color: var(--text-tertiary); margin-top: 6px; text-align: center; font-style: italic; }
+
+/* ISS Pass Timeline */
+.iss-timeline-section {
+  border-top: 1px solid var(--border);
+  padding: 12px 14px;
+  background: var(--bg-secondary);
+}
+.iss-timeline-wrap { }
+.iss-timeline-label {
+  font-size: 10px; text-transform: uppercase; letter-spacing: 0.07em;
+  color: var(--text-tertiary); margin-bottom: 6px;
+}
+.iss-timeline-summary { font-size: 11px; color: var(--text-secondary); margin-top: 6px; line-height: 1.45; }
+.iss-timeline-legend {
+  display: flex; align-items: center; gap: 5px; margin-top: 5px;
+  font-size: 10px; color: var(--text-tertiary);
+}
+.dot-green, .dot-amber, .dot-gray {
+  display: inline-block; width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0;
+}
+.dot-green { background: #22c55e; }
+.dot-amber { background: #f59e0b; }
+.dot-gray  { background: #6b7280; }
+
+/* ISS Facts Ticker */
+.iss-facts-ticker {
+  border-top: 1px solid var(--border);
+  padding: 10px 14px;
+  display: flex; align-items: flex-start; gap: 8px;
+  background: var(--bg-secondary);
+  border-radius: 0 0 8px 8px;
+  min-height: 44px;
+}
+.iss-facts-icon { font-size: 13px; flex-shrink: 0; margin-top: 1px; opacity: 0.65; }
+.iss-facts-text { font-size: 11px; color: var(--text-tertiary); font-style: italic; line-height: 1.45; }
+
 /* ── AR Sky View ─────────────────────────────────────────────────────────────── */
 
 .ar-overlay {
