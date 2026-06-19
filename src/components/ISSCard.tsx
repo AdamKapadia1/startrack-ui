@@ -57,22 +57,22 @@ interface ISSInfo {
   nasaImageUrl:   string | null;
   nasaImageTitle: string | null;
   // Keplerian elements
-  inclinationDeg:   number;
-  raanDeg:          number;
-  eccentricity:     number;
-  argPerigeeDeg:    number;
-  meanAnomalyDeg:   number;
-  meanMotionRevDay: number;
-  bstar:            number;
-  elementSet:       number;
-  revNumber:        number;
+  inclinationDeg:   number | null;
+  raanDeg:          number | null;
+  eccentricity:     number | null;
+  argPerigeeDeg:    number | null;
+  meanAnomalyDeg:   number | null;
+  meanMotionRevDay: number | null;
+  bstar:            number | null;
+  elementSet:       number | null;
+  revNumber:        number | null;
   smaKm:            number | null;
   apogeeKm:         number | null;
   perigeeKm:        number | null;
   periodMin:        number | null;
   // ECI state vector
-  eciPosX: number; eciPosY: number; eciPosZ: number;
-  eciVelX: number; eciVelY: number; eciVelZ: number;
+  eciPosX: number | null; eciPosY: number | null; eciPosZ: number | null;
+  eciVelX: number | null; eciVelY: number | null; eciVelZ: number | null;
   // Solar
   solarStatus:          'SUNLIT' | 'ECLIPSE';
   timeToTransitionSecs: number | null;
@@ -371,12 +371,12 @@ function ISSKeplerianSection({ info }: { info: ISSInfo }) {
       <div className="iss-orbital-grid">
         <div className="iss-orbital-col">
           <OrbEl label="NORAD ID"       value="25544" />
-          <OrbEl label="INCLINATION"    value={`${info.inclinationDeg.toFixed(4)}°`} />
-          <OrbEl label="RAAN"           value={`${info.raanDeg.toFixed(4)}°`} />
-          <OrbEl label="ECCENTRICITY"   value={info.eccentricity.toFixed(7)} />
-          <OrbEl label="ARG PERIGEE"    value={`${info.argPerigeeDeg.toFixed(4)}°`} />
-          <OrbEl label="MEAN ANOMALY"   value={`${info.meanAnomalyDeg.toFixed(4)}°`} />
-          <OrbEl label="MEAN MOTION"    value={`${info.meanMotionRevDay.toFixed(8)} rev/day`} />
+          <OrbEl label="INCLINATION"    value={info.inclinationDeg   != null ? `${info.inclinationDeg!.toFixed(4)}°`      : '—'} />
+          <OrbEl label="RAAN"           value={info.raanDeg          != null ? `${info.raanDeg!.toFixed(4)}°`          : '—'} />
+          <OrbEl label="ECCENTRICITY"   value={info.eccentricity     != null ? info.eccentricity!.toFixed(7)           : '—'} />
+          <OrbEl label="ARG PERIGEE"    value={info.argPerigeeDeg    != null ? `${info.argPerigeeDeg!.toFixed(4)}°`    : '—'} />
+          <OrbEl label="MEAN ANOMALY"   value={info.meanAnomalyDeg   != null ? `${info.meanAnomalyDeg!.toFixed(4)}°`   : '—'} />
+          <OrbEl label="MEAN MOTION"    value={info.meanMotionRevDay != null ? `${info.meanMotionRevDay!.toFixed(8)} rev/day` : '—'} />
         </div>
         <div className="iss-orbital-col">
           <OrbEl label="EPOCH"          value={epochStr} />
@@ -385,7 +385,7 @@ function ISSKeplerianSection({ info }: { info: ISSInfo }) {
           <OrbEl label="PERILUNE"       value={info.perigeeKm != null ? `${info.perigeeKm!.toFixed(1)} km` : '—'} />
           <OrbEl label="PERIOD"         value={info.periodMin  != null ? `${info.periodMin!.toFixed(4)} min` : '—'} />
           <OrbEl label="SPEED"          value={info.speedKmS != null ? `${info.speedKmS.toFixed(3)} km/s` : '—'} />
-          <OrbEl label="B* DRAG"        value={info.bstar !== 0 ? info.bstar.toExponential(4) : '—'} />
+          <OrbEl label="B* DRAG"        value={info.bstar != null && info.bstar !== 0 ? info.bstar!.toExponential(4) : '—'} />
         </div>
       </div>
       <div className="iss-orbital-source">
@@ -407,15 +407,15 @@ function ISSStateVectorSection({ info }: { info: ISSInfo }) {
       <div className="iss-sv-groups">
         <div className="iss-sv-group">
           <div className="iss-sv-group-label">POSITION ECI (km)</div>
-          <div className="iss-sv-row"><span className="iss-sv-key">X</span><span className="iss-sv-val">{info.eciPosX.toFixed(1)}</span></div>
-          <div className="iss-sv-row"><span className="iss-sv-key">Y</span><span className="iss-sv-val">{info.eciPosY.toFixed(1)}</span></div>
-          <div className="iss-sv-row"><span className="iss-sv-key">Z</span><span className="iss-sv-val">{info.eciPosZ.toFixed(1)}</span></div>
+          <div className="iss-sv-row"><span className="iss-sv-key">X</span><span className="iss-sv-val">{info.eciPosX != null ? info.eciPosX!.toFixed(1) : '—'}</span></div>
+          <div className="iss-sv-row"><span className="iss-sv-key">Y</span><span className="iss-sv-val">{info.eciPosY != null ? info.eciPosY!.toFixed(1) : '—'}</span></div>
+          <div className="iss-sv-row"><span className="iss-sv-key">Z</span><span className="iss-sv-val">{info.eciPosZ != null ? info.eciPosZ!.toFixed(1) : '—'}</span></div>
         </div>
         <div className="iss-sv-group">
           <div className="iss-sv-group-label">VELOCITY ECI (km/s)</div>
-          <div className="iss-sv-row"><span className="iss-sv-key">Vx</span><span className="iss-sv-val">{info.eciVelX.toFixed(4)}</span></div>
-          <div className="iss-sv-row"><span className="iss-sv-key">Vy</span><span className="iss-sv-val">{info.eciVelY.toFixed(4)}</span></div>
-          <div className="iss-sv-row"><span className="iss-sv-key">Vz</span><span className="iss-sv-val">{info.eciVelZ.toFixed(4)}</span></div>
+          <div className="iss-sv-row"><span className="iss-sv-key">Vx</span><span className="iss-sv-val">{info.eciVelX != null ? info.eciVelX!.toFixed(4) : '—'}</span></div>
+          <div className="iss-sv-row"><span className="iss-sv-key">Vy</span><span className="iss-sv-val">{info.eciVelY != null ? info.eciVelY!.toFixed(4) : '—'}</span></div>
+          <div className="iss-sv-row"><span className="iss-sv-key">Vz</span><span className="iss-sv-val">{info.eciVelZ != null ? info.eciVelZ!.toFixed(4) : '—'}</span></div>
         </div>
         <div className="iss-sv-group">
           <div className="iss-sv-group-label">GEODETIC (WGS-84)</div>
@@ -740,7 +740,7 @@ export function ISSCard({ satellites, location, onSelectSatellite, onOpenSkyMap,
     return () => clearInterval(id);
   }, []);
 
-  const hasOrbitalData = info && info.inclinationDeg > 0;
+  const hasOrbitalData = info && info.inclinationDeg != null && info.inclinationDeg > 0;
 
   return (
     <div className="iss-card">

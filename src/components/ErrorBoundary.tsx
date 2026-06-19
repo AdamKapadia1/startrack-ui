@@ -45,9 +45,15 @@ export class ErrorBoundary extends Component<Props, State> {
           <div style={{ fontSize: '16px', fontWeight: 700, color: '#e8f5f0', marginBottom: '8px' }}>
             Something went wrong
           </div>
-          <div style={{ fontSize: '12px', color: '#4a6080', lineHeight: 1.6, marginBottom: '24px' }}>
+          <div style={{ fontSize: '12px', color: '#4a6080', lineHeight: 1.6, marginBottom: '8px' }}>
             StarTrack encountered an error. Refresh the page to reconnect.
           </div>
+          {this.state.message && (
+            <div style={{ fontSize: '10px', color: '#ff4444', fontFamily: 'monospace', marginBottom: '16px',
+              background: 'rgba(239,68,68,0.08)', padding: '8px', borderRadius: '6px', wordBreak: 'break-all' }}>
+              {this.state.message}
+            </div>
+          )}
           <button
             onClick={() => window.location.reload()}
             style={{
