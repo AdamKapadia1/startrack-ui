@@ -6069,44 +6069,159 @@ circle[fill="#7b61ff"] { filter: drop-shadow(0 0 6px #7b61ff); }
 .iss-crew-toggle:hover { color: var(--text-secondary); }
 .iss-crew-toggle svg   { margin-left: auto; }
 
-/* ISS crew list (expanded) */
-.iss-crew-list { display: flex; flex-direction: column; gap: 6px; margin: 8px 0 4px; }
-.iss-crew-member { display: flex; align-items: center; gap: 10px; }
-.iss-crew-name { font-size: 13px; color: var(--text-primary); }
-.iss-crew-attribution { font-size: 10px; color: var(--text-tertiary); margin-top: 6px; font-style: italic; }
+/* ── ISS card overhaul: professional space ops design ─────────────────────── */
 
-/* ISS World Map */
-.iss-world-map { border-top: 1px solid var(--border); background: #0c1a33; }
+/* Top accent border */
+.iss-card { border-top: 1px solid var(--accent); }
 
-.iss-video-wrap {
+/* Section headers with ice-blue accent bar */
+.iss-sec-header {
+  font-size: 9px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+  color: var(--text-tertiary);
+  padding: 10px 14px 5px 12px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  border-top: 1px solid var(--border);
+}
+.iss-sec-header::before {
+  content: '';
+  display: inline-block;
+  width: 2px;
+  height: 12px;
+  background: var(--accent);
+  border-radius: 1px;
+  flex-shrink: 0;
+}
+
+/* Photo placeholder */
+.iss-photo-placeholder {
+  width: 100%; height: 140px;
+  display: flex; align-items: center; justify-content: center;
+  background: var(--bg-tertiary);
+  color: var(--text-tertiary); font-size: 13px; letter-spacing: 0.04em;
+}
+.iss-photo-credit {
+  font-size: 10px; color: var(--text-tertiary); padding: 4px 10px;
+  font-style: italic; background: var(--bg-secondary);
+  border-bottom: 1px solid var(--border);
+}
+
+/* Telemetry values — monospace */
+.iss-tel-value {
+  font-family: 'JetBrains Mono', 'Courier New', monospace;
+}
+
+/* Ground track map */
+.iss-map-wrap { overflow: hidden; }
+.iss-map-placeholder {
+  height: 200px; display: flex; align-items: center; justify-content: center;
+  background: var(--bg-tertiary); color: var(--text-tertiary); font-size: 13px;
+}
+
+/* Leaflet dark-theme overrides */
+.leaflet-container { background: #0c1a33; }
+.leaflet-control-attribution {
+  background: rgba(0,0,8,0.6) !important;
+  color: rgba(255,255,255,0.35) !important;
+  font-size: 9px !important;
+}
+.leaflet-control-attribution a { color: rgba(255,255,255,0.45) !important; }
+
+/* ISS pulsing marker */
+.iss-map-icon { background: none !important; border: none !important; }
+.iss-marker-outer {
+  position: relative;
+  width: 28px; height: 28px;
+  display: flex; align-items: center; justify-content: center;
+}
+.iss-marker-outer::after {
+  content: '';
+  position: absolute;
+  top: 50%; left: 50%;
+  width: 28px; height: 28px;
+  border-radius: 50%;
+  background: rgba(255,140,0,0.35);
+  transform: translate(-50%, -50%);
+  animation: iss-marker-pulse 2.2s ease-out infinite;
+}
+.iss-marker-inner {
+  position: relative; z-index: 1;
+  width: 12px; height: 12px;
+  border-radius: 50%;
+  background: #ff8c00;
+  box-shadow: 0 0 8px rgba(255,140,0,0.9), 0 0 20px rgba(255,140,0,0.4);
+}
+@keyframes iss-marker-pulse {
+  0%   { transform: translate(-50%,-50%) scale(1); opacity: 0.6; }
+  100% { transform: translate(-50%,-50%) scale(3.5); opacity: 0; }
+}
+
+/* Leaflet popup — dark theme */
+.iss-map-popup .leaflet-popup-content-wrapper {
+  background: var(--bg-secondary, #151f2e);
+  color: var(--text-primary, #e2e8f0);
+  border: 1px solid var(--border, #1e2d40);
+  border-radius: 4px;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.6);
+  padding: 0;
+}
+.iss-map-popup .leaflet-popup-content { margin: 0; }
+.iss-map-popup .leaflet-popup-tip-container { display: none; }
+.iss-popup-title {
+  padding: 6px 12px 2px;
+  font-size: 11px; font-weight: 700;
+  color: #ff8c00; letter-spacing: 0.1em; text-transform: uppercase;
+}
+.iss-popup-row {
+  padding: 1px 12px 5px;
+  font-size: 11px;
+  font-family: 'JetBrains Mono', monospace;
+  color: var(--text-secondary, #94a3b8);
+}
+
+/* Live feeds section */
+.iss-feeds-wrap {
   padding: 10px 14px;
   background: var(--bg-secondary);
   border-top: 1px solid var(--border);
 }
-.iss-video-btn {
-  display: flex; align-items: center; justify-content: center; gap: 8px;
-  width: 100%; background: rgba(239,68,68,0.1); border: 1px solid rgba(239,68,68,0.3);
-  border-radius: 6px; color: var(--text-primary); text-decoration: none;
-  font-size: 13px; font-weight: 500; padding: 8px 12px; cursor: pointer;
-  transition: background 0.15s, border-color 0.15s; box-sizing: border-box;
+.iss-feeds-btns { display: flex; gap: 8px; }
+.iss-feed-btn {
+  flex: 1;
+  display: flex; align-items: center; justify-content: center; gap: 6px;
+  padding: 8px 10px;
+  background: rgba(77,182,255,0.07);
+  border: 1px solid rgba(77,182,255,0.25);
+  border-radius: 4px;
+  color: var(--text-primary);
+  text-decoration: none;
+  font-size: 12px; font-weight: 500;
+  transition: background 0.15s, border-color 0.15s;
+  white-space: nowrap;
 }
-.iss-video-btn:hover { background: rgba(239,68,68,0.22); border-color: rgba(239,68,68,0.55); }
-.iss-video-note { font-size: 11px; color: var(--text-tertiary); margin-top: 6px; text-align: center; font-style: italic; }
+.iss-feed-btn:hover {
+  background: rgba(77,182,255,0.14);
+  border-color: rgba(77,182,255,0.45);
+}
+.iss-feeds-note {
+  margin-top: 7px;
+  font-size: 10px; color: var(--text-tertiary); font-style: italic; text-align: center;
+}
 
-/* ISS Pass Timeline */
+/* Pass timeline */
 .iss-timeline-section {
-  border-top: 1px solid var(--border);
-  padding: 12px 14px;
+  padding: 10px 14px;
   background: var(--bg-secondary);
+  border-top: 1px solid var(--border);
 }
 .iss-timeline-wrap { }
-.iss-timeline-label {
-  font-size: 10px; text-transform: uppercase; letter-spacing: 0.07em;
-  color: var(--text-tertiary); margin-bottom: 6px;
-}
-.iss-timeline-summary { font-size: 11px; color: var(--text-secondary); margin-top: 6px; line-height: 1.45; }
+.iss-timeline-meta { font-size: 11px; color: var(--text-secondary); margin-top: 6px; line-height: 1.45; }
 .iss-timeline-legend {
-  display: flex; align-items: center; gap: 5px; margin-top: 5px;
+  display: flex; align-items: center; gap: 5px; margin-top: 4px;
   font-size: 10px; color: var(--text-tertiary);
 }
 .dot-green, .dot-amber, .dot-gray {
@@ -6116,16 +6231,20 @@ circle[fill="#7b61ff"] { filter: drop-shadow(0 0 6px #7b61ff); }
 .dot-amber { background: #f59e0b; }
 .dot-gray  { background: #6b7280; }
 
-/* ISS Facts Ticker */
+/* Crew list */
+.iss-crew-list { display: flex; flex-direction: column; gap: 6px; margin: 8px 0 4px; }
+.iss-crew-member { display: flex; align-items: center; gap: 10px; }
+.iss-crew-name { font-size: 13px; color: var(--text-primary); }
+.iss-crew-attribution { font-size: 10px; color: var(--text-tertiary); margin-top: 6px; font-style: italic; }
+
+/* Facts ticker — no background, clean */
 .iss-facts-ticker {
   border-top: 1px solid var(--border);
   padding: 10px 14px;
-  display: flex; align-items: flex-start; gap: 8px;
-  background: var(--bg-secondary);
+  min-height: 42px;
+  display: flex; align-items: center;
   border-radius: 0 0 8px 8px;
-  min-height: 44px;
 }
-.iss-facts-icon { font-size: 13px; flex-shrink: 0; margin-top: 1px; opacity: 0.65; }
 .iss-facts-text { font-size: 11px; color: var(--text-tertiary); font-style: italic; line-height: 1.45; }
 
 /* ── AR Sky View ─────────────────────────────────────────────────────────────── */
