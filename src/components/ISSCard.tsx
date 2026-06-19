@@ -100,11 +100,11 @@ interface Props {
 
 const ISS_FACTS = [
   'The ISS travels at 28,000 km/h, completing an orbit every 92 minutes',
-  'It has been continuously inhabited since November 2000 — over 24 years',
-  'The station is 109 metres wide and 73 metres long — the size of a football pitch',
+  'It has been continuously inhabited since November 2000, over 24 years.',
+  'The station is 109 metres wide and 73 metres long, the size of a football pitch.',
   'Astronauts aboard experience 16 sunrises and 16 sunsets every day',
   'The ISS orbits at approximately 420 km above Earth\'s surface',
-  'Its total mass is around 420,000 kg — heavier than 300 cars',
+  'Its total mass is around 420,000 kg, heavier than 300 cars.',
   'The ISS is the single largest structure humans have ever placed in orbit',
   'Crew members exercise for 2 hours daily to prevent muscle and bone deterioration',
 ];
@@ -316,7 +316,7 @@ function ISSPassTimeline({ passes }: { passes: NextPass[] }) {
             </span>
             <div className="iss-timeline-legend">
               <span className="dot-green" /><span>≥40°</span>
-              <span className="dot-amber" /><span>20–39°</span>
+              <span className="dot-amber" /><span>20-39°</span>
               <span className="dot-gray"  /><span>&lt;20°</span>
             </div>
           </>
@@ -364,32 +364,32 @@ function ISSKeplerianSection({ info }: { info: ISSInfo }) {
         day: '2-digit', month: 'short', year: 'numeric',
         hour: '2-digit', minute: '2-digit', timeZone: 'UTC',
       }) + ' UTC'
-    : '—';
+    : '-';
 
   return (
     <div className="iss-orbital-section">
       <div className="iss-orbital-grid">
         <div className="iss-orbital-col">
           <OrbEl label="NORAD ID"       value="25544" />
-          <OrbEl label="INCLINATION"    value={info.inclinationDeg   != null ? `${info.inclinationDeg!.toFixed(4)}°`      : '—'} />
-          <OrbEl label="RAAN"           value={info.raanDeg          != null ? `${info.raanDeg!.toFixed(4)}°`          : '—'} />
-          <OrbEl label="ECCENTRICITY"   value={info.eccentricity     != null ? info.eccentricity!.toFixed(7)           : '—'} />
-          <OrbEl label="ARG PERIGEE"    value={info.argPerigeeDeg    != null ? `${info.argPerigeeDeg!.toFixed(4)}°`    : '—'} />
-          <OrbEl label="MEAN ANOMALY"   value={info.meanAnomalyDeg   != null ? `${info.meanAnomalyDeg!.toFixed(4)}°`   : '—'} />
-          <OrbEl label="MEAN MOTION"    value={info.meanMotionRevDay != null ? `${info.meanMotionRevDay!.toFixed(8)} rev/day` : '—'} />
+          <OrbEl label="INCLINATION"    value={info.inclinationDeg   != null ? `${info.inclinationDeg!.toFixed(4)}°`      : '-'} />
+          <OrbEl label="RAAN"           value={info.raanDeg          != null ? `${info.raanDeg!.toFixed(4)}°`          : '-'} />
+          <OrbEl label="ECCENTRICITY"   value={info.eccentricity     != null ? info.eccentricity!.toFixed(7)           : '-'} />
+          <OrbEl label="ARG PERIGEE"    value={info.argPerigeeDeg    != null ? `${info.argPerigeeDeg!.toFixed(4)}°`    : '-'} />
+          <OrbEl label="MEAN ANOMALY"   value={info.meanAnomalyDeg   != null ? `${info.meanAnomalyDeg!.toFixed(4)}°`   : '-'} />
+          <OrbEl label="MEAN MOTION"    value={info.meanMotionRevDay != null ? `${info.meanMotionRevDay!.toFixed(8)} rev/day` : '-'} />
         </div>
         <div className="iss-orbital-col">
           <OrbEl label="EPOCH"          value={epochStr} />
-          <OrbEl label="SEMI-MAJOR AXIS" value={info.smaKm    != null ? `${info.smaKm!.toFixed(3)} km`    : '—'} />
-          <OrbEl label="APOLUNE"        value={info.apogeeKm  != null ? `${info.apogeeKm!.toFixed(1)} km`  : '—'} />
-          <OrbEl label="PERILUNE"       value={info.perigeeKm != null ? `${info.perigeeKm!.toFixed(1)} km` : '—'} />
-          <OrbEl label="PERIOD"         value={info.periodMin  != null ? `${info.periodMin!.toFixed(4)} min` : '—'} />
-          <OrbEl label="SPEED"          value={info.speedKmS != null ? `${info.speedKmS.toFixed(3)} km/s` : '—'} />
-          <OrbEl label="B* DRAG"        value={info.bstar != null && info.bstar !== 0 ? info.bstar!.toExponential(4) : '—'} />
+          <OrbEl label="SEMI-MAJOR AXIS" value={info.smaKm    != null ? `${info.smaKm!.toFixed(3)} km`    : '-'} />
+          <OrbEl label="APOLUNE"        value={info.apogeeKm  != null ? `${info.apogeeKm!.toFixed(1)} km`  : '-'} />
+          <OrbEl label="PERILUNE"       value={info.perigeeKm != null ? `${info.perigeeKm!.toFixed(1)} km` : '-'} />
+          <OrbEl label="PERIOD"         value={info.periodMin  != null ? `${info.periodMin!.toFixed(4)} min` : '-'} />
+          <OrbEl label="SPEED"          value={info.speedKmS != null ? `${info.speedKmS.toFixed(3)} km/s` : '-'} />
+          <OrbEl label="B* DRAG"        value={info.bstar != null && info.bstar !== 0 ? info.bstar!.toExponential(4) : '-'} />
         </div>
       </div>
       <div className="iss-orbital-source">
-        Element set {info.elementSet || '—'} · Rev {info.revNumber ? info.revNumber.toLocaleString() : '—'} · CelesTrak / NORAD 25544
+        Element set {info.elementSet || '-'} · Rev {info.revNumber ? info.revNumber.toLocaleString() : '-'} · CelesTrak / NORAD 25544
       </div>
     </div>
   );
@@ -398,24 +398,24 @@ function ISSKeplerianSection({ info }: { info: ISSInfo }) {
 // ── Section 2 — State Vector ──────────────────────────────────────────────────
 
 function ISSStateVectorSection({ info }: { info: ISSInfo }) {
-  const latStr = info.currentLat != null ? `${info.currentLat.toFixed(2)}°` : '—';
-  const lonStr = info.currentLon != null ? `${info.currentLon.toFixed(2)}°` : '—';
-  const altStr = info.altitudeKm != null ? `${info.altitudeKm.toFixed(0)} km` : '—';
+  const latStr = info.currentLat != null ? `${info.currentLat.toFixed(2)}°` : '-';
+  const lonStr = info.currentLon != null ? `${info.currentLon.toFixed(2)}°` : '-';
+  const altStr = info.altitudeKm != null ? `${info.altitudeKm.toFixed(0)} km` : '-';
 
   return (
     <div className="iss-sv-section">
       <div className="iss-sv-groups">
         <div className="iss-sv-group">
           <div className="iss-sv-group-label">POSITION ECI (km)</div>
-          <div className="iss-sv-row"><span className="iss-sv-key">X</span><span className="iss-sv-val">{info.eciPosX != null ? info.eciPosX!.toFixed(1) : '—'}</span></div>
-          <div className="iss-sv-row"><span className="iss-sv-key">Y</span><span className="iss-sv-val">{info.eciPosY != null ? info.eciPosY!.toFixed(1) : '—'}</span></div>
-          <div className="iss-sv-row"><span className="iss-sv-key">Z</span><span className="iss-sv-val">{info.eciPosZ != null ? info.eciPosZ!.toFixed(1) : '—'}</span></div>
+          <div className="iss-sv-row"><span className="iss-sv-key">X</span><span className="iss-sv-val">{info.eciPosX != null ? info.eciPosX!.toFixed(1) : '-'}</span></div>
+          <div className="iss-sv-row"><span className="iss-sv-key">Y</span><span className="iss-sv-val">{info.eciPosY != null ? info.eciPosY!.toFixed(1) : '-'}</span></div>
+          <div className="iss-sv-row"><span className="iss-sv-key">Z</span><span className="iss-sv-val">{info.eciPosZ != null ? info.eciPosZ!.toFixed(1) : '-'}</span></div>
         </div>
         <div className="iss-sv-group">
           <div className="iss-sv-group-label">VELOCITY ECI (km/s)</div>
-          <div className="iss-sv-row"><span className="iss-sv-key">Vx</span><span className="iss-sv-val">{info.eciVelX != null ? info.eciVelX!.toFixed(4) : '—'}</span></div>
-          <div className="iss-sv-row"><span className="iss-sv-key">Vy</span><span className="iss-sv-val">{info.eciVelY != null ? info.eciVelY!.toFixed(4) : '—'}</span></div>
-          <div className="iss-sv-row"><span className="iss-sv-key">Vz</span><span className="iss-sv-val">{info.eciVelZ != null ? info.eciVelZ!.toFixed(4) : '—'}</span></div>
+          <div className="iss-sv-row"><span className="iss-sv-key">Vx</span><span className="iss-sv-val">{info.eciVelX != null ? info.eciVelX!.toFixed(4) : '-'}</span></div>
+          <div className="iss-sv-row"><span className="iss-sv-key">Vy</span><span className="iss-sv-val">{info.eciVelY != null ? info.eciVelY!.toFixed(4) : '-'}</span></div>
+          <div className="iss-sv-row"><span className="iss-sv-key">Vz</span><span className="iss-sv-val">{info.eciVelZ != null ? info.eciVelZ!.toFixed(4) : '-'}</span></div>
         </div>
         <div className="iss-sv-group">
           <div className="iss-sv-group-label">GEODETIC (WGS-84)</div>
@@ -436,7 +436,7 @@ function ISSPassGeometrySection({ passDetails }: { passDetails: PassDetail[] }) 
     return (
       <div className="iss-body">
         <span style={{ fontSize: '10px', color: 'var(--text-tertiary)' }}>
-          No upcoming passes — observer location required
+          No upcoming passes: observer location required
         </span>
       </div>
     );
@@ -466,13 +466,13 @@ function ISSPassGeometrySection({ passDetails }: { passDetails: PassDetail[] }) 
               <tr key={i} className={p.maxEl === bestEl ? 'iss-pass-best-row' : ''}>
                 <td>{i + 1}</td>
                 <td className="iss-pass-time">{formatBST(p.startUTC)}</td>
-                <td>{p.startAz != null ? `${p.startAz}°` : '—'}</td>
+                <td>{p.startAz != null ? `${p.startAz}°` : '-'}</td>
                 <td className="iss-pass-el">{p.maxEl}°</td>
                 <td className="iss-pass-time">{formatBST(p.maxUTC)}</td>
                 <td className="iss-pass-time">{formatBST(p.endUTC)}</td>
-                <td>{p.endAz != null ? `${p.endAz}°` : '—'}</td>
+                <td>{p.endAz != null ? `${p.endAz}°` : '-'}</td>
                 <td>{Math.round(p.duration / 60)} min</td>
-                <td>{p.maxRangeKm != null ? `${p.maxRangeKm.toLocaleString()} km` : '—'}</td>
+                <td>{p.maxRangeKm != null ? `${p.maxRangeKm.toLocaleString()} km` : '-'}</td>
               </tr>
             ))}
           </tbody>
@@ -527,9 +527,9 @@ function ISSSolarBetaSection({ info }: { info: ISSInfo }) {
         </svg>
         <div className={`iss-beta-value ${betaClass}`}>{beta.toFixed(2)}°</div>
         <div className="iss-beta-sub">
-          {absBeta > 70 ? 'High beta — prolonged solar exposure'
-            : absBeta > 40 ? 'Mid beta — partial eclipse cycles'
-            : 'Low beta — standard eclipse cycles'}
+          {absBeta > 70 ? 'High beta: prolonged solar exposure'
+            : absBeta > 40 ? 'Mid beta: partial eclipse cycles'
+            : 'Low beta: standard eclipse cycles'}
         </div>
       </div>
 
@@ -589,7 +589,7 @@ function ISSRadioSection({ passDetails }: { passDetails: PassDetail[] }) {
       {first ? (
         <>
           <div className="iss-radio-doppler-header">
-            DOPPLER — NEXT PASS (145.800 MHz DOWNLINK)
+            DOPPLER: NEXT PASS (145.800 MHz DOWNLINK)
           </div>
           <div className="iss-radio-doppler-cells">
             {([
@@ -609,7 +609,7 @@ function ISSRadioSection({ passDetails }: { passDetails: PassDetail[] }) {
           </div>
         </>
       ) : (
-        <div className="iss-radio-no-pass">Pass data unavailable — location required</div>
+        <div className="iss-radio-no-pass">Pass data unavailable: location required</div>
       )}
     </div>
   );
@@ -635,18 +635,18 @@ function ISSTLEQualitySection({ info }: { info: ISSInfo }) {
           day: '2-digit', month: 'short', year: 'numeric',
           hour: '2-digit', minute: '2-digit', timeZone: 'UTC',
         }) + ' UTC'
-      : '—';
+      : '-';
 
   return (
     <div className="iss-tle-quality-section">
       <div className="iss-tle-meta-grid">
         <div className="iss-tle-meta-row">
           <span className="iss-tle-meta-label">TLE AGE</span>
-          <span className="iss-tle-meta-value">{age > 0 ? fmtAge(age) : '—'}</span>
+          <span className="iss-tle-meta-value">{age > 0 ? fmtAge(age) : '-'}</span>
         </div>
         <div className="iss-tle-meta-row">
           <span className="iss-tle-meta-label">ELEMENT SET</span>
-          <span className="iss-tle-meta-value">{info.elementSet || '—'}</span>
+          <span className="iss-tle-meta-value">{info.elementSet || '-'}</span>
         </div>
         <div className="iss-tle-meta-row">
           <span className="iss-tle-meta-label">EPOCH</span>
@@ -654,7 +654,7 @@ function ISSTLEQualitySection({ info }: { info: ISSInfo }) {
         </div>
         <div className="iss-tle-meta-row">
           <span className="iss-tle-meta-label">REVOLUTION No.</span>
-          <span className="iss-tle-meta-value">{info.revNumber ? info.revNumber.toLocaleString() : '—'}</span>
+          <span className="iss-tle-meta-value">{info.revNumber ? info.revNumber.toLocaleString() : '-'}</span>
         </div>
       </div>
       <div className="iss-confidence-row">
@@ -742,6 +742,7 @@ export function ISSCard({ satellites, location, onSelectSatellite, onOpenSkyMap,
 
   const hasOrbitalData = info && info.inclinationDeg != null && info.inclinationDeg > 0;
 
+  try {
   return (
     <div className="iss-card">
 
@@ -751,7 +752,7 @@ export function ISSCard({ satellites, location, onSelectSatellite, onOpenSkyMap,
           <div className="iss-overhead-header"><span>ISS IS OVERHEAD NOW</span></div>
           <div className="iss-overhead-meta">
             {peakEl != null && <span>Peaking at <strong>{peakEl}°</strong> elevation</span>}
-            {direction && <span> — <strong>{direction}</strong></span>}
+            {direction && <span>, <strong>{direction}</strong></span>}
             {approxMins != null && approxMins > 0 && (
               <span> · approx. <strong>{approxMins} min</strong> visible</span>
             )}
@@ -768,7 +769,7 @@ export function ISSCard({ satellites, location, onSelectSatellite, onOpenSkyMap,
           {direction && issTle && (
             <div className="iss-overhead-guidance">
               <p>
-                Look <strong>{direction}</strong> at <strong>{Math.round(issTle.elevation)}°</strong> elevation —{' '}
+                Look <strong>{direction}</strong> at <strong>{Math.round(issTle.elevation)}°</strong> elevation:{' '}
                 {elevationHint(issTle.elevation)}.
               </p>
               <p className="iss-overhead-tip">
@@ -841,7 +842,7 @@ export function ISSCard({ satellites, location, onSelectSatellite, onOpenSkyMap,
         <ISSStateVectorSection info={info!} />
       ) : (
         <div className="iss-body" style={{ color: 'var(--text-tertiary)', fontSize: '10px' }}>
-          {loading ? 'Acquiring state vector…' : '—'}
+          {loading ? 'Acquiring state vector…' : '-'}
         </div>
       )}
 
@@ -872,7 +873,7 @@ export function ISSCard({ satellites, location, onSelectSatellite, onOpenSkyMap,
                   <rect x="2" y="7" width="20" height="14" rx="1"/><polyline points="17 2 12 7 7 2"/>
                 </svg>
               ),
-              title: 'NASA+', subtitle: 'Official NASA streaming — free, no ads',
+              title: 'NASA+', subtitle: 'Official NASA streaming, free, no adverts.',
               note: 'Covers ISS events, spacewalks and launches live', href: 'https://plus.nasa.gov',
             },
             {
@@ -930,7 +931,7 @@ export function ISSCard({ satellites, location, onSelectSatellite, onOpenSkyMap,
         <ISSSolarBetaSection info={info!} />
       ) : (
         <div className="iss-body" style={{ color: 'var(--text-tertiary)', fontSize: '10px' }}>
-          {loading ? 'Computing solar geometry…' : '—'}
+          {loading ? 'Computing solar geometry…' : '-'}
         </div>
       )}
 
@@ -949,7 +950,7 @@ export function ISSCard({ satellites, location, onSelectSatellite, onOpenSkyMap,
           <div className="iss-body">
             <div className="iss-crew-collapsible">
               <button className="iss-crew-toggle" onClick={() => setCrewExpanded(x => !x)}>
-                {info.crewCount} aboard — {crewExpanded ? 'hide' : 'show'}
+                {info.crewCount} aboard: {crewExpanded ? 'hide' : 'show'}
                 <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"
                   style={{ transform: crewExpanded ? 'rotate(180deg)' : 'none', transition: 'transform 0.2s' }}>
                   <polyline points="6 9 12 15 18 9"/>
@@ -979,7 +980,7 @@ export function ISSCard({ satellites, location, onSelectSatellite, onOpenSkyMap,
         <ISSTLEQualitySection info={info!} />
       ) : (
         <div className="iss-body" style={{ color: 'var(--text-tertiary)', fontSize: '10px' }}>
-          {loading ? 'Loading…' : '—'}
+          {loading ? 'Loading…' : '-'}
         </div>
       )}
 
@@ -1007,4 +1008,12 @@ export function ISSCard({ satellites, location, onSelectSatellite, onOpenSkyMap,
       <ISSFactsTicker />
     </div>
   );
+  } catch (err) {
+    console.error('[ISSCard render error]', err);
+    return (
+      <div className="iss-card" style={{ padding: 24, color: 'var(--text-tertiary)', fontSize: 12, fontFamily: 'monospace' }}>
+        ISS data unavailable. Refresh to reconnect.
+      </div>
+    );
+  }
 }
