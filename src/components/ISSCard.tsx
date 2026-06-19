@@ -502,17 +502,26 @@ export function ISSCard({ satellites, location, onSelectSatellite, onOpenSkyMap,
         )}
       </div>
 
-      {/* ── LIVE FEEDS ── */}
-      <div className="iss-sec-header">Live Feeds</div>
-      <div className="iss-feeds-wrap">
-        <div className="iss-feeds-btns">
-          <a href="https://www.nasa.gov/nasatv-ustream/" target="_blank" rel="noopener noreferrer"
-            className="iss-feed-btn">
-            📺 Watch NASA Live
-          </a>
+      {/* ── LIVE FROM SPACE ── */}
+      <div className="iss-sec-header">Live from Space</div>
+      <div className="iss-stream-wrap">
+        <div className="iss-stream-note">NASA External HD Camera · Updates live from orbit</div>
+        <iframe
+          src="https://ustream.tv/embed/17074538"
+          width="100%"
+          height="220"
+          style={{ border: 'none', borderRadius: '4px', display: 'block' }}
+          allowFullScreen
+          title="NASA ISS Live Stream"
+        />
+        <div className="iss-feeds-btns" style={{ marginTop: '8px' }}>
           <a href="https://eol.jsc.nasa.gov/ESRS/HDEV/" target="_blank" rel="noopener noreferrer"
             className="iss-feed-btn">
-            🌍 ISS Earth Cameras
+            📡 ISS Earth Cameras
+          </a>
+          <a href="https://www.nasa.gov/nasatv/" target="_blank" rel="noopener noreferrer"
+            className="iss-feed-btn">
+            📺 NASA TV Live
           </a>
         </div>
         <div className="iss-feeds-note">Official NASA live streams — opens in new tab</div>

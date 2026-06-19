@@ -6183,6 +6183,20 @@ circle[fill="#7b61ff"] { filter: drop-shadow(0 0 6px #7b61ff); }
   color: var(--text-secondary, #94a3b8);
 }
 
+/* Live from Space — stream embed + feed buttons */
+.iss-stream-wrap {
+  padding: 10px 14px;
+  background: var(--bg-secondary);
+  border-top: 1px solid var(--border);
+}
+.iss-stream-note {
+  font-size: 10px;
+  color: var(--text-tertiary);
+  font-style: italic;
+  margin-bottom: 8px;
+  letter-spacing: 0.02em;
+}
+
 /* Live feeds section */
 .iss-feeds-wrap {
   padding: 10px 14px;
