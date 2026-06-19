@@ -502,29 +502,61 @@ export function ISSCard({ satellites, location, onSelectSatellite, onOpenSkyMap,
         )}
       </div>
 
-      {/* ── LIVE FROM SPACE ── */}
-      <div className="iss-sec-header">Live from Space</div>
-      <div className="iss-stream-wrap">
-        <div className="iss-stream-note">NASA External HD Camera · Updates live from orbit</div>
-        <iframe
-          src="https://ustream.tv/embed/17074538"
-          width="100%"
-          height="220"
-          style={{ border: 'none', borderRadius: '4px', display: 'block' }}
-          allowFullScreen
-          title="NASA ISS Live Stream"
-        />
-        <div className="iss-feeds-btns" style={{ marginTop: '8px' }}>
-          <a href="https://eol.jsc.nasa.gov/ESRS/HDEV/" target="_blank" rel="noopener noreferrer"
-            className="iss-feed-btn">
-            📡 ISS Earth Cameras
-          </a>
-          <a href="https://www.nasa.gov/nasatv/" target="_blank" rel="noopener noreferrer"
-            className="iss-feed-btn">
-            📺 NASA TV Live
-          </a>
+      {/* ── LIVE FROM THE ISS ── */}
+      <div className="iss-sec-header">Live from the ISS</div>
+      <div className="iss-live-section">
+        <div className="iss-live-cards">
+          {([
+            {
+              icon: (
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+                  <rect x="2" y="7" width="20" height="14" rx="1"/><polyline points="17 2 12 7 7 2"/>
+                </svg>
+              ),
+              title:    'NASA+',
+              subtitle: 'Official NASA streaming — free, no ads',
+              note:     'Covers ISS events, spacewalks and launches live',
+              href:     'https://plus.nasa.gov',
+            },
+            {
+              icon: (
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+                  <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/>
+                  <circle cx="12" cy="13" r="4"/>
+                </svg>
+              ),
+              title:    'Sen.com 4K',
+              subtitle: 'Commercial 4K camera mounted on the ISS',
+              note:     'Ultra HD Earth views when feed is active',
+              href:     'https://sen.com',
+            },
+            {
+              icon: (
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+                  <polygon points="5 3 19 12 5 21 5 3"/>
+                </svg>
+              ),
+              title:    'NASA on YouTube',
+              subtitle: 'Live streams of ISS events and spacewalks',
+              note:     'Subscribe for live event notifications',
+              href:     'https://www.youtube.com/@NASA',
+            },
+          ] as const).map(card => (
+            <a key={card.title} href={card.href} target="_blank" rel="noopener noreferrer"
+              className="iss-live-card">
+              <div className="iss-live-card-icon">{card.icon}</div>
+              <div className="iss-live-card-title">{card.title}</div>
+              <div className="iss-live-card-subtitle">{card.subtitle}</div>
+              <div className="iss-live-card-note">{card.note}</div>
+              <span className="iss-live-card-open">Open ↗</span>
+            </a>
+          ))}
         </div>
-        <div className="iss-feeds-note">Official NASA live streams — opens in new tab</div>
+        <div className="iss-live-disclaimer">
+          The original NASA HDEV exterior camera experiment ended in 2019.
+          Live exterior feeds are now available intermittently via Sen.com
+          and during scheduled NASA events.
+        </div>
       </div>
 
       {/* ── VISIBILITY WINDOW ── */}

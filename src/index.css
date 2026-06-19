@@ -6197,6 +6197,86 @@ circle[fill="#7b61ff"] { filter: drop-shadow(0 0 6px #7b61ff); }
   letter-spacing: 0.02em;
 }
 
+/* Live from the ISS — three-card layout */
+.iss-live-section {
+  padding: 10px 14px 12px;
+  background: var(--bg-secondary);
+  border-top: 1px solid var(--border);
+}
+.iss-live-cards {
+  display: flex;
+  gap: 8px;
+}
+.iss-live-card {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  padding: 10px;
+  background: var(--bg-tertiary);
+  border: 1px solid var(--border);
+  border-radius: 0;
+  text-decoration: none;
+  color: inherit;
+  min-width: 0;
+  transition: border-color 0.15s, background 0.15s;
+}
+.iss-live-card:hover {
+  border-color: var(--accent);
+  background: rgba(77,182,255,0.05);
+}
+.iss-live-card-icon {
+  color: var(--accent);
+  margin-bottom: 3px;
+  opacity: 0.85;
+}
+.iss-live-card-title {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--text-primary);
+  letter-spacing: 0.02em;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.iss-live-card-subtitle {
+  font-size: 10px;
+  color: var(--text-secondary);
+  line-height: 1.35;
+}
+.iss-live-card-note {
+  font-size: 9.5px;
+  color: var(--text-tertiary);
+  line-height: 1.35;
+  flex: 1;
+  margin-top: 2px;
+}
+.iss-live-card-open {
+  display: inline-block;
+  margin-top: 8px;
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--accent);
+  border: 1px solid var(--accent);
+  padding: 2px 6px;
+  border-radius: 0;
+  opacity: 0.75;
+  align-self: flex-start;
+}
+.iss-live-card:hover .iss-live-card-open {
+  opacity: 1;
+  background: rgba(77,182,255,0.12);
+}
+.iss-live-disclaimer {
+  margin-top: 10px;
+  font-size: 10px;
+  color: var(--text-tertiary);
+  font-style: italic;
+  line-height: 1.5;
+}
+
 /* Live feeds section */
 .iss-feeds-wrap {
   padding: 10px 14px;
