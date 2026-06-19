@@ -13,21 +13,16 @@ interface NextPass {
 }
 
 interface ISSInfo {
-  crew:       string[];
-  crewCount:  number;
-  altitudeKm: number | null;
-  speedKmS:   number | null;
-  currentLat: number | null;
-  currentLon: number | null;
-  nextPass:   NextPass | null;
+  crew:           string[];
+  crewCount:      number;
+  altitudeKm:     number | null;
+  speedKmS:       number | null;
+  currentLat:     number | null;
+  currentLon:     number | null;
+  nextPass:       NextPass | null;
+  nasaImage:      string | null;
+  nasaImageTitle: string | null;
 }
-
-const ISS_PHOTOS = [
-  'https://www.nasa.gov/wp-content/uploads/2023/03/iss068e027836.jpg',
-  'https://www.nasa.gov/wp-content/uploads/2026/06/iss074e0590568orig.jpg',
-  'https://images-assets.nasa.gov/image/iss074e0521507/iss074e0521507~large.jpg',
-];
-const WIKI_FALLBACK = 'https://upload.wikimedia.org/wikipedia/commons/thumb/0/04/International_Space_Station_after_undocking_of_STS-132.jpg/1280px-International_Space_Station_after_undocking_of_STS-132.jpg';
 
 interface Props {
   satellites:        Satellite[];
@@ -81,8 +76,6 @@ export function ISSCard({ satellites, location, onSelectSatellite }: Props) {
   const [info,    setInfo]    = useState<ISSInfo | null>(null);
   const [loading, setLoading] = useState(true);
 
-  const photo = ISS_PHOTOS[new Date().getDay() % ISS_PHOTOS.length];
-
   const issTle = satellites.find(s =>
     s.satname.toUpperCase().includes('ISS') ||
     s.satname.toUpperCase().includes('ZARYA')
@@ -111,13 +104,30 @@ export function ISSCard({ satellites, location, onSelectSatellite }: Props) {
   return (
     <div className="iss-card">
       <div className="iss-banner">
-        <img
-          src={photo}
-          alt=""
-          className="iss-banner-img"
-          style={{ width: '100%', height: '180px', objectFit: 'cover', borderRadius: '6px 6px 0 0' }}
-          onError={(e) => { e.currentTarget.src = WIKI_FALLBACK; }}
-        />
+        {info?.nasaImage ? (
+          <img
+            src={info.nasaImage}
+            alt={info.nasaImageTitle ?? 'NASA Astronomy Picture of the Day'}
+            className="iss-banner-img"
+            style={{ width: '100%', height: '180px', objectFit: 'cover', borderRadius: '6px 6px 0 0' }}
+          />
+        ) : (
+          <div style={{
+            width: '100%', height: '180px', borderRadius: '6px 6px 0 0',
+            background: '#0a0a1a', display: 'flex', flexDirection: 'column',
+            alignItems: 'center', justifyContent: 'center', gap: '8px',
+          }}>
+            <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#4a5568" strokeWidth="1.5">
+              <circle cx="12" cy="12" r="10"/>
+              <circle cx="12" cy="12" r="3"/>
+              <line x1="12" y1="2" x2="12" y2="5"/>
+              <line x1="12" y1="19" x2="12" y2="22"/>
+              <line x1="2" y1="12" x2="5" y2="12"/>
+              <line x1="19" y1="12" x2="22" y2="12"/>
+            </svg>
+            <span style={{ color: '#4a5568', fontSize: '13px' }}>Photo unavailable</span>
+          </div>
+        )}
         <div className="iss-banner-overlay">
           <div className="iss-banner-top">
             <span className="iss-label">International Space Station</span>
