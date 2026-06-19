@@ -5,6 +5,15 @@ interface Props {
   loading: boolean;
 }
 
+// Strips all dash variants used as clause separators (em dash U+2014, en dash U+2013,
+// horizontal bar U+2015, minus sign U+2212) in spaced and unspaced forms.
+function sanitiseDashes(text: string): string {
+  return text
+    .replace(/ *[—–―−] */g, ', ')
+    .replace(/ {2,}/g, ' ')
+    .trim();
+}
+
 function parseBold(text: string) {
   return text.split('**').map((part, i) =>
     i % 2 === 1 ? <strong key={i}>{part}</strong> : <span key={i}>{part}</span>
@@ -17,7 +26,8 @@ function splitSentences(text: string): [string, string] {
 }
 
 export function AIRecommendation({ recommendation, loading }: Props) {
-  const [first, rest] = recommendation ? splitSentences(recommendation) : ['', ''];
+  const clean = recommendation ? sanitiseDashes(recommendation) : '';
+  const [first, rest] = clean ? splitSentences(clean) : ['', ''];
 
   return (
     <div className="ai-panel">

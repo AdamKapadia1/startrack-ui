@@ -25,6 +25,15 @@ interface PatternUnavailable {
 
 type PatternResult = PatternData | PatternUnavailable;
 
+// Strips all dash variants used as clause separators (em dash U+2014, en dash U+2013,
+// horizontal bar U+2015, minus sign U+2212) in spaced and unspaced forms.
+function sanitiseDashes(text: string): string {
+  return text
+    .replace(/ *[—–―−] */g, ', ')
+    .replace(/ {2,}/g, ' ')
+    .trim();
+}
+
 function fmtHour(h: number): string {
   if (h === 0)  return '12a';
   if (h === 12) return '12p';
@@ -135,7 +144,7 @@ export function HistoricalInsight() {
       </div>
 
       <div className="insight-body">
-        <p className="insight-text">{result.insight}</p>
+        <p className="insight-text">{sanitiseDashes(result.insight)}</p>
 
         <div className="insight-trend">
           <span className="insight-trend-label">7-day trend</span>
