@@ -16,6 +16,11 @@ interface Props {
   onViewSkyMap:    () => void;
 }
 
+function splitAtSentence(text: string): [string, string] {
+  const match = text.match(/^(.+?[.!?])\s+([\s\S]+)/);
+  return match ? [match[1], match[2]] : [text, ''];
+}
+
 const RING_R    = 32;
 const RING_C    = 40;
 const RING_CIRC = 2 * Math.PI * RING_R;
@@ -73,6 +78,7 @@ export function MobileOverview({
   recData, recLoading, starlinkSat, topSat, topPasses, onViewSkyMap,
 }: Props) {
   const [showBreakdown, setShowBreakdown] = useState(false);
+  const [recExpanded,   setRecExpanded]   = useState(false);
   const secsAgo  = useAgoSecs(lastUpdated);
   const countdown = useNextPassCountdown(topPasses);
 
@@ -96,6 +102,7 @@ export function MobileOverview({
     : 'Waiting...';
 
   const recommendation = recData?.recommendation ?? '';
+  const [recFirst, recRest] = recommendation ? splitAtSentence(recommendation) : ['', ''];
 
   const todayCount    = recData?.today?.length    ?? 0;
   const tomorrowCount = recData?.tomorrow?.length ?? 0;
@@ -182,7 +189,20 @@ export function MobileOverview({
             <div className="skeleton" style={{ height: 12, width: '72%', borderRadius: 4 }}/>
           </div>
         ) : (
-          <p className="mob-ai-text">{recommendation}</p>
+          <>
+            <p className="mob-ai-text">{recFirst}</p>
+            {recRest && recExpanded && (
+              <p className="mob-ai-text mob-ai-text--rest">{recRest}</p>
+            )}
+            {recRest && (
+              <button
+                className="mob-ai-expand"
+                onClick={() => setRecExpanded(v => !v)}
+              >
+                {recExpanded ? 'Show less' : 'Read more'}
+              </button>
+            )}
+          </>
         )}
 
         {passLine && (

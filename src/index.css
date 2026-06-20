@@ -6982,23 +6982,64 @@ circle[fill="#7b61ff"] { filter: drop-shadow(0 0 6px #7b61ff); }
    ═══════════════════════════════════════════════════════════════════════════ */
 @media (max-width: 768px) {
 
-  /* Body: use dynamic viewport height so iOS bottom bar doesn't clip */
+  /* ── Force dark-mode CSS tokens on mobile regardless of stored theme ──────
+     The user may have previously saved a light-theme preference on desktop.
+     On mobile we always render the dark navy shell, since all MobileOverview
+     card colours are hardcoded dark. Overriding here means the shell (header,
+     tab bar, footer, body) matches the dark cards instead of going white.     */
+  :root,
+  [data-theme="light"] {
+    --bg-primary:     #080c14;
+    --bg-secondary:   #0d1520;
+    --bg-tertiary:    #111d2e;
+    --bg-overlay:     #0a1525;
+    --surface:        #0d1520;
+    --surface-2:      #111d2e;
+    --text:           #e8f4fd;
+    --text-primary:   #e8f4fd;
+    --text-secondary: #8ba3c4;
+    --text-tertiary:  #4a6080;
+    --text-dim:       #8ba3c4;
+    --text-muted:     #4a6080;
+    --text-data:      #00d4ff;
+    --border:         #1a2d45;
+    --border-primary: #1a2d45;
+    --border-accent:  rgba(0, 212, 255, 0.13);
+    --accent-primary:   #00d4ff;
+    --accent-secondary: #00ff88;
+    --green:          #00ff88;
+    --green-dim:      rgba(0, 212, 255, 0.06);
+    --green-glow:     rgba(0, 212, 255, 0.18);
+    --blue-border:    rgba(0, 212, 255, 0.18);
+    --border-dim:     rgba(26, 45, 69, 0.55);
+  }
+
+  /* ── Deep navy on every shell layer ─────────────────────────────────────── */
+  html {
+    background: #080c14;
+  }
+
   body {
+    background: #080c14 !important;
+    background-attachment: unset !important;
     height: 100dvh;
     overflow: hidden;
   }
 
-  /* Force dark in PWA standalone mode before JS runs */
-  @media (display-mode: standalone) {
-    :root { color-scheme: dark; }
+  .app {
+    background: #080c14;
+    height: 100dvh;
   }
 
-  /* Header: two-row grid on mobile */
+  /* Header: solid navy, two-row grid, safe-area top inset */
   .header {
+    background: #080c14 !important;
+    border-bottom-color: rgba(120, 160, 200, 0.12) !important;
     grid-template-columns: 1fr auto;
     grid-template-rows: 44px auto;
     height: auto;
     padding: 0 14px;
+    padding-top: env(safe-area-inset-top, 0px);
     align-items: stretch;
   }
 
@@ -7062,8 +7103,10 @@ circle[fill="#7b61ff"] { filter: drop-shadow(0 0 6px #7b61ff); }
     flex-shrink: 0;
   }
 
-  /* Tab bar: scrollable on mobile */
+  /* Tab bar: navy background, horizontally scrollable */
   .tab-bar {
+    background: #080c14 !important;
+    border-bottom-color: rgba(120, 160, 200, 0.1) !important;
     overflow-x: auto;
     overflow-y: hidden;
     -webkit-overflow-scrolling: touch;
@@ -7080,14 +7123,27 @@ circle[fill="#7b61ff"] { filter: drop-shadow(0 0 6px #7b61ff); }
     scroll-snap-align: start;
   }
 
-  /* Tab pane: tighter padding, full height */
+  /* Tab content: correct scroll on iOS */
+  .tab-content {
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior-y: contain;
+  }
+
+  /* Tab pane: tighter padding */
   .tab-pane {
     padding: 12px 12px 100px;
   }
 
-  /* Chat bubble: respect iOS safe-area inset */
+  /* Footer: navy, safe-area bottom inset */
+  .footer {
+    background: #080c14 !important;
+    border-top-color: rgba(120, 160, 200, 0.1) !important;
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+  }
+
+  /* Chat bubble: clear iOS home indicator safe area */
   .chat-bubble-btn {
-    bottom: max(20px, env(safe-area-inset-bottom, 20px));
+    bottom: calc(20px + env(safe-area-inset-bottom, 0px));
     right: 16px;
     width: 48px;
     height: 48px;
@@ -7238,6 +7294,23 @@ circle[fill="#7b61ff"] { filter: drop-shadow(0 0 6px #7b61ff); }
   line-height: 1.55;
   color: #e8eef5;
   margin: 0 0 6px;
+}
+
+.mob-ai-text--rest {
+  margin-top: 4px;
+  color: #8b97a8;
+}
+
+.mob-ai-expand {
+  background: none;
+  border: none;
+  color: #00d4ff;
+  cursor: pointer;
+  font-family: 'Inter', sans-serif;
+  font-size: 12px;
+  font-weight: 500;
+  padding: 2px 0 6px;
+  display: block;
 }
 
 .mob-ai-secondary {

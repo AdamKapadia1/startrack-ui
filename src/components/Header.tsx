@@ -17,6 +17,16 @@ const STATUS: Record<WsStatus, StatusCfg> = {
   offline:      { label: 'Offline',    color: '#ff4444', pulse: false },
 };
 
+const UK_POSTCODE = /^[A-Z]{1,2}[0-9R][0-9A-Z]?\s*[0-9][A-BD-HJLNP-UW-Z]{2}$/i;
+
+function extractTownName(name: string): string {
+  const parts = name.split(',').map(s => s.trim()).filter(Boolean);
+  if (parts.length < 2) return name;
+  if (UK_POSTCODE.test(parts[0])) return parts.slice(1).join(', ');
+  if (UK_POSTCODE.test(parts[parts.length - 1])) return parts.slice(0, -1).join(', ');
+  return name;
+}
+
 function useAgoText(date: Date | null): string {
   const [text, setText] = useState('');
   useEffect(() => {
@@ -171,7 +181,7 @@ export function Header({ location, onOpenSettings, onOpenHelp, onToggleTheme, on
           <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/>
           <circle cx="12" cy="10" r="3"/>
         </svg>
-        <span className="header-mobile-loc-name">{location.name}</span>
+        <span className="header-mobile-loc-name">{extractTownName(location.name)}</span>
         {agoText && <span className="header-mobile-loc-ago">{agoText}</span>}
         <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true" style={{ marginLeft: 'auto', flexShrink: 0 }}>
           <path d="M9 18l6-6-6-6"/>
