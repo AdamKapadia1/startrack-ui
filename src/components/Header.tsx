@@ -11,7 +11,7 @@ interface StatusCfg { label: string; color: string; pulse: boolean }
 
 const STATUS: Record<WsStatus, StatusCfg> = {
   connecting:   { label: 'Connecting', color: '#ffb800', pulse: true  },
-  live:         { label: 'Live',       color: '#00d4ff', pulse: true  },
+  live:         { label: 'Live',       color: '#3dd68c', pulse: true  },
   reconnecting: { label: 'Connecting', color: '#ffb800', pulse: true  },
   polling:      { label: 'Refreshing', color: '#4a6080', pulse: false },
   offline:      { label: 'Offline',    color: '#ff4444', pulse: false },
@@ -106,42 +106,80 @@ export function Header({ location, onOpenSettings, onOpenHelp, onToggleTheme, on
         </span>
       </div>
 
-      {user ? (
-        <LocationSwitcher
-          location={location}
-          savedLocations={savedLocations}
-          onSwitch={onSwitchLocation}
-          onManage={onManageLocations}
-          flashing={flashing}
-          gpsAccuracy={gpsAccuracy}
-          agoText={agoText}
-        />
-      ) : (
-        <div className={`header-location${flashing ? ' header-location-flash' : ''}`}>
-          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-            <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/>
-            <circle cx="12" cy="10" r="3"/>
-          </svg>
-          {location.name}&nbsp;|&nbsp;
-          {Math.abs(location.lat).toFixed(2)}°{location.lat >= 0 ? 'N' : 'S'},&nbsp;
-          {Math.abs(location.lon).toFixed(2)}°{location.lon >= 0 ? 'E' : 'W'}
-          {gpsAccuracy !== null && gpsAccuracy !== undefined && (
-            <span
-              className="gps-accuracy"
-              style={{
-                color: gpsAccuracy < 50 ? '#00d4ff' : gpsAccuracy < 200 ? '#ffb800' : '#4a6080',
-              }}
-            >
-              ±{gpsAccuracy}m
-            </span>
-          )}
-          {agoText && (
-            <span className="header-ago">&nbsp;· {agoText}</span>
-          )}
-        </div>
-      )}
+      {/* Desktop location: hidden on mobile via CSS */}
+      <div className="header-location-desktop">
+        {user ? (
+          <LocationSwitcher
+            location={location}
+            savedLocations={savedLocations}
+            onSwitch={onSwitchLocation}
+            onManage={onManageLocations}
+            flashing={flashing}
+            gpsAccuracy={gpsAccuracy}
+            agoText={agoText}
+          />
+        ) : (
+          <div className={`header-location${flashing ? ' header-location-flash' : ''}`}>
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+              <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/>
+              <circle cx="12" cy="10" r="3"/>
+            </svg>
+            {location.name}&nbsp;|&nbsp;
+            {Math.abs(location.lat).toFixed(2)}°{location.lat >= 0 ? 'N' : 'S'},&nbsp;
+            {Math.abs(location.lon).toFixed(2)}°{location.lon >= 0 ? 'E' : 'W'}
+            {gpsAccuracy !== null && gpsAccuracy !== undefined && (
+              <span
+                className="gps-accuracy"
+                style={{
+                  color: gpsAccuracy < 50 ? '#00d4ff' : gpsAccuracy < 200 ? '#ffb800' : '#4a6080',
+                }}
+              >
+                ±{gpsAccuracy}m
+              </span>
+            )}
+            {agoText && (
+              <span className="header-ago">&nbsp;· {agoText}</span>
+            )}
+          </div>
+        )}
+      </div>
 
-      <div className="header-actions">
+      {/* Mobile right: bell and avatar, hidden on desktop via CSS */}
+      <div className="header-mobile-right">
+        <AlertSettings passes={topPasses} favourites={favourites} />
+        {user ? (
+          <button
+            className="user-avatar-btn"
+            aria-label="Open profile"
+            onClick={onOpenHistory}
+            title={user.email}
+          >
+            {(user.email?.[0] ?? '?').toUpperCase()}
+          </button>
+        ) : (
+          <button className="auth-signin-btn" onClick={onOpenAuth}>Sign in</button>
+        )}
+      </div>
+
+      {/* Mobile location row: full-width tap target, hidden on desktop via CSS */}
+      <button
+        className={`header-mobile-loc${flashing ? ' header-location-flash' : ''}`}
+        onClick={onOpenSettings}
+        aria-label="Open location settings"
+      >
+        <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true">
+          <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/>
+          <circle cx="12" cy="10" r="3"/>
+        </svg>
+        <span className="header-mobile-loc-name">{location.name}</span>
+        {agoText && <span className="header-mobile-loc-ago">{agoText}</span>}
+        <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true" style={{ marginLeft: 'auto', flexShrink: 0 }}>
+          <path d="M9 18l6-6-6-6"/>
+        </svg>
+      </button>
+
+      {/* Desktop actions: hidden on mobile via CSS */}
+      <div className="header-actions header-actions-desktop">
         <AlertSettings passes={topPasses} favourites={favourites} />
 
         {/* Auth button */}

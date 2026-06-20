@@ -6949,3 +6949,394 @@ circle[fill="#7b61ff"] { filter: drop-shadow(0 0 6px #7b61ff); }
   color: var(--text-tertiary);
   opacity: 0.45;
 }
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   MOBILE REDESIGN  (max-width: 768px)
+   All rules below are scoped to mobile. Desktop layout is unchanged.
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+/* ── AI superscript in header logo ───────────────────────────────────────── */
+.header-logo sup {
+  color: #00d4ff;
+  font-size: 0.58em;
+  font-weight: 700;
+  letter-spacing: 0;
+  vertical-align: super;
+}
+
+/* ── Desktop wrappers (shown on desktop, hidden on mobile) ───────────────── */
+.header-location-desktop {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* ── Mobile-only header elements (hidden on desktop) ─────────────────────── */
+.header-mobile-right,
+.header-mobile-loc {
+  display: none;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   Mobile breakpoint overrides
+   ═══════════════════════════════════════════════════════════════════════════ */
+@media (max-width: 768px) {
+
+  /* Body: use dynamic viewport height so iOS bottom bar doesn't clip */
+  body {
+    height: 100dvh;
+    overflow: hidden;
+  }
+
+  /* Force dark in PWA standalone mode before JS runs */
+  @media (display-mode: standalone) {
+    :root { color-scheme: dark; }
+  }
+
+  /* Header: two-row grid on mobile */
+  .header {
+    grid-template-columns: 1fr auto;
+    grid-template-rows: 44px auto;
+    height: auto;
+    padding: 0 14px;
+    align-items: stretch;
+  }
+
+  .header-brand {
+    grid-column: 1;
+    grid-row: 1;
+    align-self: center;
+  }
+
+  /* Hide the desktop location column */
+  .header-location-desktop {
+    display: none;
+  }
+
+  /* Hide the desktop actions bar */
+  .header-actions-desktop {
+    display: none !important;
+  }
+
+  /* Mobile right: bell + avatar in top-right */
+  .header-mobile-right {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    grid-column: 2;
+    grid-row: 1;
+    align-self: center;
+  }
+
+  /* Mobile location row: full-width below brand */
+  .header-mobile-loc {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    grid-column: 1 / -1;
+    grid-row: 2;
+    background: none;
+    border: none;
+    border-top: 1px solid rgba(120, 160, 200, 0.1);
+    color: #8b97a8;
+    cursor: pointer;
+    font-family: 'Inter', sans-serif;
+    font-size: 11px;
+    padding: 8px 0 10px;
+    text-align: left;
+    width: 100%;
+  }
+
+  .header-mobile-loc-name {
+    color: #e8eef5;
+    font-weight: 500;
+    flex: 1;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+  }
+
+  .header-mobile-loc-ago {
+    color: #5f6a7c;
+    font-size: 10px;
+    flex-shrink: 0;
+  }
+
+  /* Tab bar: scrollable on mobile */
+  .tab-bar {
+    overflow-x: auto;
+    overflow-y: hidden;
+    -webkit-overflow-scrolling: touch;
+    scroll-snap-type: x proximity;
+    scrollbar-width: none;
+    padding: 0 4px;
+  }
+  .tab-bar::-webkit-scrollbar { display: none; }
+
+  .tab-btn {
+    flex-shrink: 0;
+    padding: 10px 14px;
+    font-size: 12px;
+    scroll-snap-align: start;
+  }
+
+  /* Tab pane: tighter padding, full height */
+  .tab-pane {
+    padding: 12px 12px 100px;
+  }
+
+  /* Chat bubble: respect iOS safe-area inset */
+  .chat-bubble-btn {
+    bottom: max(20px, env(safe-area-inset-bottom, 20px));
+    right: 16px;
+    width: 48px;
+    height: 48px;
+  }
+
+} /* end @media (max-width: 768px) */
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   MobileOverview component styles
+   ═══════════════════════════════════════════════════════════════════════════ */
+.mobile-overview {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+/* ── Hero status card ──────────────────────────────────────────────────────── */
+.mob-hero-card {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  background: #0d1320;
+  border: 1px solid rgba(120, 160, 200, 0.14);
+  border-left: 2px solid #00d4ff;
+  border-radius: 14px;
+  padding: 16px;
+  user-select: none;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.mob-hero-ring-wrap {
+  position: relative;
+  flex-shrink: 0;
+  width: 72px;
+  height: 72px;
+}
+
+.mob-hero-ring-center {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  pointer-events: none;
+}
+
+.mob-hero-ring-num {
+  font-family: 'JetBrains Mono', 'Courier New', monospace;
+  font-size: 18px;
+  font-weight: 700;
+  line-height: 1;
+}
+
+.mob-hero-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.mob-hero-status {
+  font-size: 15px;
+  font-weight: 600;
+  letter-spacing: -0.2px;
+  margin-bottom: 2px;
+}
+
+.mob-hero-sats {
+  font-size: 12px;
+  color: #8b97a8;
+  margin-bottom: 2px;
+}
+
+.mob-hero-updated {
+  font-size: 11px;
+  color: #5f6a7c;
+}
+
+.mob-hero-hint {
+  font-family: 'JetBrains Mono', 'Courier New', monospace;
+  font-size: 9px;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  color: #5f6a7c;
+  margin-top: 6px;
+}
+
+/* ── Signal breakdown panel ───────────────────────────────────────────────── */
+.mob-breakdown-panel {
+  background: #0d1320;
+  border: 1px solid rgba(120, 160, 200, 0.14);
+  border-radius: 10px;
+  padding: 12px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.mob-bk-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  font-size: 12px;
+  color: #8b97a8;
+}
+
+.mob-bk-row span:first-child { color: #e8eef5; }
+
+.mob-bk-row em {
+  font-style: normal;
+  font-size: 10px;
+  color: #5f6a7c;
+  margin-left: 2px;
+}
+
+.mob-bk-row--total {
+  border-top: 1px solid rgba(120, 160, 200, 0.1);
+  margin-top: 4px;
+  padding-top: 6px;
+  font-weight: 600;
+  color: #e8eef5;
+}
+
+/* ── AI recommendation card ───────────────────────────────────────────────── */
+.mob-ai-card {
+  background: #0d1320;
+  border: 1px solid rgba(120, 160, 200, 0.14);
+  border-radius: 14px;
+  padding: 14px 16px;
+}
+
+.mob-ai-head {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 8px;
+}
+
+.mob-ai-label {
+  font-family: 'JetBrains Mono', 'Courier New', monospace;
+  font-size: 9px;
+  font-weight: 600;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  color: #a78bfa;
+}
+
+.mob-ai-text {
+  font-size: 13px;
+  line-height: 1.55;
+  color: #e8eef5;
+  margin: 0 0 6px;
+}
+
+.mob-ai-secondary {
+  font-size: 11px;
+  color: #8b97a8;
+  margin: 0 0 8px;
+}
+
+.mob-ai-loading {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 4px 0;
+}
+
+.mob-ai-dtc {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding-top: 8px;
+  border-top: 1px solid rgba(120, 160, 200, 0.1);
+  color: #5f6a7c;
+  font-size: 10px;
+}
+
+/* ── Stats grid ───────────────────────────────────────────────────────────── */
+.mob-stats-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+
+.mob-stats-card {
+  background: #0d1320;
+  border: 1px solid rgba(120, 160, 200, 0.14);
+  border-radius: 14px;
+  padding: 14px 16px;
+}
+
+.mob-stats-label {
+  font-family: 'JetBrains Mono', 'Courier New', monospace;
+  font-size: 9px;
+  font-weight: 600;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  color: #6b7689;
+  margin-bottom: 6px;
+}
+
+.mob-stats-value {
+  font-family: 'JetBrains Mono', 'Courier New', monospace;
+  font-size: 22px;
+  font-weight: 700;
+  color: #e8eef5;
+  line-height: 1;
+}
+
+.mob-stats-unit {
+  font-size: 13px;
+  font-weight: 500;
+  color: #8b97a8;
+  margin-left: 2px;
+}
+
+/* ── Constellation mono row ───────────────────────────────────────────────── */
+.mob-const-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-family: 'JetBrains Mono', 'Courier New', monospace;
+  font-size: 10px;
+  letter-spacing: 1px;
+  color: #6b7689;
+  padding: 0 2px;
+}
+
+.mob-const-sep {
+  color: rgba(120, 160, 200, 0.3);
+}
+
+/* ── Sky map link bar ─────────────────────────────────────────────────────── */
+.mob-skymap-bar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: #0d1320;
+  border: 1px solid rgba(120, 160, 200, 0.14);
+  border-radius: 14px;
+  color: #00d4ff;
+  cursor: pointer;
+  font-family: 'Inter', sans-serif;
+  font-size: 13px;
+  font-weight: 500;
+  padding: 14px 16px;
+  width: 100%;
+  -webkit-tap-highlight-color: transparent;
+  transition: background 0.15s;
+}
+
+.mob-skymap-bar:active {
+  background: rgba(0, 212, 255, 0.06);
+}

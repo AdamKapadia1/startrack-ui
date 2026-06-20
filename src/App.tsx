@@ -42,6 +42,7 @@ import { useSatellites }        from './hooks/useSatellites';
 import { useRecommendation }    from './hooks/useRecommendation';
 import { useWeather }           from './hooks/useWeather';
 import { useLocation }          from './hooks/useLocation';
+import { MobileOverview }       from './components/MobileOverview';
 
 // ── Tab definition ────────────────────────────────────────────────────────────
 
@@ -80,7 +81,12 @@ function App() {
     accountSettings, updateAccountSettings,
   } = useProfile(user?.id);
 
-  const isMobile = window.innerWidth < 768;
+  const [isMobile, setIsMobile] = useState(() => window.innerWidth < 768);
+  useEffect(() => {
+    const handler = () => setIsMobile(window.innerWidth < 768);
+    window.addEventListener('resize', handler);
+    return () => window.removeEventListener('resize', handler);
+  }, []);
   const [skyView,             setSkyView]             = useState<'2d' | '3d'>('2d');
   const [authOpen,            setAuthOpen]            = useState(false);
   const [historyOpen,         setHistoryOpen]         = useState(false);
@@ -221,46 +227,61 @@ function App() {
         {/* ── OVERVIEW ── */}
         {activeTab === 'overview' && (
           <div className="tab-pane tab-overview">
-            <div className="section-label">Live Overview</div>
-            <MetricCards
-              satellites={filteredSatellites}
-              topPasses={topPasses}
-              activeConstellation={activeConstellation}
-              loading={!satData}
-            />
-            <ConnectivityGauge
-              satellites={satellites}
-              lastUpdated={lastUpdated}
-              signalScore={signalScore}
-              scoreBreakdown={scoreBreakdown}
-            />
-            <AIRecommendation
-              recommendation={recData?.recommendation ?? ''}
-              loading={recLoading}
-            />
-            {starlinkSat && <DtcCard satellite={starlinkSat} />}
-
-            {/* Compact sky map in overview */}
-            {skyMapHeader}
-            <SkyMap
-              satellites={satellites}
-              cloudCover={weather?.cloudCover}
-              passes={topPasses}
-              positions={positions}
-              posLastUpdate={posLastUpdate}
-              activeConstellation={activeConstellation}
-              loading={!satData}
-              compact={true}
-              horizonSettings={horizonSettings}
-              minElevation={accountSettings.default_elevation_threshold}
-              favourites={favourites}
-            />
-            <button
-              className="tab-skymap-link"
-              onClick={() => switchTab('skymap')}
-            >
-              View full sky map →
-            </button>
+            {isMobile ? (
+              <MobileOverview
+                satellites={satellites}
+                signalScore={signalScore}
+                scoreBreakdown={scoreBreakdown}
+                lastUpdated={lastUpdated}
+                recData={recData}
+                recLoading={recLoading}
+                starlinkSat={starlinkSat ?? null}
+                topSat={topSat}
+                topPasses={topPasses}
+                onViewSkyMap={() => switchTab('skymap')}
+              />
+            ) : (
+              <>
+                <div className="section-label">Live Overview</div>
+                <MetricCards
+                  satellites={filteredSatellites}
+                  topPasses={topPasses}
+                  activeConstellation={activeConstellation}
+                  loading={!satData}
+                />
+                <ConnectivityGauge
+                  satellites={satellites}
+                  lastUpdated={lastUpdated}
+                  signalScore={signalScore}
+                  scoreBreakdown={scoreBreakdown}
+                />
+                <AIRecommendation
+                  recommendation={recData?.recommendation ?? ''}
+                  loading={recLoading}
+                />
+                {starlinkSat && <DtcCard satellite={starlinkSat} />}
+                {skyMapHeader}
+                <SkyMap
+                  satellites={satellites}
+                  cloudCover={weather?.cloudCover}
+                  passes={topPasses}
+                  positions={positions}
+                  posLastUpdate={posLastUpdate}
+                  activeConstellation={activeConstellation}
+                  loading={!satData}
+                  compact={true}
+                  horizonSettings={horizonSettings}
+                  minElevation={accountSettings.default_elevation_threshold}
+                  favourites={favourites}
+                />
+                <button
+                  className="tab-skymap-link"
+                  onClick={() => switchTab('skymap')}
+                >
+                  View full sky map
+                </button>
+              </>
+            )}
           </div>
         )}
 

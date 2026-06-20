@@ -41,13 +41,6 @@ function useNextPassCountdown(topPasses: Pass[]): string {
   return display;
 }
 
-function signalScore(satellites: Satellite[]): number {
-  if (!satellites.length) return 0;
-  const best       = Math.max(...satellites.map(s => s.elevation));
-  const elevScore  = Math.max(0, Math.min(40, (best / 85) * 40));
-  const countBonus = satellites.length > 50 ? 10 : satellites.length > 10 ? 5 : 0;
-  return Math.min(100, Math.round(elevScore + countBonus + 28)); // 28 ≈ average weather baseline
-}
 
 export function MetricCards({ satellites, topPasses, activeConstellation, loading }: Props) {
   const countdown = useNextPassCountdown(topPasses);
@@ -55,7 +48,7 @@ export function MetricCards({ satellites, topPasses, activeConstellation, loadin
   if (loading) {
     return (
       <div className="metric-grid">
-        {[0, 1, 2, 3].map(i => (
+        {[0, 1, 2].map(i => (
           <div key={i} className="metric-card">
             <Skeleton height="12px" width="70%" />
             <div style={{ margin: '8px 0 4px' }}>
@@ -70,7 +63,6 @@ export function MetricCards({ satellites, topPasses, activeConstellation, loadin
 
   const count      = satellites.length;
   const bestEl     = count > 0 ? Math.max(...satellites.map(s => s.elevation)) : 0;
-  const score      = signalScore(satellites);
   const filterLabel = activeConstellation === 'ALL'
     ? 'All constellations'
     : CONSTELLATION_LABELS[activeConstellation] ?? `${activeConstellation} only`;
@@ -112,12 +104,6 @@ export function MetricCards({ satellites, topPasses, activeConstellation, loadin
         <div className="metric-value">{countdown}</div>
       </div>
 
-      <div className="metric-card">
-        <div className="metric-label">Signal Score</div>
-        <div className={`metric-value${score >= 60 ? ' metric-value--green' : ''}`}>
-          {score}<span className="metric-unit">/100</span>
-        </div>
-      </div>
     </div>
   );
 }
