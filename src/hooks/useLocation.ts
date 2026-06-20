@@ -7,6 +7,16 @@ export interface LocationSettings {
   alt:  number;
 }
 
+const API_BASE = import.meta.env.VITE_API_URL ?? '';
+
+function syncObserverToServer(loc: LocationSettings) {
+  fetch(`${API_BASE}/api/notifications/location`, {
+    method:  'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body:    JSON.stringify({ lat: loc.lat, lon: loc.lon, alt: loc.alt, name: loc.name }),
+  }).catch(() => {});
+}
+
 export type GeoPermState = 'checking' | 'prompt' | 'granted' | 'denied' | 'declined';
 export type GpsStatus    = 'idle' | 'locating' | 'active' | 'error';
 
@@ -101,6 +111,7 @@ export function useLocation() {
         setLocation(prev => {
           const updated = { ...prev, name };
           persist(updated);
+          syncObserverToServer(updated);
           return updated;
         });
       },
@@ -131,6 +142,7 @@ export function useLocation() {
         };
         persist(newLoc);
         setLocation(newLoc);
+        syncObserverToServer(newLoc);
         startWatch();
       },
       err => {
@@ -191,6 +203,7 @@ export function useLocation() {
   function saveLocation(loc: LocationSettings) {
     persist(loc);
     setLocation(loc);
+    syncObserverToServer(loc);
     // Stop GPS tracking when user manually sets a location
     if (watchIdRef.current !== null) {
       navigator.geolocation?.clearWatch(watchIdRef.current);
