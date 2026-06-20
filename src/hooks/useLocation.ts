@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
+import { supabase } from '../lib/supabaseClient';
 
 export interface LocationSettings {
   name: string;
@@ -9,11 +10,20 @@ export interface LocationSettings {
 
 const API_BASE = import.meta.env.VITE_API_URL ?? '';
 
-function syncObserverToServer(loc: LocationSettings) {
+// No-op for guests: returns immediately if Supabase is not configured or the user has no session.
+// Only fires the network request for authenticated users, passing their JWT so the endpoint
+// can verify identity and the Supabase RLS policy can enforce user_id ownership.
+async function syncObserverToServer(loc: LocationSettings) {
+  if (!supabase) return;
+  const { data: { session } } = await supabase.auth.getSession();
+  if (!session) return;
   fetch(`${API_BASE}/api/notifications/location`, {
     method:  'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body:    JSON.stringify({ lat: loc.lat, lon: loc.lon, alt: loc.alt, name: loc.name }),
+    headers: {
+      'Content-Type':  'application/json',
+      'Authorization': `Bearer ${session.access_token}`,
+    },
+    body: JSON.stringify({ lat: loc.lat, lon: loc.lon, alt: loc.alt, name: loc.name }),
   }).catch(() => {});
 }
 
